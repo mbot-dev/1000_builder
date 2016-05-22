@@ -14,32 +14,44 @@ function rpcMethod(simpleMML) {
     return mml;
 };
 
+// Returns error object
+function createRPCError(code, message, id) {
+    return {
+        jsonrpc: '2.0',
+        error: {
+            code: code,
+            message: message
+        },
+        id: id
+    };
+};
+
 // RPC route
 router.post(config.rpc.path, function (req, res) {
 
     try {
         var body = req.body;
+        var rpcId = body.id;
 
         // {jsonrpc: '2.0', method: 'build', params: [simpleMML], id: 'string'}
 
         if (!body.hasOwnProperty('jsonrpc') || body.jsonrpc !== '2.0') {
-            throw {result: {code: -32600, message: 'Invalid Request'}};
+            throw createRPCError(-32600, 'Invalid Request', rpcId);
         }
         if (!body.hasOwnProperty('method') ) {
-            throw {result: {code: -32601, message: 'Method not found'}};
+            throw createRPCError(-32601, 'Method not found', rpcId);
         }
         if (body.method !== config.rpc.method) {
-            throw {result: {code: -32600, message: 'Invalid Request'}};
+            throw createRPCError(-32600, 'Invalid Request', rpcId);
         }
         if (!body.hasOwnProperty('params')) {
-            throw {result: {code: -32600, message: 'Invalid Request'}};
+            throw createRPCError(-32600, 'Invalid Request', rpcId);
         }
 
         // Notification
-        if (!body.hasOwnProperty('id')) {
+        if (rpcId === 'undefined') {
             // No response;
         } else {
-            var rpcId = body.id;               // id to return
             var arg = body.params[0];          // argmentはsimplMML一つ
 
             // call rpc method
@@ -51,7 +63,7 @@ router.post(config.rpc.path, function (req, res) {
             };
             res.send(response);
         }
-        
+
     } catch (err) {
         console.log(err);
         res.send(err);

@@ -120,6 +120,9 @@ request.post(options, (error, response, body) => {
     } else if (status !== 2) {
        console.log('Application error: %d', status);
        console.log(body);
+   } else if (body.hasOwnProperty('error')) {
+       var err = body.error;
+       console.log(pd.xml(err));
    } else {
        var mml = body.result;
        console.log(pd.xml(mml));
