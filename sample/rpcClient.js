@@ -1,9 +1,9 @@
-const rpc = require('json-rpc2');
+"use strict";
+
+const request = require('request');
 const uuid = require('node-uuid');
 const pd = require('pretty-data2').pd;
 const utils = require('../lib/utils');
-
-var client = rpc.Client.$create(8080, 'localhost');
 
 // 対象患者
 var simplePatient = {
@@ -95,7 +95,33 @@ var simpleMML = {
     content: [simpleModule]
 };
 
-client.call('build', [simpleMML], function(err, result) {
-    console.log(pd.xml(result));
-    //console.log(result);
+// JSON-RPC 2.0 仕様のオブジェクト
+var jsonRpc2 = {
+    jsonrpc: '2.0',                             // must be '2.0'
+    method: 'build',                            // rpc の method名 'build'  <-- 千年ビルダーの仕様
+    params: [simpleMML],                        // []
+    id: uuid.v4()                               // id が必要
+};
+
+// Request パラメータ
+var options = {
+    url: 'http://localhost:3000/api/v1',        // 千年ビルダーのURI /api/v1 が必要
+    method: "POST",
+    json: true,                                 // Node.js の request 固有
+    headers: {
+        "content-type": "application/json"      // content-type にjsonが必要
+    },
+    body: jsonRpc2                              // body に jsonRpc2 オブジェクトをセットする
+};
+request.post(options, (error, response, body) => {
+    var status = response.statusCode / 100;
+    if (error) {
+       console.log(error);
+    } else if (status !== 2) {
+       console.log('Application error: %d', status);
+       console.log(body);
+   } else {
+       var mml = body.result;
+       console.log(pd.xml(mml));
+   }
 });

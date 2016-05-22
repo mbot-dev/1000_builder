@@ -1,0 +1,10 @@
+{
+   "server": {
+      "listen": "localhost",
+      "port": 3000
+  },
+  "rpc": {
+      "path": "/api/v1",
+      "method": "build"
+  }
+}

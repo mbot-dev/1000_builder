@@ -1,22 +1,23 @@
 "use strict";
 
-const rpc = require('json-rpc2');
-const simpleBuilder = require('./api/simpleBuilder');
-const mmlBuilder = require('./lib/mmlBuilder');
+const express = require('express');
+const bodyParser = require('body-parser');
+const config = require('config');
+const rpcRouter = require('./api/rpcRouter');
 
-var server = rpc.Server.$create({
-    'websocket': true, // is true by default
-    'headers': { // allow custom headers is empty by default
-        'Access-Control-Allow-Origin': '*'
-    }
+var app = express();
+app.use(bodyParser.json());
+
+// Remote Procedure Call は
+// express router として /api/rpcRouter.js で実装
+app.use(rpcRouter);
+
+app.get('/', function (req, res) {
+    res.status(404);        // HTTP status 404: NotFound
+    res.send('Not found');
 });
 
-function build(args, opt, callback) {
-    var mmlObj = simpleBuilder.buildMML(args[0]);
-    var mml = mmlBuilder.build(mmlObj);
-  callback(null, mml);
-};
-
-server.expose('build', build);
-
-server.listen(8080, 'localhost');
+app.listen(config.server.port, config.server.listen, () => {
+    var info = ['1000 builder listening on ', config.server.listen, ':', config.server.port].join('');
+    console.log(info);
+});
