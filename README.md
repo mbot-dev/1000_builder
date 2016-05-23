@@ -773,7 +773,7 @@ JavaScript のオブジェクトリテラルで記述しています。
 ### プログラムの概要
 
  * RPC エンドポイント:　/api/rpcRouter.js
- * ポストデータを中間オブジェクト（MMLのxsdに相当）に変換: /api/simpleBuilder.js
+ * ポストデータを中間オブジェクト（MMLのXML要素に対応）に変換: /api/simpleBuilder.js
  * 中間オブジェクトを手動でXMLに変換: /lib/内の各Builder.js
 
 
