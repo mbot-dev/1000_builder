@@ -8,14 +8,14 @@ const mmlBuilder = require('../lib/mmlBuilder');
 var router = express.Router();
 
 // RPC method
-function rpcMethod(simpleMML) {
+function rpcMethod(simpleMML, callback) {
     var mmlObj = simpleBuilder.buildMML(simpleMML);
     var mml = mmlBuilder.build(mmlObj);
-    return mml;
+    callback(mml);
 };
 
 // Returns error object
-function createRPCError(code, message, id) {
+function buildError(code, message, id) {
     return {
         jsonrpc: '2.0',
         error: {
@@ -36,16 +36,16 @@ router.post(config.rpc.path, function (req, res) {
         // {jsonrpc: '2.0', method: 'build', params: [simpleMML], id: 'string'}
 
         if (!body.hasOwnProperty('jsonrpc') || body.jsonrpc !== '2.0') {
-            throw createRPCError(-32600, 'Invalid Request', rpcId);
+            throw buildError(-32600, 'Invalid Request', rpcId);
         }
         if (!body.hasOwnProperty('method') ) {
-            throw createRPCError(-32601, 'Method not found', rpcId);
+            throw buildError(-32601, 'Method not found', rpcId);
         }
         if (body.method !== config.rpc.method) {
-            throw createRPCError(-32600, 'Invalid Request', rpcId);
+            throw buildError(-32600, 'Invalid Request', rpcId);
         }
         if (!body.hasOwnProperty('params')) {
-            throw createRPCError(-32600, 'Invalid Request', rpcId);
+            throw buildError(-32600, 'Invalid Request', rpcId);
         }
 
         // Notification
@@ -55,13 +55,14 @@ router.post(config.rpc.path, function (req, res) {
             var arg = body.params[0];          // argmentはsimplMML一つ
 
             // call rpc method
-            var mml = rpcMethod(arg);
-            var response = {
-                jsonrpc: '2.0',
-                result: mml,
-                id: rpcId
-            };
-            res.send(response);
+            var mml = rpcMethod(arg, (mml) => {
+                var response = {
+                    jsonrpc: '2.0',
+                    result: mml,
+                    id: rpcId
+                };
+                res.send(response);
+            });
         }
 
     } catch (err) {

@@ -17,25 +17,25 @@ var simplePatient = {
     facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
     kanjiName: '宮田 奈々',                             // 漢字の氏名
     kanaName: 'ミヤタ ナナ',                             // カナ
-    romanName: 'Nana Miyata',                          // ローマ字
+    romanName: 'Nana Miyata',                          // ローマ字（上記の内一つは必要）
     sex: 'femail',                                     // MML0010(女:femail 男:male その他:other 不明:unknown)
     birthday: '1994-11-26',                            // 生年月日
-    maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
-    nationality: 'JPN',                                // 国籍 オプション
+    maritalStatus: 'single',                           // 婚姻状況 MML0011を使用（オプション）
+    nationality: 'JPN',                                // 国籍（オプション）
     zipCode: '000-0000',                               // 郵便番号
     address: '横浜市中区日本大通り 1-23-4-567',            // 住所
     telephone: '054-078-7934',                         // 電話番号
-    mobile: '090-2710-1564',                           // モバイル
-    email: 'miyata_nana@example.com'                   // 電子メール オプション
+    mobile: '090-2710-1564',                           // モバイル（オプション）
+    email: 'miyata_nana@example.com'                   // 電子メール（オプション）
 };
 
 // 医師
 var simpleCreator = {
     id: '201605',                                      // 施設で付番されている医師のId
     idType: 'facility',                                // 施設固有のIdであることを示す
-    kanjiName: '青山 慶二',                             // 医師名
-    prefix: 'Professor',                               // 肩書き等 オプション
-    degree: 'MD/PhD',                                  // 学位 オプション
+    kanjiName: '青山 慶二',                             // 医師名（カナ、ローマ字も可）
+    prefix: 'Professor',                               // 肩書き等（オプション）
+    degree: 'MD/PhD',                                  // 学位（オプション）
     facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
     facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027(ca|insurance|monbusho|JMARI|OID)から選ぶ
     facilityName: 'シルク内科',                          // 施設名
@@ -52,9 +52,9 @@ var simpleCreator = {
 var simplePrescription = {
     medication: [
         {
-            issuedTo: 'external',
+            issuedTo: 'external',                           // 院外処方（院内処方: internal）
             medicine: 'マーズレン S 顆粒',                    // 処方薬
-            medicineCode: '612320261',                      // 処方薬
+            medicineCode: '612320261',                      // 処方薬のコード
             medicineCodeSystem: 'YJ',                       // コード体系
             dose: 1,                                        // 1回の量
             doseUnit: 'g',                                  // 単位
@@ -67,10 +67,10 @@ var simplePrescription = {
             longTerm: false                                 // 臨時処方
         },
         {
-            issuedTo: 'external',
-            medicine: 'メトリジン錠 2 mg',
-            medicineCode: '612160027',
-            medicineCodeSystem: 'YJ',
+            issuedTo: 'external',                           // 院外処方（院内処方: internal）
+            medicine: 'メトリジン錠 2 mg',                    // 処方薬
+            medicineCode: '612160027',                      // 処方薬のコード
+            medicineCodeSystem: 'YJ',                       // コード体系
             dose: 2,                                        // 1回の量
             doseUnit: '錠',                                 // 単位
             frequencyPerDay: 2,                             // 1日の内服回数
@@ -78,7 +78,7 @@ var simplePrescription = {
             duration: 14,                                   // 14日分
             instruction: '内服2回 朝夜食後に',                 // 用法
             PRN: false,                                     // 頓用=false
-            brandSubstitutionPermitted: false,              // ジェネリック
+            brandSubstitutionPermitted: false,              // ジェネリック不可
             longTerm: true                                  // 長期処方
         }
     ]
@@ -306,7 +306,7 @@ var simpleTest = {
     labCenter: {
         id: '303030',                                // 検査実施会社内での Id
         idType: 'facility',                          // 施設で付番されているIdであることを示す
-        kanjiName: '石山 由美子',                      // 検査実施施設の代表 なんちゃって個人情報から 代表とは?
+        kanjiName: '石山 由美子',                      // 検査実施施設の代表 （代表とは?）
         facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
         facilityIdType: 'OID',                       // MML0027 OID 方式
         facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
@@ -711,17 +711,17 @@ var simpleItem = {
 
 ```javascript
 var simpleDiagnosis = {
-    diagnosis: 'colon carcinoid',
-    code: 'C189-.006',
-    system: 'ICD10',
-    category: 'mainDiagnosis',
-    startDate: startDate,
-    endDate: endDate,
-    outcome: 'fullyRecovered'
+    diagnosis: 'colon carcinoid',                   // 傷病名
+    code: 'C189-.006',                              // コード
+    system: 'ICD10',                                // コード体系
+    category: 'mainDiagnosis',                      // カテゴリー　MML0012 ~ MML0015 から選ぶ
+    startDate: startDate,                           // 開始日　YYYY-MM-DD
+    endDate: endDate,                               // 終了日　YYYY-MM-DD
+    outcome: 'fullyRecovered'                       // 転帰　MML0016 から選ぶ
 };
 ```
 
-レスポンス（ヘッダーとdocInfoを除いています）
+レスポンス（ヘッダーとdocInfoを除いています）。
 
 ```xml
 <mmlRd:RegisteredDiagnosisModule>
@@ -737,9 +737,11 @@ var simpleDiagnosis = {
 
 ### JSON-RPC 2.0
 
-* サーバーとクライアントの通信は JSON-RPC 2.0 のリモートプロシジャーコールです。
-* したがって電子カルテの実装言語に依存しません。
-* サーバーシステムは Node.js です。
+電子カルテの実装言語には依存しません。
+
+* 通信方式: リモートプロシジャーコール
+* 仕様: JSON-RPC 2.0
+* サーバーシステム: Node.js
 
 
 ### プログラムのテスト手順
@@ -761,17 +763,18 @@ var simpleDiagnosis = {
 
 ### ポストデータの詳細
 
-サンプルディレクトリ内に JavaScript のオブジェクトリテラルで記述しています。
+JavaScript のオブジェクトリテラルで記述しています。
 
- * 処方せん prescription.js
- * 検体検査 labTest.js
- * 病名 diagnosis.js
+ * 処方せん: /sample/prescription.js
+ * 検体検査: /sample/labTest.js
+ * 病名: /sample/diagnosis.js
 
 
 ### プログラムの概要
 
- * ポストされたデータをMMLのxsdをJSONで表した中間オブジェクトに変換 （api/simpleBuilder が担当）
- * 中間オブジェクトを手動でXMLに変換（libディレクトリ内の各Builderが担当）
+ * RPC エンドポイント:　/api/rpcRouter.js
+ * ポストデータを中間オブジェクト（MMLのxsdに相当）に変換: /api/simpleBuilder.js
+ * 中間オブジェクトを手動でXMLに変換: /lib/内の各Builder.js
 
 
 ### フィードバック

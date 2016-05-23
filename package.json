@@ -1,23 +1,23 @@
 {
-  "name": "1000_builder",
-  "version": "1.0.0",
-  "description": "JSON-RPC service to generate MML4.0 to join the gEHR project.",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com:mbot-dev/1000_builder.git"
-  },
-  "author": "Kazushi Minagawa",
-  "license": "MIT",
-  "dependencies": {
-    "body-parser": "^1.15.1",
-    "config": "^1.20.3",
-    "express": "^4.13.4",
-    "node-uuid": "^1.4.7",
-    "pretty-data2": "^0.40.1",
-    "request": "^2.72.0"
-  }
+    "name": "1000_builder",
+    "version": "1.0.0",
+    "description": "MML4.0 generation server to join the gEHR project.",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com:mbot-dev/1000_builder.git"
+    },
+    "author": "Kazushi Minagawa",
+    "license": "MIT",
+    "dependencies": {
+        "body-parser": "^1.15.1",
+        "config": "^1.20.3",
+        "express": "^4.13.4",
+        "node-uuid": "^1.4.7",
+        "pretty-data2": "^0.40.1",
+        "request": "^2.72.0"
+    }
 }

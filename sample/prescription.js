@@ -2,8 +2,6 @@
 
 const uuid = require('node-uuid');
 const pd = require('pretty-data2').pd;
-const readline = require('readline');
-const fs = require('fs');
 const utils = require('../lib/utils');
 const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
