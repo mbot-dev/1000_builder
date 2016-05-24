@@ -297,7 +297,7 @@ var simpleTest = {
     registId: registId,                             // 検査Id
     registTime: registTime,                         // 受付日時
     reportTime: reportTime,                         // 報告日時
-    reportStatusCode: 'final',                      // 報告状態 コード  mmlLb0001
+    reportStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
     reportStatusName: '最終報告',                    // 報告状態
     codeSystem: 'YBS_2016',                         // 検査コード体系名
     facilityName: simpleCreator.facilityName,       // 検査依頼施設
@@ -308,7 +308,7 @@ var simpleTest = {
         idType: 'facility',                          // 施設で付番されているIdであることを示す
         kanjiName: '石山 由美子',                      // 検査実施施設の代表 （代表とは?）
         facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
-        facilityIdType: 'OID',                       // MML0027 OID 方式
+        facilityIdType: 'OID',                       // MML0027 OID方式
         facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
         facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
         facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
@@ -489,7 +489,7 @@ var simpleItem = {
       <content>
         <mmlLb:TestModule>
           <mmlLb:information mmlLb:registId="79efa525-41cc-4fd2-8af6-1361cd0bcb74" mmlLb:registTime="2016-05-21T16:34:40" mmlLb:reportTime="2016-05-21T16:34:40">
-            <mmlLb:reportStatus mmlLb:statusCode="最終報告" mmlLb:statusCodeId="mmlLb0001">final</mmlLb:reportStatus>
+            <mmlLb:reportStatus mmlLb:statusCode="final" mmlLb:statusCodeId="mmlLb0001">最終報告</mmlLb:reportStatus>
             <mmlLb:facility mmlLb:facilityCode="JPN012345678901" mmlLb:facilityCodeId="JMARI">シルク内科</mmlLb:facility>
             <mmlLb:laboratoryCenter mmlLb:centerCode="1.2.3.4.5.6.7890.1.2" mmlLb:centerCodeId="OID">ベイスターズ・ラボ</mmlLb:laboratoryCenter>
           </mmlLb:information>
@@ -761,20 +761,20 @@ var simpleDiagnosis = {
  * node rpcClient.js
 
 
-### ポストデータの詳細
-
-JavaScript のオブジェクトリテラルで記述しています。
-
- * 処方せん: /sample/prescription.js
- * 検体検査: /sample/labTest.js
- * 病名: /sample/diagnosis.js
-
-
 ### プログラムの概要
 
- * RPC エンドポイント:　/api/rpcRouter.js
- * ポストデータを中間オブジェクト（MMLのXML要素に対応）に変換: /api/simpleBuilder.js
- * 中間オブジェクトを手動でXMLに変換: /lib/内の各Builder.js
+  * RPC エンドポイント: /api/rpcRouter.js
+  * ポストデータを中間オブジェクト（MMLのXML要素に対応）に変換: /api/simpleBuilder.js
+  * 中間オブジェクトを手動でXMLに変換: /lib/内の各Builder.js
+
+
+### ポストデータの詳細
+
+ 1. [wiki simple](https://github.com/mbot-dev/1000_builder/wiki/simple)
+ 2. サンプルプログラム
+  - 処方せん: /sample/prescription.js
+  - 検体検査: /sample/labTest.js
+  - 病名: /sample/diagnosis.js
 
 
 ### フィードバック

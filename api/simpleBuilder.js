@@ -658,9 +658,9 @@ function buildTestModule (simpleTest) {
                 reportTime: simpleTest.reportTime
             },
             reportStatus: {
-                value: simpleTest.reportStatusCode,
+                value: simpleTest.reportStatusName,
                 attr: {
-                    statusCode: simpleTest.reportStatusName,
+                    statusCode: simpleTest.reportStatusCode,
                     statusCodeId: 'mmlLb0001'
                 }
             },

@@ -61,7 +61,7 @@ function simpleLabTest(callBack) {
         registId: registId,                             // 検査Id 　運用で決める
         registTime: registTime,                         // 受付日時
         reportTime: reportTime,                         // 報告日時
-        reportStatusCode: 'final',                      // 報告状態 コード  mmlLb0001
+        reportStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
         reportStatusName: '最終報告',                    // 報告状態
         codeSystem: 'YBS_2016',                         // 検査コード体系名
         facilityName: simpleCreator.facilityName,       // 検査依頼施設
@@ -70,7 +70,7 @@ function simpleLabTest(callBack) {
         labCenter: {
             id: '303030',                                // 検査実施会社内での Id
             idType: 'facility',                          // 施設で付番されているIdであることを示す
-            kanjiName: '石山 由美子',                      // 検査実施施設の代表 なんちゃって個人情報から 代表とは?
+            kanjiName: '石山 由美子',                      // 検査実施施設の代表 代表とは?
             facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
             facilityIdType: 'OID',                       // MML0027 OID 方式
             facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
