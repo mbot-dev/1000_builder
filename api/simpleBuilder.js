@@ -873,6 +873,7 @@ exports.buildMML = (simpleMML) => {
         }
     });
 
+    /*
     // 患者情報がなかった場合は先頭へ追加する
     if (!hasPatientModule) {
         var simple = {
@@ -882,7 +883,7 @@ exports.buildMML = (simpleMML) => {
         };
         docInfo = buildDocInfo(simple, creatorInfo, defaultAccessRight);
         result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
-    }
+    }*/
 
     return result;
 };

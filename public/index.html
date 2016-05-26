@@ -1,0 +1,428 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="simple.css">
+    <script src="jquery-2.2.4.min.js"></script>
+    <script src="uuid.js"></script>
+    <script src="1000-utils.js"></script>
+    <script type="text/javascript">
+    //------------------------------------------------------------------
+    // 検査項目の結果値配列  Closure
+    var test_items = (function () {
+        var items = [];
+        return function () {
+            return items;
+        };
+    })();
+    // 検査の registId
+    var regist_id = (function () {
+        var id = uuid.v4();
+        return function () {
+            return id;
+        };
+    })();
+    // 検査の registTime
+    var regist_time = (function () {
+        var dt = nowAsDateTime();
+        return function () {
+            return dt;
+        };
+    })();
+    // 検査の reportTime
+    var report_time = (function () {
+        var dt = nowAsDateTime();
+        return function () {
+            return dt;
+        };
+    })();
+    //------------------------------------------------------------------
+
+    // 患者
+    function simplePatient () {
+        return {
+            id: '0516',                                        // 施設(病院)内で発番されている患者Id
+            idType: 'facility',                                // 施設固有のIdであることを示す
+            facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
+            kanjiName: '宮田 奈々',                             // 漢字の氏名
+            kanaName: 'ミヤタ ナナ',                             // カナ
+            romanName: 'Nana Miyata',                          // ローマ字
+            sex: 'femail',                                     // MML0010(女:femail 男:male その他:other 不明:unknown)
+            birthday: '1994-11-26',                            // 生年月日
+            maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
+            nationality: 'JPN',                                // 国籍 オプション
+            zipCode: '000-0000',                               // 郵便番号
+            address: '横浜市中区日本大通り 1-23-4-567',            // 住所
+            telephone: '054-078-7934',                         // 電話番号
+            mobile: '090-2710-1564',                           // モバイル
+            email: 'miyata_nana@example.com'                   // 電子メール オプション
+        };
+    };
+
+    // 医師等
+    function simpleCreator () {
+        return {
+            id: '201605',                                      // 施設で付番されている医師のId
+            idType: 'facility',                                // 施設固有のIdであることを示す
+            kanjiName: '青山 慶二',                             // 医師名
+            prefix: 'Professor',                               // 肩書き等 オプション
+            degree: 'MD/PhD',                                  // 学位 オプション
+            facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
+            facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027(ca|insurance|monbusho|JMARI|OID)から選ぶ
+            facilityName: 'シルク内科',                          // 施設名
+            facilityZipCode: '231-0023',                       // 施設郵便番号
+            facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
+            facilityPhone: '045-571-6572',                     // 施設電話番号
+            departmentId: '01',                                // 医科用:MML0028 歯科用:MML0030 から選ぶ
+            departmentIdType: 'medical',                       // 医科用の診療科コード:medical 歯科用の診療科コード:dental を指定 MML0029(medical|dental|facility)から選ぶ
+            departmentName: '第一内科',                         // 診療科名
+            license: 'doctor'                                  // 医療資格 MML0026から選ぶ
+        };
+    };
+
+    // 処方せん
+    function prescription () {
+        // 服薬開始日
+        var startDate = nowAsDate();    // YYYY-MM-DD
+        return {
+            medication: [
+                {
+                    issuedTo: 'external',                           //
+                    medicine: 'マーズレン S 顆粒',                    // 処方薬
+                    medicineCode: '612320261',                      // 処方薬
+                    medicineCodeSystem: 'YJ',                       // コード体系
+                    dose: 1,                                        // 1回の量
+                    doseUnit: 'g',                                  // 単位
+                    frequencyPerDay: 2,                             // 1日の内服回数
+                    startDate: startDate,                           // 服薬開始日 YYYY-MM-DD
+                    duration: 7,                                    // 7日分
+                    instruction: '内服2回 朝夜食後に',                 // 用法
+                    PRN: false,                                     // 頓用=false
+                    brandSubstitutionPermitted: true,               // ジェネリック可
+                    longTerm: false                                 // 臨時処方
+                },
+                {
+                    issuedTo: 'external',
+                    medicine: 'メトリジン錠 2 mg',
+                    medicineCode: '612160027',
+                    medicineCodeSystem: 'YJ',
+                    dose: 2,                                        // 1回の量
+                    doseUnit: '錠',                                 // 単位
+                    frequencyPerDay: 2,                             // 1日の内服回数
+                    startDate: startDate,                           // 服薬開始日
+                    duration: 14,                                   // 14日分
+                    instruction: '内服2回 朝夜食後に',                 // 用法
+                    PRN: false,                                     // 頓用=false
+                    brandSubstitutionPermitted: false,              // ジェネリック
+                    longTerm: true                                  // 長期処方
+                }
+            ]
+        };
+    };
+
+    // 病名
+    function diagnosis () {
+        var now = new Date();
+        var endDate = toDateString(now);                        // 終了日 = 今
+        now.setDate(now.getDate() - 30);                        // 30日前が
+        var startDate = toDateString(now);                      // 開始日
+
+        return {
+            diagnosis: 'colon carcinoid',
+            code: 'C189-.006',
+            system: 'ICD10',
+            category: 'mainDiagnosis',
+            startDate: startDate,
+            endDate: endDate,
+            outcome: 'fullyRecovered'
+        };
+    };
+
+    // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
+    function createTestItems (content) {
+        var items = [];
+        // リターン区切りでline by line
+        var lines = content.split("\n");
+        lines.forEach(function (entry) {
+            // この行をカンマ区切りで配列に格納する
+            var arr = entry.split(/\s*,\s*/);
+            // この行のテスト項目
+            var simpleItem = {};
+            simpleItem.spcCode = arr[0];              // 検体コード
+            simpleItem.spcName = arr[1];              // 検体名
+            simpleItem.testCode = arr[2];             // コード
+            simpleItem.testName = arr[3];             // テスト項目名
+            simpleItem.testResult = arr[4];           // 結果値
+
+            if (arr[5] !== '') {
+                simpleItem.unit = arr[5];              // 単位
+            }
+            if (arr[6] !== '' ) {
+                simpleItem.low = arr[6];               // 下限値
+            }
+            if (arr[7] !== '' ) {
+                simpleItem.up = arr[7];                // 上限値
+            }
+            if (arr[8] !== '' ) {
+                simpleItem.out = arr[8];               // 判定フラグ
+            }
+            if (arr[9] !== '' && arr[10] !== '') {
+                simpleItem.memoCode = arr[9];          // メモコード
+                simpleItem.memo = arr[10];             // メモ
+            }
+            items.push(simpleItem);
+        });
+        return items;
+    };
+
+    // 検査結果値のCSVファイル（test_result.csv）を読む
+    // HTTP コールなので Promise
+    function readTestResult () {
+
+        return new Promise (function (resolve, reject) {
+            if (test_items().length > 0) {
+                resolve(test_items());
+            } else {
+                $.ajax ({
+                    url: 'http://localhost:3000/test_result.csv',
+                    type:"GET",
+                    success: function (result) {
+                    },
+                    error: function (err,status,thrown) {
+                        reject(err);
+                    },
+                    complete: function (xhr,status) {
+                        // 結果値
+                        var items = createTestItems(xhr.responseText);
+                        items.forEach (function (entry) {
+                            test_items().push(entry);
+                        });
+                        resolve(test_items());
+                    }
+                });
+            }
+        });
+    };
+
+    // 検体検査 この関数のみ callback を引数に取る
+    // 検査結果値をファイルから読み込むため
+    function labTest (callback) {
+
+        readTestResult().then (function (items) {
+            // 検査を依頼した人　すなわち creator
+            var creator = simpleCreator();
+            var test = {
+                registId: regist_id(),                          // 検査Id 　運用で決める
+                registTime: regist_time(),                      // 受付日時
+                reportTime: report_time(),                      // 報告日時
+                reportStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
+                reportStatusName: '最終報告',                    // 報告状態
+                codeSystem: 'YBS_2016',                         // 検査コード体系名
+                facilityName: creator.facilityName,             // 検査依頼施設
+                facilityId: creator.facilityId,                 // 検査依頼施設
+                facilityIdType: 'JMARI',                        // 検査依頼施設
+                labCenter: {
+                    id: '303030',                                // 検査実施会社内での Id
+                    idType: 'facility',                          // 施設で付番されているIdであることを示す
+                    kanjiName: '石山 由美子',                      // 検査実施施設の代表 代表とは?
+                    facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
+                    facilityIdType: 'OID',                       // MML0027 OID 方式
+                    facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
+                    facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
+                    facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
+                    facilityPhone: '045-000-0072',               // 検査実施会社の電話
+                    license: 'lab'                               // MML0026 他に?
+                },
+                testItem: items
+            };
+
+            callback(test);
+
+        }, function error (error) {
+            alert(error);
+        });
+    };
+
+    // 処方情報を左側にセットする
+    function setupPrescription () {
+        var sp = JSON.stringify(simplePatient(),null,4);
+        var sc = JSON.stringify(simpleCreator(),null,4);
+        var spre = JSON.stringify(prescription(), null, 4);
+        var arr = [];
+        arr.push('// 患者');
+        arr.push('\n');
+        arr.push('var simplePatient = ');
+        arr.push(sp);
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 医師');
+        arr.push('\n');
+        arr.push('var simpleCreator = ');
+        arr.push(sc);
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 処方せん');
+        arr.push('\n');
+        arr.push('var simplePrescription = ');
+        arr.push(spre);
+        arr.push(';');
+        var text = arr.join('');
+        $('#simple').text(text);
+    };
+
+    // 検査情報を左側にセットする
+    function setupLabTest () {
+
+        labTest (function (simpleTest) {
+            var sp = JSON.stringify(simplePatient(),null,4);
+            var sc = JSON.stringify(simpleCreator(),null,4);
+            var sd = JSON.stringify(simpleTest, null, 4);
+            var arr = [];
+            arr.push('// 患者');
+            arr.push('\n');
+            arr.push('var simplePatient = ');
+            arr.push(sp);
+            arr.push(';');
+            arr.push('\n');
+            arr.push('// 医師');
+            arr.push('\n');
+            arr.push('var simpleCreator = ');
+            arr.push(sc);
+            arr.push(';');
+            arr.push('\n');
+            arr.push('// 検査');
+            arr.push('\n');
+            arr.push('var simpleTest = ');
+            arr.push(sd);
+            arr.push(';');
+            var text = arr.join('');
+            $('#simple').text(text);
+        });
+    };
+
+    // 病名情報を左側にセットする
+    function setupDiagnosis () {
+        var sp = JSON.stringify(simplePatient(),null,4);
+        var sc = JSON.stringify(simpleCreator(),null,4);
+        var sd = JSON.stringify(diagnosis(), null, 4);
+        var arr = [];
+        arr.push('// 患者');
+        arr.push('\n');
+        arr.push('var simplePatient = ');
+        arr.push(sp);
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 医師');
+        arr.push('\n');
+        arr.push('var simpleCreator = ');
+        arr.push(sc);
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 病名');
+        arr.push('\n');
+        arr.push('var simpleDiagnosis = ');
+        arr.push(sd);
+        arr.push(';');
+        var text = arr.join('');
+        $('#simple').text(text);
+    };
+
+    // selectionが変更された
+    function changeModule (selectModule) {
+        $('#result').text('');
+        if (selectModule.value === 'prescription') {
+            setupPrescription();
+
+        } else if (selectModule.value=== 'test') {
+            setupLabTest();
+
+        } else if (selectModule.value=== 'registeredDiagnosis') {
+            setupDiagnosis();
+        }
+    };
+
+    // 実際の RPC コール
+    function send (contentType, contentModule) {
+
+        // 検査の確定日時は報告日時に一致させる
+        var confirmDate = (contentType === 'test') ? contentModule.reportTime : nowAsDateTime();
+
+        var simpleModule = {
+            docInfo: {
+                contentModuleType: contentType,
+                uuid: uuid.v4(),                                    // UUIDを発行
+                confirmDate: confirmDate                            // 確定日時 YYYY-MM-DDTHH:mm:ss
+            },
+            data: [contentModule]
+        };
+        var simpleMML = {
+            patient: simplePatient(),
+            creator: simpleCreator(),
+            content: [simpleModule]
+        };
+        var jsonRpc2 = {
+            jsonrpc: '2.0',                                         // must be '2.0'
+            method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
+            params: [simpleMML],                                    // []
+            id: uuid.v4()                                           // id が必要
+        };
+        $.ajax({
+            url: 'http://localhost:3000/api/v1',                    // http://localhost:3000/api/v1
+            contentType: 'application/json',
+            data: JSON.stringify (jsonRpc2),
+            type:"POST",
+            dataType:"json",
+            success: function (result) {
+            },
+            error: function (err,status,thrown) {
+                alert ("this syntax sucks!! " + " ERROR: " + err + " STATUS: " + status + " " + thrown );
+            },
+            complete: function (xhr,status) {
+                var data = $.parseJSON(xhr.responseText);
+                data = data.result;
+                var xml_formatted = formatXml(data);
+                //xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+                //document.getElementById("result").value = xml_formatted;
+                $('#result').text(xml_formatted);
+            }
+        });
+    };
+
+    // エンコードボタンクリック
+    function rpcCall () {
+        var contentType;
+        var contentModule;
+        var contentType = document.getElementById('selectModule').value;
+        if (contentType === 'prescription') {
+            contentModule = prescription();
+            send(contentType, contentModule);
+        } else if (contentType === 'registeredDiagnosis') {
+            contentModule = diagnosis();
+            send(contentType, contentModule);
+        } else if (contentType === 'test') {
+            labTest( function (simpleTest) {
+                contentModule = simpleTest;
+                send(contentType, contentModule);
+            });
+        }
+    };
+    </script>
+</head>
+<body onload="setupPrescription();">
+    <div id="main">
+        <div id="header">
+            <select id="selectModule" onchange="changeModule(this);">
+                <option value='prescription'>処 方</option>
+                <option value='test'>検 査</option>
+                <option value='registeredDiagnosis'>病 名</option>
+            </select>　　<button onclick="rpcCall();">エンコード</button>
+        </div>
+        <div id="boxLeft">
+            <textarea id="simple"></textarea>
+        </div>
+        <div id="boxRight">
+            <textarea id="result"></textarea>
+        </div>
+        <div id="footer">
+        </div>
+    </div>
+</body>
+<html>

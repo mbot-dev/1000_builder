@@ -2,6 +2,7 @@
 
 const express = require('express');
 const config = require('config');
+const pd = require('pretty-data2').pd;
 const simpleBuilder = require('./simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
 
@@ -11,6 +12,8 @@ var router = express.Router();
 function rpcMethod(simpleMML, callback) {
     var mmlObj = simpleBuilder.buildMML(simpleMML);
     var mml = mmlBuilder.build(mmlObj);
+    var prety = pd.xml(mml);
+    console.log(prety);
     callback(mml);
 };
 
@@ -28,6 +31,8 @@ function buildError(code, message, id) {
 
 // RPC route
 router.post(config.rpc.path, function (req, res) {
+
+    console.log('rpc get called');
 
     try {
         var body = req.body;

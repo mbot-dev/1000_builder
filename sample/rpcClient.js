@@ -105,7 +105,7 @@ var jsonRpc2 = {
 
 // Request パラメータ
 var options = {
-    url: 'http://localhost:3000/api/v1',        // 千年ビルダーのURI /api/v1 が必要
+    url: 'https://1000-builder.au-syd.mybluemix.net/api/v1',        // 千年ビルダーのURI /api/v1 が必要
     method: "POST",
     json: true,                                 // Node.js の request 固有
     headers: {
