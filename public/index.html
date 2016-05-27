@@ -13,27 +13,6 @@
             return items;
         };
     })();
-    // 検査の registId
-    var regist_id = (function () {
-        var id = uuid.v4();
-        return function () {
-            return id;
-        };
-    })();
-    // 検査の registTime
-    var regist_time = (function () {
-        var dt = nowAsDateTime();
-        return function () {
-            return dt;
-        };
-    })();
-    // 検査の reportTime
-    var report_time = (function () {
-        var dt = nowAsDateTime();
-        return function () {
-            return dt;
-        };
-    })();
     //------------------------------------------------------------------
 
     // 患者
@@ -79,7 +58,7 @@
     };
 
     // 処方せん
-    function prescription () {
+    function simplePrescription () {
         // 服薬開始日
         var startDate = nowAsDate();    // YYYY-MM-DD
         return {
@@ -119,7 +98,7 @@
     };
 
     // 病名
-    function diagnosis () {
+    function simpleDiagnosis () {
         var now = new Date();
         var endDate = toDateString(now);                        // 終了日 = 今
         now.setDate(now.getDate() - 30);                        // 30日前が
@@ -204,15 +183,15 @@
 
     // 検体検査 この関数のみ callback を引数に取る
     // 検査結果値をファイルから読み込むため
-    function labTest (callback) {
+    function simpleLabTest (callback) {
 
         readTestResult().then (function (items) {
             // 検査を依頼した人　すなわち creator
             var creator = simpleCreator();
             var test = {
-                registId: regist_id(),                          // 検査Id 　運用で決める
-                registTime: regist_time(),                      // 受付日時
-                reportTime: report_time(),                      // 報告日時
+                registId: uuid.v4(),                            // 検査Id 　運用で決める
+                registTime: nowAsDateTime(),                    // 受付日時
+                reportTime: nowAsDateTime(),                    // 報告日時
                 reportStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
                 reportStatusName: '最終報告',                    // 報告状態
                 codeSystem: 'YBS_2016',                         // 検査コード体系名
@@ -241,109 +220,10 @@
         });
     };
 
-    // 処方情報を左側にセットする
-    function setupPrescription () {
-        var sp = JSON.stringify(simplePatient(),null,4);
-        var sc = JSON.stringify(simpleCreator(),null,4);
-        var spre = JSON.stringify(prescription(), null, 4);
-        var arr = [];
-        arr.push('// 患者');
-        arr.push('\n');
-        arr.push('var simplePatient = ');
-        arr.push(sp);
-        arr.push(';');
-        arr.push('\n');
-        arr.push('// 医師');
-        arr.push('\n');
-        arr.push('var simpleCreator = ');
-        arr.push(sc);
-        arr.push(';');
-        arr.push('\n');
-        arr.push('// 処方せん');
-        arr.push('\n');
-        arr.push('var simplePrescription = ');
-        arr.push(spre);
-        arr.push(';');
-        var text = arr.join('');
-        $('#simple').text(text);
-    };
-
-    // 検査情報を左側にセットする
-    function setupLabTest () {
-
-        labTest (function (simpleTest) {
-            var sp = JSON.stringify(simplePatient(),null,4);
-            var sc = JSON.stringify(simpleCreator(),null,4);
-            var sd = JSON.stringify(simpleTest, null, 4);
-            var arr = [];
-            arr.push('// 患者');
-            arr.push('\n');
-            arr.push('var simplePatient = ');
-            arr.push(sp);
-            arr.push(';');
-            arr.push('\n');
-            arr.push('// 医師');
-            arr.push('\n');
-            arr.push('var simpleCreator = ');
-            arr.push(sc);
-            arr.push(';');
-            arr.push('\n');
-            arr.push('// 検査');
-            arr.push('\n');
-            arr.push('var simpleTest = ');
-            arr.push(sd);
-            arr.push(';');
-            var text = arr.join('');
-            $('#simple').text(text);
-        });
-    };
-
-    // 病名情報を左側にセットする
-    function setupDiagnosis () {
-        var sp = JSON.stringify(simplePatient(),null,4);
-        var sc = JSON.stringify(simpleCreator(),null,4);
-        var sd = JSON.stringify(diagnosis(), null, 4);
-        var arr = [];
-        arr.push('// 患者');
-        arr.push('\n');
-        arr.push('var simplePatient = ');
-        arr.push(sp);
-        arr.push(';');
-        arr.push('\n');
-        arr.push('// 医師');
-        arr.push('\n');
-        arr.push('var simpleCreator = ');
-        arr.push(sc);
-        arr.push(';');
-        arr.push('\n');
-        arr.push('// 病名');
-        arr.push('\n');
-        arr.push('var simpleDiagnosis = ');
-        arr.push(sd);
-        arr.push(';');
-        var text = arr.join('');
-        $('#simple').text(text);
-    };
-
-    // selectionが変更された
-    function changeModule (selectModule) {
-        $('#result').text('');
-        if (selectModule.value === 'prescription') {
-            setupPrescription();
-
-        } else if (selectModule.value=== 'test') {
-            setupLabTest();
-
-        } else if (selectModule.value=== 'registeredDiagnosis') {
-            setupDiagnosis();
-        }
-    };
-
-    // 実際の RPC コール
-    function send (contentType, contentModule) {
+    function post(patient, creator, contentType, content) {
 
         // 検査の確定日時は報告日時に一致させる
-        var confirmDate = (contentType === 'test') ? contentModule.reportTime : nowAsDateTime();
+        var confirmDate = (contentType === 'test') ? content.reportTime : nowAsDateTime();
 
         var simpleModule = {
             docInfo: {
@@ -351,11 +231,11 @@
                 uuid: uuid.v4(),                                    // UUIDを発行
                 confirmDate: confirmDate                            // 確定日時 YYYY-MM-DDTHH:mm:ss
             },
-            data: [contentModule]
+            data: [content]
         };
         var simpleMML = {
-            patient: simplePatient(),
-            creator: simpleCreator(),
+            patient: patient,
+            creator: creator,
             content: [simpleModule]
         };
         var jsonRpc2 = {
@@ -379,50 +259,203 @@
                 var data = $.parseJSON(xhr.responseText);
                 data = data.result;
                 var xml_formatted = formatXml(data);
-                //xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
-                //document.getElementById("result").value = xml_formatted;
-                $('#result').text(xml_formatted);
+                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+                $('#boxRight').html(xml_escaped);
+
+                /*var rHeight = $('#boxRight').height();
+                var lHeight = $('#boxLeft').height();
+                if (rHeight > lHeight) {
+                    $('#boxLeft').height(rHeight);
+                } else {
+                    $('#boxRight').height(lHeight);
+                }*/
             }
         });
     };
 
-    // エンコードボタンクリック
-    function rpcCall () {
-        var contentType;
-        var contentModule;
-        var contentType = document.getElementById('selectModule').value;
-        if (contentType === 'prescription') {
-            contentModule = prescription();
-            send(contentType, contentModule);
-        } else if (contentType === 'registeredDiagnosis') {
-            contentModule = diagnosis();
-            send(contentType, contentModule);
-        } else if (contentType === 'test') {
-            labTest( function (simpleTest) {
-                contentModule = simpleTest;
-                send(contentType, contentModule);
-            });
+    // 処方情報を左側にセットする
+    function showPrescription () {
+        // staffs
+        var patient = simplePatient();
+        var creator = simpleCreator();
+        var prescription = simplePrescription();
+        // 表示
+        var arr = [];
+        arr.push('<pre>');
+        arr.push('// 患者');
+        arr.push('\n');
+        arr.push('var simplePatient = ');
+        arr.push(JSON.stringify(patient,null,4));
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 医師');
+        arr.push('\n');
+        arr.push('var simpleCreator = ');
+        arr.push(JSON.stringify(creator,null,4));
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 処方せん');
+        arr.push('\n');
+        arr.push('var simplePrescription = ');
+        arr.push(JSON.stringify(prescription, null, 4));
+        arr.push(';');
+        arr.push('</pre>');
+        var text = arr.join('');
+        $('#boxLeft').html(text);
+        // POST
+        post(patient, creator, 'prescription', prescription);
+    };
+
+    // 検査情報を左側にセットする
+    function showLabTest () {
+
+        simpleLabTest (function (simpleTest) {
+            // staffs
+            var patient = simplePatient();
+            var creator = simpleCreator();
+            // 表示
+            var arr = [];
+            arr.push('<pre>');
+            arr.push('// 患者');
+            arr.push('\n');
+            arr.push('var simplePatient = ');
+            arr.push(JSON.stringify(patient,null,4));
+            arr.push(';');
+            arr.push('\n');
+            arr.push('// 医師');
+            arr.push('\n');
+            arr.push('var simpleCreator = ');
+            arr.push(JSON.stringify(creator,null,4));
+            arr.push(';');
+            arr.push('\n');
+            arr.push('// 検査');
+            arr.push('\n');
+            arr.push('var simpleTest = ');
+            arr.push(JSON.stringify(simpleTest, null, 4));
+            arr.push(';');
+            arr.push('</pre>');
+            var text = arr.join('');
+            $('#boxLeft').html(text);
+            // POST
+            post(patient, creator, 'test', simpleTest);
+        });
+    };
+
+    // 病名情報を左側にセットする
+    function showDiagnosis () {
+        // staffs
+        var patient = simplePatient();
+        var creator = simpleCreator();
+        var diagnosis = simpleDiagnosis();
+        // 表示
+        var arr = [];
+        arr.push('<pre>');
+        arr.push('// 患者');
+        arr.push('\n');
+        arr.push('var simplePatient = ');
+        arr.push(JSON.stringify(patient,null,4));
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 医師');
+        arr.push('\n');
+        arr.push('var simpleCreator = ');
+        arr.push(JSON.stringify(creator,null,4));
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 病名');
+        arr.push('\n');
+        arr.push('var simpleDiagnosis = ');
+        arr.push(JSON.stringify(diagnosis, null, 4));
+        arr.push(';');
+        arr.push('</pre>');
+        var text = arr.join('');
+        $('#boxLeft').html(text);
+        // POST
+        post(patient, creator, 'registeredDiagnosis', diagnosis);
+    };
+
+    // selectionが変更された
+    function changeModule (selectModule) {
+
+        if (selectModule.value === 'prescription') {
+            showPrescription();
+
+        } else if (selectModule.value === 'test') {
+            showLabTest();
+
+        } else if (selectModule.value === 'registeredDiagnosis') {
+            showDiagnosis();
         }
     };
     </script>
 </head>
-<body onload="setupPrescription();">
-    <div id="main">
-        <div id="header">
-            <select id="selectModule" onchange="changeModule(this);">
-                <option value='prescription'>処 方</option>
-                <option value='test'>検 査</option>
-                <option value='registeredDiagnosis'>病 名</option>
-            </select>　　<button onclick="rpcCall();">エンコード</button>
+<body onload="showPrescription();">
+    <div id="topBar">
+        <h1>1000 Years Builder</h1><a href="https://github.com/mbot-dev/1000_builder"><img src="GitHub-Mark-Light-32px.png"></a>
+    </div>
+    <div id="content">
+        <div id="topSection">
+            <p>千年ビルダーは、千年カルテプロジェクトに参加するのを手助けするサーバーアプリケーションです。クライアントは各種の医療情報システムで、そこから簡単なデータを受け取り、MML4.0にエンコードしたデータを返します。</p>
+            <h3>利用イメージ</h3>
+            <ul>
+                <li>患者さんがクリニックを受診しました。</li>
+                <li>医師は処方せんを出しました。</li>
+            </ul>
+            <p>クライアントはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。左側が用意するデータ（選択可能）、右側がMML4.0にエンコードされたデータです。</p>
         </div>
-        <div id="boxLeft">
-            <textarea id="simple"></textarea>
+        <div id="dataHeader">
+            <div id="commandBar">
+                <p>クライアントが用意するデータ:
+                    <select id="selectModule" onchange="changeModule(this);">
+                        <option value='prescription'>処 方</option>
+                        <option value='test'>検 査</option>
+                        <option value='registeredDiagnosis'>病 名</option>
+                    </select>
+                </p>
+            </div>
+            <div id="mmlBar"><p>サーバーが生成した MML4.0</p></div>
+            <div style="clear:both;"></div>
         </div>
-        <div id="boxRight">
-            <textarea id="result"></textarea>
-        </div>
-        <div id="footer">
+        <div id="boxLeft"></div>
+        <div id="boxRight"></div>
+        <div id="bottomSection">
+            <p>　</p>
+            <p style="font-size:small;text-align:center;">サンプルデータの個人名には<a href="http://kazina.com/dummy/">なんちゃって個人情報</a>を使用しています。</p>
+            <h3>データ利用</h3>
+            <ul>
+                <li>サーバーが生成した MML データを千年カルテプロジェクトに送信します。</li>
+                <li>デフォルトで次のアクセス権が設定されます。
+                <ul>
+                    <li>診察した病院: 参照、修正、削除する全権限</li>
+                    <li>患者: 参照のみ</li>
+                    <li>患者が受診したことのある病院: 参照可</li>
+                </ul></li>
+            </ul>
+            <h3>このサーバーの目的</h3>
+            <p>MMLは医療情報を1000年に渡って活用することを目的としています。そのために多くの名前空間と深い階層によって情報が整理されています。これをサポートするのは、新規のアプリケーションであっても既存の製品であっても、かなりのコストが必要です。このアプリケーションはそこへシンプルなAPIを提供します。クライアントが用意しなければならないのはシンプルなJSONで、属性は殆どが自明なものばかりです。
+                したがって、
+            </p>
+            <uL>
+                <li>医療システムベンダーは、自社の製品に（既存であっても）千年カルテの機能をより簡単に組み込むことができます。</li>
+                <li>プロジェクトはこのサーバーだけを検証すればよく、信頼性が向上し、コストが下がります。</li>
+                <li>モバイルアプリからの送信も容易となり、院内の全ての場所、薬局、介護、リハビリ等、医療連携の幅が広がります。</li>
+            </ul>
+            <h3>クライアントの開発資料</h3>
+            <uL>
+                <li><a href="https://github.com/mbot-dev/1000_builder/wiki/simple">Wiki</a> に仕様及び設定ガイドがあります。</li>
+                <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
+                <li>このサーバーは IBM Bluemix 基盤で動いています。これをテストで使用することができます。</li>
+                <li>クライアントとサーバーの通信方式は JSON によるリモートプロシジャーコールです。システムの実装言語に依存しません。</li>
+            </ul>
+            <h3>関連情報</h3>
+            <ul>
+                <li><a href="https://www.facebook.com/gEHR-398609153661839/">千年カルテプロジェクト</a></li>
+                <li><a href="http://www.medxml.net/MML40j/mml4.html">MML4.0</a></li>
+            </ul>
         </div>
     </div>
+    <div id="footer">
+        <p>©2016 Kazushi Minagawa.</p>
+    </div>
 </body>
-<html>
+</html>

@@ -2,6 +2,7 @@
 
 const request = require('request');
 const uuid = require('node-uuid');
+const config = require('config');
 const pd = require('pretty-data2').pd;
 const utils = require('../lib/utils');
 
@@ -105,7 +106,7 @@ var jsonRpc2 = {
 
 // Request パラメータ
 var options = {
-    url: 'https://1000-builder.au-syd.mybluemix.net/api/v1',        // 千年ビルダーのURI /api/v1 が必要
+    url: 'http://localhost:3000/api/v1',        // 千年ビルダーのURI /api/v1 が必要
     method: "POST",
     json: true,                                 // Node.js の request 固有
     headers: {
