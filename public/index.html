@@ -6,7 +6,23 @@
     <script src="1000-utils.js"></script>
     <script type="text/javascript">
     //------------------------------------------------------------------
-    // 検査項目の結果値配列  Closure
+    // Closures
+    //------------------------------------------------------------------
+    // RPCのエンドポイント
+    var rpc_url = (function () {
+        var url = 'http://localhost:6001/api/v1';
+        return function () {
+            return url;
+        };
+    })();
+    // 検査項目と結果値を格納しているcsvファイルのURI
+    var test_result_csv_url = (function () {
+        var url = 'http://localhost:6001/test_result.csv';
+        return function () {
+            return url;
+        };
+    })();
+    // 上記csvをパースした検査項目の結果を入れる配列
     var test_items = (function () {
         var items = [];
         return function () {
@@ -14,6 +30,43 @@
         };
     })();
     //------------------------------------------------------------------
+    // 1000-builderへsimpleMMLをポストする（RPC）
+    //------------------------------------------------------------------
+    function post(simpleMML) {
+
+        // JSON-RPC2 へsimpleMMLをセットsる
+        var jsonRpc2 = {
+            jsonrpc: '2.0',                                         // must be '2.0'
+            method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
+            params: [simpleMML],                                    // 配列にsimpleMMLwp入れる
+            id: uuid.v4()                                           // id が必要 MMLの uuidとは別で JSON-RPC2.0 でも必要
+        };
+        // RPC を実行する
+        $.ajax({
+            url: rpc_url(),                                         // http://localhost:3000/api/v1
+            contentType: 'application/json',
+            data: JSON.stringify (jsonRpc2),
+            type:"POST",
+            dataType:"json",
+            success: function (result) {
+            },
+            error: function (err,status,thrown) {
+                alert ("this syntax sucks!! " + " ERROR: " + err + " STATUS: " + status + " " + thrown );
+            },
+            complete: function (xhr, status) {
+                // responseからJSONを生成する
+                var data = $.parseJSON(xhr.responseText);
+                // {jsonRpc2:'jsonRpc2', result:{MML}, id=''} が返ってくるので result: を取り出す
+                data = data.result;
+                // 結果はMML(XML) なので 'pretty print する
+                var xml_formatted = formatXml(data);
+                // 表示するために escapeする
+                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+                // MML4.0 box へ表示する
+                $('#mmlBox').html(xml_escaped);
+            }
+        });
+    };
 
     // 患者
     function simplePatient () {
@@ -62,6 +115,7 @@
         // 服薬開始日
         var startDate = nowAsDate();    // YYYY-MM-DD
         return {
+            contentType: 'prescription',
             medication: [
                 {
                     issuedTo: 'external',                           //
@@ -98,6 +152,7 @@
     };
 
     // 病名
+    // 1病名毎に1モジュール
     function simpleDiagnosis () {
         var now = new Date();
         var endDate = toDateString(now);                        // 終了日 = 今
@@ -105,6 +160,7 @@
         var startDate = toDateString(now);                      // 開始日
 
         return {
+            contentType: 'registeredDiagnosis',
             diagnosis: 'colon carcinoid',
             code: 'C189-.006',
             system: 'ICD10',
@@ -161,7 +217,7 @@
                 resolve(test_items());
             } else {
                 $.ajax ({
-                    url: 'http://localhost:3000/test_result.csv',
+                    url: test_result_csv_url(),
                     type:"GET",
                     success: function (result) {
                     },
@@ -189,6 +245,7 @@
             // 検査を依頼した人　すなわち creator
             var creator = simpleCreator();
             var test = {
+                contentType: 'test',
                 registId: uuid.v4(),                            // 検査Id 　運用で決める
                 registTime: nowAsDateTime(),                    // 受付日時
                 reportTime: nowAsDateTime(),                    // 報告日時
@@ -220,60 +277,99 @@
         });
     };
 
-    function post(patient, creator, contentType, content) {
+    // 検査情報をセットする
+    function showLabTest () {
 
-        // 検査の確定日時は報告日時に一致させる
-        var confirmDate = (contentType === 'test') ? content.reportTime : nowAsDateTime();
-
-        var simpleModule = {
-            docInfo: {
-                contentModuleType: contentType,
-                uuid: uuid.v4(),                                    // UUIDを発行
-                confirmDate: confirmDate                            // 確定日時 YYYY-MM-DDTHH:mm:ss
-            },
-            data: [content]
-        };
-        var simpleMML = {
-            patient: patient,
-            creator: creator,
-            content: [simpleModule]
-        };
-        var jsonRpc2 = {
-            jsonrpc: '2.0',                                         // must be '2.0'
-            method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
-            params: [simpleMML],                                    // []
-            id: uuid.v4()                                           // id が必要
-        };
-        $.ajax({
-            url: 'http://localhost:3000/api/v1',                    // http://localhost:3000/api/v1
-            contentType: 'application/json',
-            data: JSON.stringify (jsonRpc2),
-            type:"POST",
-            dataType:"json",
-            success: function (result) {
-            },
-            error: function (err,status,thrown) {
-                alert ("this syntax sucks!! " + " ERROR: " + err + " STATUS: " + status + " " + thrown );
-            },
-            complete: function (xhr,status) {
-                var data = $.parseJSON(xhr.responseText);
-                data = data.result;
-                var xml_formatted = formatXml(data);
-                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
-                $('#boxRight').html(xml_escaped);
-
-                /*var rHeight = $('#boxRight').height();
-                var lHeight = $('#boxLeft').height();
-                if (rHeight > lHeight) {
-                    $('#boxLeft').height(rHeight);
-                } else {
-                    $('#boxRight').height(lHeight);
-                }*/
-            }
+        simpleLabTest (function (simpleTest) {
+            // staffs
+            var patient = simplePatient();
+            var creator = simpleCreator();
+            // 表示
+            var arr = [];
+            arr.push('<pre>');
+            arr.push('// 患者');
+            arr.push('\n');
+            arr.push('var simplePatient = ');
+            arr.push(JSON.stringify(patient, null, 4));
+            arr.push(';');
+            arr.push('\n');
+            arr.push('// 医師');
+            arr.push('\n');
+            arr.push('var simpleCreator = ');
+            arr.push(JSON.stringify(creator, null, 4));
+            arr.push(';');
+            arr.push('\n');
+            arr.push('// 検査');
+            arr.push('\n');
+            arr.push('var simpleTest = ');
+            arr.push(JSON.stringify(simpleTest, null, 4));
+            arr.push(';');
+            arr.push('</pre>');
+            var text = arr.join('');
+            $('#simpleBox').html(text);
+            // MMLコンテナを作る
+            var confirmDate = simpleTest.reportTime;    // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
+            var uid = uuid.v4();                        // MMLには uuid が必要
+            var simpleMML = {
+                patient: patient,                       // 対象患者
+                creator: creator,                       // 担当医（診察した医師）
+                mmlInfo: {                              // 簡単なメタ情報をつける
+                    uuid: uid,                              // UUIDを発行
+                    confirmDate: confirmDate                // 確定日時 YYYY-MM-DDTHH:mm:ss
+                },
+                content: [simpleTest]                   // 中身をこのsimpleTestにする
+            };
+            // POST する
+            post(simpleMML);
         });
     };
 
-    // 処方情報を左側にセットする
+    // 病名情報をセットする
+    function showDiagnosis () {
+        // staffs
+        var patient = simplePatient();
+        var creator = simpleCreator();
+        var diagnosis = simpleDiagnosis();
+        // 表示
+        var arr = [];
+        arr.push('<pre>');
+        arr.push('// 患者');
+        arr.push('\n');
+        arr.push('var simplePatient = ');
+        arr.push(JSON.stringify(patient, null, 4));
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 医師');
+        arr.push('\n');
+        arr.push('var simpleCreator = ');
+        arr.push(JSON.stringify(creator, null, 4));
+        arr.push(';');
+        arr.push('\n');
+        arr.push('// 病名');
+        arr.push('\n');
+        arr.push('var simpleDiagnosis = ');
+        arr.push(JSON.stringify(diagnosis, null, 4));
+        arr.push(';');
+        arr.push('</pre>');
+        var text = arr.join('');
+        $('#simpleBox').html(text);
+        // MMLコンテナを作る
+        var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+        var uid = uuid.v4();                        // MMLには uuid が必要
+        var simpleMML = {
+            patient: patient,                       // 対象患者
+            creator: creator,                       // 担当医（診察した医師）
+            mmlInfo: {                              // 簡単なメタ情報をつける
+                uuid: uid,                              // UUIDを発行
+                confirmDate: confirmDate                // 確定日時 YYYY-MM-DDTHH:mm:ss
+            },
+            content: [diagnosis]                    // 中身をこのdiagnosisにする
+        };
+        // POST する
+        post(simpleMML);
+    };
+
+    // 処方情報をセットする
     function showPrescription () {
         // staffs
         var patient = simplePatient();
@@ -301,143 +397,87 @@
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
-        $('#boxLeft').html(text);
-        // POST
-        post(patient, creator, 'prescription', prescription);
-    };
-
-    // 検査情報を左側にセットする
-    function showLabTest () {
-
-        simpleLabTest (function (simpleTest) {
-            // staffs
-            var patient = simplePatient();
-            var creator = simpleCreator();
-            // 表示
-            var arr = [];
-            arr.push('<pre>');
-            arr.push('// 患者');
-            arr.push('\n');
-            arr.push('var simplePatient = ');
-            arr.push(JSON.stringify(patient,null,4));
-            arr.push(';');
-            arr.push('\n');
-            arr.push('// 医師');
-            arr.push('\n');
-            arr.push('var simpleCreator = ');
-            arr.push(JSON.stringify(creator,null,4));
-            arr.push(';');
-            arr.push('\n');
-            arr.push('// 検査');
-            arr.push('\n');
-            arr.push('var simpleTest = ');
-            arr.push(JSON.stringify(simpleTest, null, 4));
-            arr.push(';');
-            arr.push('</pre>');
-            var text = arr.join('');
-            $('#boxLeft').html(text);
-            // POST
-            post(patient, creator, 'test', simpleTest);
-        });
-    };
-
-    // 病名情報を左側にセットする
-    function showDiagnosis () {
-        // staffs
-        var patient = simplePatient();
-        var creator = simpleCreator();
-        var diagnosis = simpleDiagnosis();
-        // 表示
-        var arr = [];
-        arr.push('<pre>');
-        arr.push('// 患者');
-        arr.push('\n');
-        arr.push('var simplePatient = ');
-        arr.push(JSON.stringify(patient,null,4));
-        arr.push(';');
-        arr.push('\n');
-        arr.push('// 医師');
-        arr.push('\n');
-        arr.push('var simpleCreator = ');
-        arr.push(JSON.stringify(creator,null,4));
-        arr.push(';');
-        arr.push('\n');
-        arr.push('// 病名');
-        arr.push('\n');
-        arr.push('var simpleDiagnosis = ');
-        arr.push(JSON.stringify(diagnosis, null, 4));
-        arr.push(';');
-        arr.push('</pre>');
-        var text = arr.join('');
-        $('#boxLeft').html(text);
-        // POST
-        post(patient, creator, 'registeredDiagnosis', diagnosis);
+        $('#simpleBox').html(text);
+        // MMLコンテナを作る
+        var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+        var uid = uuid.v4();                        // MMLには uuid が必要
+        var simpleMML = {
+            patient: patient,                       // 対象患者
+            creator: creator,                       // 担当医（診察した医師）
+            mmlInfo: {                              // 簡単なメタ情報をつける
+                uuid: uid,                              // UUIDを発行
+                confirmDate: confirmDate                // 確定日時 YYYY-MM-DDTHH:mm:ss
+            },
+            content: [prescription]                 // 中身をこのprescriptionにする
+        };
+        // POST する
+        post(simpleMML);
     };
 
     // selectionが変更された
-    function changeModule (selectModule) {
-
-        if (selectModule.value === 'prescription') {
+    function changeModule (selection) {
+        if (selection.value === 'prescription') {
             showPrescription();
-
-        } else if (selectModule.value === 'test') {
-            showLabTest();
-
-        } else if (selectModule.value === 'registeredDiagnosis') {
+        } else if (selection.value === 'registeredDiagnosis') {
             showDiagnosis();
+        } else if (selection.value === 'test') {
+            showLabTest();
         }
     };
     </script>
 </head>
 <body onload="showPrescription();">
-    <div id="topBar">
+    <div id="headerBar">
         <h1>1000 Years Builder</h1><a href="https://github.com/mbot-dev/1000_builder"><img src="GitHub-Mark-Light-32px.png"></a>
     </div>
     <div id="content">
         <div id="topSection">
-            <p>千年ビルダーは、千年カルテプロジェクトに参加するのを手助けするサーバーアプリケーションです。クライアントは各種の医療情報システムで、そこから簡単なデータを受け取り、MML4.0にエンコードしたデータを返します。</p>
+            <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテプロジェクトが必要とするMML4.0形式のデータを生成するサーバーアプリケーションです。</p>
             <h3>利用イメージ</h3>
             <ul>
                 <li>患者さんがクリニックを受診しました。</li>
                 <li>医師は処方せんを出しました。</li>
             </ul>
-            <p>クライアントはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。左側が用意するデータ（選択可能）、右側がMML4.0にエンコードされたデータです。</p>
+            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。左側がポストするデータ（選択可能）、右側がMML4.0にエンコードされたデータです。</p>
         </div>
         <div id="dataHeader">
             <div id="commandBar">
-                <p>クライアントが用意するデータ:
-                    <select id="selectModule" onchange="changeModule(this);">
+                <p>クライアントがポストするデータ:
+                    <select onchange="changeModule(this);" style="vertical-align:center;">
                         <option value='prescription'>処 方</option>
-                        <option value='test'>検 査</option>
                         <option value='registeredDiagnosis'>病 名</option>
+                        <option value='test'>検 査</option>
                     </select>
                 </p>
             </div>
             <div id="mmlBar"><p>サーバーが生成した MML4.0</p></div>
             <div style="clear:both;"></div>
         </div>
-        <div id="boxLeft"></div>
-        <div id="boxRight"></div>
+        <!-- lefet=simpleXXX right=MMML -->
+        <div id="simpleBox"></div>
+        <div id="mmlBox"></div>
+        <!-- -->
         <div id="bottomSection">
             <p>　</p>
             <p style="font-size:small;text-align:center;">サンプルデータの個人名には<a href="http://kazina.com/dummy/">なんちゃって個人情報</a>を使用しています。</p>
             <h3>データ利用</h3>
             <ul>
-                <li>サーバーが生成した MML データを千年カルテプロジェクトに送信します。</li>
-                <li>デフォルトで次のアクセス権が設定されます。
-                <ul>
-                    <li>診察した病院: 参照、修正、削除する全権限</li>
-                    <li>患者: 参照のみ</li>
-                    <li>患者が受診したことのある病院: 参照可</li>
-                </ul></li>
+                <li>サーバーが生成したMMLを千年カルテプロジェクトに送信します。</li>
+                <li>この時デフォルトで次のアクセス権が設定されます。
+                    <ul>
+                        <li>診察した病院: 参照、修正、削除する全権限</li>
+                        <li>患者: 参照のみ</li>
+                        <li>患者が受診したことのある病院: 参照可</li>
+                    </ul>
+                </li>
             </ul>
             <h3>このサーバーの目的</h3>
-            <p>MMLは医療情報を1000年に渡って活用することを目的としています。そのために多くの名前空間と深い階層によって情報が整理されています。これをサポートするのは、新規のアプリケーションであっても既存の製品であっても、かなりのコストが必要です。このアプリケーションはそこへシンプルなAPIを提供します。クライアントが用意しなければならないのはシンプルなJSONで、属性は殆どが自明なものばかりです。
+            <p>MMLは医療情報を1000年に渡って活用できるようにするため、情報を多くの名前空間と深い階層によって定義しています。これをサポートするのは、新規のアプリケーションであっても既存の製品であっても、かなりのコストが必要です。千年ビルダーはそこへシンプルなAPIを提供します。クライアントがポストするのは簡単なJSONで、属性は殆どが自明なものばかりです。
                 したがって、
             </p>
             <uL>
                 <li>医療システムベンダーは、自社の製品に（既存であっても）千年カルテの機能をより簡単に組み込むことができます。</li>
-                <li>プロジェクトはこのサーバーだけを検証すればよく、信頼性が向上し、コストが下がります。</li>
+                <li>千年基盤はこのサーバーだけを検証すればよく、信頼性が向上し、コストが下がります。</li>
                 <li>モバイルアプリからの送信も容易となり、院内の全ての場所、薬局、介護、リハビリ等、医療連携の幅が広がります。</li>
             </ul>
             <h3>クライアントの開発資料</h3>
@@ -445,16 +485,18 @@
                 <li><a href="https://github.com/mbot-dev/1000_builder/wiki/simple">Wiki</a> に仕様及び設定ガイドがあります。</li>
                 <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
                 <li>このサーバーは IBM Bluemix 基盤で動いています。これをテストで使用することができます。</li>
-                <li>クライアントとサーバーの通信方式は JSON によるリモートプロシジャーコールです。システムの実装言語に依存しません。</li>
+                <li>クライアントとサーバーの通信方式はJSONによるリモートプロシジャーコールです。システムの実装言語に依存しません。</li>
             </ul>
             <h3>関連情報</h3>
             <ul>
                 <li><a href="https://www.facebook.com/gEHR-398609153661839/">千年カルテプロジェクト</a></li>
                 <li><a href="http://www.medxml.net/MML40j/mml4.html">MML4.0</a></li>
+                <li><a href="https://gist.github.com/dolphin-dev/f177a57c91d527e01059">カルテに記載される情報</a></li>
+                <li><a href="https://gist.github.com/dolphin-dev/c0d59774ecfbe47c0b3b">確定日について</a></li>
             </ul>
         </div>
     </div>
-    <div id="footer">
+    <div id="footerBar">
         <p>©2016 Kazushi Minagawa.</p>
     </div>
 </body>

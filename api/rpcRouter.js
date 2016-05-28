@@ -2,19 +2,16 @@
 
 const express = require('express');
 const config = require('config');
-const pd = require('pretty-data2').pd;
 const simpleBuilder = require('./simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
 
 var router = express.Router();
 
 // RPC method
-function rpcMethod(simpleMML, callback) {
+function rpcMethod(simpleMML) {
     var mmlObj = simpleBuilder.buildMML(simpleMML);
     var mml = mmlBuilder.build(mmlObj);
-    var prety = pd.xml(mml);
-    console.log(prety);
-    callback(mml);
+    return mml;
 };
 
 // Returns error object
@@ -31,8 +28,6 @@ function buildError(code, message, id) {
 
 // RPC route
 router.post(config.rpc.path, function (req, res) {
-
-    console.log('rpc get called');
 
     try {
         var body = req.body;
@@ -58,16 +53,14 @@ router.post(config.rpc.path, function (req, res) {
             // No response;
         } else {
             var arg = body.params[0];          // argmentはsimplMML一つ
-
             // call rpc method
-            var mml = rpcMethod(arg, (mml) => {
-                var response = {
-                    jsonrpc: '2.0',
-                    result: mml,
-                    id: rpcId
-                };
-                res.send(response);
-            });
+            var mml = rpcMethod(arg);
+            var response = {
+                jsonrpc: '2.0',
+                result: mml,
+                id: rpcId
+            };
+            res.send(response);
         }
 
     } catch (err) {

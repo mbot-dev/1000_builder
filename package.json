@@ -1,9 +1,10 @@
 {
-    "name": "1000_builder",
+    "name": "1000-builder",
     "version": "1.0.0",
     "description": "MML4.0 generation server to join the gEHR project.",
     "main": "app.js",
     "scripts": {
+        "start": "node app.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -14,10 +15,13 @@
     "license": "MIT",
     "dependencies": {
         "body-parser": "^1.15.1",
+        "cfenv": "1.0.x",
         "config": "^1.20.3",
         "express": "^4.13.4",
         "node-uuid": "^1.4.7",
-        "pretty-data2": "^0.40.1",
-        "request": "^2.72.0"
-    }
+        "pretty-data2": "^0.40.1"
+    },
+    "engines": {
+		"node": "4.4.4"
+	}
 }

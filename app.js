@@ -2,7 +2,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const config = require('config');
+const cfenv = require('cfenv');
 const rpcRouter = require('./api/rpcRouter');
 
 var app = express();
@@ -17,7 +17,7 @@ app.get('/', function(req, res){
   res.sendfile(__dirname + '/public/index.html');
 });
 
-app.listen(config.server.port, config.server.listen, () => {
-    var info = ['1000 builder listening on ', config.server.listen, ':', config.server.port].join('');
-    console.log(info);
+var appEnv = cfenv.getAppEnv();
+app.listen(appEnv.port, '0.0.0.0', () => {
+    console.log("1000-builder starting on " + appEnv.url);
 });

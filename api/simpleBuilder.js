@@ -1,10 +1,7 @@
 "use strict";
 
 const uuid = require('node-uuid');
-const readline = require('readline');
-const fs = require('fs');
 const utils = require('../lib/utils');
-
 
 /**
  * 患者、医師等の個人用Idを生成する
@@ -249,12 +246,12 @@ function buildDefaultAccessRight (patientId, patientName) {
 
 /**
  * docInfo を生成する
- * @param {simpleDocInfo} simpleDocInfo
+ * @param {baseDocInfo} baseDocInfo
  * @param {CreatorInfo} creatorInfo - このドキュメントのcreator
  * @params {[]} defaultAccessRight - このプロジェクトのデフォルトアクセス権
  * @returns {docInfo}
  */
-function buildDocInfo (simpleDocInfo, creatorInfo, defaultAccessRight) {
+function buildDocInfo (baseDocInfo, creatorInfo, defaultAccessRight) {
     /***************************************
     var simpleDocInfo = {
         contentModuleType: '',
@@ -266,12 +263,12 @@ function buildDocInfo (simpleDocInfo, creatorInfo, defaultAccessRight) {
     };***************************************/
 
     // title
-    var title = simpleDocInfo.hasOwnProperty('title') ? simpleDocInfo.title : simpleDocInfo.contentModuleType;
+    var title = baseDocInfo.hasOwnProperty('title') ? baseDocInfo.title : baseDocInfo.contentModuleType;
 
     // 対象
     var docInfo = {
         attr: {
-            contentModuleType: simpleDocInfo.contentModuleType // 文書の種類コード MML0005を使用
+            contentModuleType: baseDocInfo.contentModuleType  // 文書の種類コード MML0005を使用
             //moduleVersion: ''                                // 使用モジュールのDTDのURIを記載
         },
         securityLevel: defaultAccessRight,                    // accessRight の配列
@@ -282,12 +279,12 @@ function buildDocInfo (simpleDocInfo, creatorInfo, defaultAccessRight) {
             }
         },
         docId: {                                              // 文書 ID 情報
-            uid: simpleDocInfo.uuid                            // 文書ユニークID ユニーク番号の形式は UUID とする (UUID はハイフンを含めた形式とする)
+            uid: baseDocInfo.uuid                             // 文書ユニークID ユニーク番号の形式は UUID とする (UUID はハイフンを含めた形式とする)
             //parentId: [],                                    // 関連親文書ID parentId  の配列
             //groupId: []                                      // グループ ID groupIdの配列
         },
         confirmDate: {
-            value: simpleDocInfo.confirmDate                   // カルテ電子保存の確定日時
+            value: baseDocInfo.confirmDate                   // カルテ電子保存の確定日時
             //attr: {
             //start: 'YYYY-MM-DDThh:mm:ss',                 // 時系列情報場合の開始日時
             //end: 'YYYY-MM-DDThh:mm:ss',                   // 時系列情報場合の終了日時
@@ -299,20 +296,31 @@ function buildDocInfo (simpleDocInfo, creatorInfo, defaultAccessRight) {
         extRefs: []                                           // content 内に記載されているすべての外部リンク情報のリスト extRefの配列
     };
 
+    // groupId
+    if (baseDocInfo.hasOwnProperty('groupId')) {
+        var group = {
+            value: baseDocInfo.groupId,
+            attr: {
+                groupClass: baseDocInfo.contentModuleType
+            }
+        };
+        docInfo.docId.groupId = [group];
+    }
+
     // 修正版かどうか -> parentUUID && parentConfirmDate
-    if (simpleDocInfo.hasOwnProperty('parentUUID') &&
-    simpleDocInfo.hasOwnProperty('parentConfirmDate')) {
+    if (baseDocInfo.hasOwnProperty('parentUUID') &&
+    baseDocInfo.hasOwnProperty('parentConfirmDate')) {
 
         var parentId = {
-            value: simpleDocInfo.parentUUID,                    // 元の版のUUID
+            value: baseDocInfo.parentUUID,                    // 元の版のUUID
             attr: {
-                relation: 'oldEdition'                           // 関連の種別 MML0008から使用
+                relation: 'oldEdition'                        // 関連の種別 MML0008から使用
             }
         };
         docInfo.docId.parentId = [parentId];
 
         docInfo.confirmDate.attr = {
-            firstConfirmDate: simpleDocInfo.parentConfirmDate  // 最初の確定日
+            firstConfirmDate: baseDocInfo.parentConfirmDate  // 最初の確定日
         };
     }
 
@@ -778,26 +786,25 @@ exports.buildMML = (simpleMML) => {
     var simpleMML = {
         patient: simplePatient,
         creator: simpleCreator,
-        content: [{simpleModule}...]
+        mmlInfo: {},
+        content: [{simplePrescription} | {simpleDiagnosis} | {simpleTest}]
     };
-    // content の要素
-    var simpleModule = {
-        docInfo:'',
-        data: [{simplePrescription} | {simpleDiagnosis} | {simpleTest}]
-    }
     ***************************************************/
 
     // このMMLの生成日
     var createDate = utils.nowAsDateTime();
 
-    // 患者情報モジュール
+    // 患者情報モジュールを生成する
     var patientModule = buildPatientModule(simpleMML.patient);
 
-    // デフォルトのアクセス権
+    // デフォルトのアクセス権を生成する
     var defaultAccessRight = buildDefaultAccessRight(simpleMML.patient.id,simpleMML.patient.kanjiName);
 
-    // このMMLのcreatorInfo
+    // このMMLのcreatorInfoを生成する
     var creatorInfo = buildCreatorInfo(simpleMML.creator);
+
+    // メタ情報
+    var mmlInfo = simpleMML.mmlInfo;
 
     // Header
     var mmlHeader = {
@@ -819,63 +826,67 @@ exports.buildMML = (simpleMML) => {
 
     // 患者情報が含まれているかどうかのフラグ
     var hasPatientModule = false;
+    var addPatientModule = false;               // 設定が必要
+    var baseDocInfo = {
+        confirmDate: mmlInfo.confirmDate,       // 確定日時はMMLの確定日時
+        groupId: mmlInfo.uuid                   // groupingId = 含まれているMMLのuuid
+    };
+
+    // MML 規格のdocInfo でbaseDocInfoを基に生成される
+    // MML のモジュール単位に付加される
     var docInfo;
 
     // simpleMMLのcontent配列をイテレート
-    simpleMML.content.forEach((simpleModule) => {
+    // content: [simplePrescription | simpleDiagnosis | simpleTest]
+    simpleMML.content.forEach((content) => {
 
-        var simpleDocInfo = simpleModule.docInfo;
-        var data = simpleModule.data;
+        // contentModuleTypeをセットする
+        baseDocInfo.contentModuleType = content.contentType;
 
-        if (simpleDocInfo.contentModuleType === 'prescription') {
+        if (content.contentType === 'prescription') {
 
-            docInfo = buildDocInfo(simpleDocInfo, creatorInfo, defaultAccessRight);
+            // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
+            var arr = buildPrescriptionModule(content);
 
-            // simpleModuleのdata配列をイテレート
-            data.forEach((simplePrescription) => {
+            // 結果は配列で返る
+            arr.forEach((prescription) => {  // uuid のbug!
 
-                // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
-                var arr = buildPrescriptionModule(simplePrescription);
-
-                // 結果は配列で返る
-                arr.forEach((prescription) => {
-
-                    // それに薬が入っていたらModuleItemへ加える
-                    if (prescription.medication.length > 0) {
-                        result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
-                    }
-                });
+                // それに薬が入っていたらModuleItemへ加える
+                if (prescription.medication.length > 0) {
+                    // MML 規格によりModule単位にuuidを付番する
+                    baseDocInfo.uuid = uuid.v4();
+                    // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
+                    docInfo = buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                    result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
+                }
             });
 
-        } else if (simpleDocInfo.contentModuleType === 'registeredDiagnosis') {
-            docInfo = buildDocInfo(simpleDocInfo, creatorInfo, defaultAccessRight);
-            data.forEach((simpleDiagnosis) => {
-                var rd = buildRegisteredDiagnosisModule(simpleDiagnosis);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: rd});
-            });
+        } else if (content.contentType === 'registeredDiagnosis') {
+            baseDocInfo.uuid = uuid.v4();
+            docInfo = buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+            var rd = buildRegisteredDiagnosisModule(content);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: rd});
 
-        } else if (simpleDocInfo.contentModuleType === 'test') {
-            data.forEach((simpleTest) => {
-                // testモジュールのcreatorはlabCenter
-                var creator = buildCreatorInfo(simpleTest.labCenter);
-                docInfo = buildDocInfo(simpleDocInfo, creator, defaultAccessRight);
-                var test = buildTestModule(simpleTest);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: test});
-            });
+        } else if (content.contentType === 'test') {
+            // 検体検査のcreatorは検査会社の代表
+            var creator = buildCreatorInfo(content.labCenter);
+            // それがdocInfoにセットされる
+            baseDocInfo.uuid = uuid.v4();
+            docInfo = buildDocInfo(baseDocInfo, creator, defaultAccessRight);
+            var test = buildTestModule(content);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: test});
 
-        } else if (simpleDocInfo.contentModuleType === 'patientInfo') {
-            docInfo = buildDocInfo(simpleDocInfo, creatorInfo, defaultAccessRight);
-            data.forEach((simplePatient) => {
-                var pm = buildPatientModule(simplePatient);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: pm});
-            });
+        } else if (content.contentType === 'patientInfo') {
+            baseDocInfo.uuid = uuid.v4();
+            docInfo = buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+            var pm = buildPatientModule(content);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: pm});
             hasPatientModule = true;
         }
     });
 
-    /*
     // 患者情報がなかった場合は先頭へ追加する
-    if (!hasPatientModule) {
+    if (addPatientModule && !hasPatientModule) {
         var simple = {
             contentModuleType: 'patientInfo',
             uuid: uuid.v4(),                                // UUIDを発行
@@ -883,7 +894,7 @@ exports.buildMML = (simpleMML) => {
         };
         docInfo = buildDocInfo(simple, creatorInfo, defaultAccessRight);
         result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
-    }*/
+    }
 
     return result;
 };

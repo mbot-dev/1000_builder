@@ -32,4 +32,9 @@ node_modules
 # Optional REPL history
 .node_repl_history
 
+# Bluemix
+.cfignore
+.project
+manifest.yml
+
 .DS_Store
