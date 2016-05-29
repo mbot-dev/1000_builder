@@ -176,6 +176,8 @@
         var items = [];
         // リターン区切りでline by line
         var lines = content.split("\n");
+        // 最初の行を除く
+        lines.shift();
         lines.forEach(function (entry) {
             // この行をカンマ区切りで配列に格納する
             var arr = entry.split(/\s*,\s*/);

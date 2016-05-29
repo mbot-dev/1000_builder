@@ -1,5 +1,6 @@
 "use strict";
 
+// https://gist.github.com/sente/1083506
 function formatXml (xml) {
     var formatted = '';
     var reg = /(>)(<)(\/*)/g;
@@ -32,18 +33,12 @@ function formatXml (xml) {
 };
 
 function addQuote (value) {
-    var arr =[];
-    arr.push('\"');
-    arr.push(value);
-    arr.push('\"');
+    var arr =['\"', value, '\"'];
     return arr.join('');
 };
 
 function addSingleQuote (value) {
-    var arr =[];
-    arr.push('\'');
-    arr.push(value);
-    arr.push('\'');
+    var arr =['\'', value, '\''];
     return arr.join('');
 };
 
@@ -56,30 +51,23 @@ function addZero (x, n) {
 
 // yyyy-MM-dd
 function toDateString (date) {
-    var arr = [];
-    arr.push(date.getFullYear());
-    arr.push('-');
-    arr.push(addZero(date.getMonth() + 1, 2));
-    arr.push('-');
-    arr.push(addZero(date.getDate(), 2));
+    var yyyy = date.getFullYear();
+    var MM = addZero(date.getMonth() + 1, 2);
+    var dd = addZero(date.getDate(), 2);
+    var arr = [yyyy, '-', MM, '-', dd];
     var str = arr.join('');
     return str;
 };
 
 // yyyy-MM-ddTHH:mm:ss
 function toDateTimeString (date) {
-    var arr = [];
-    arr.push(date.getFullYear());
-    arr.push('-');
-    arr.push(addZero(date.getMonth() + 1, 2));
-    arr.push('-');
-    arr.push(addZero(date.getDate(), 2));
-    arr.push('T');
-    arr.push(addZero(date.getHours(), 2));
-    arr.push(':');
-    arr.push(addZero(date.getMinutes(), 2));
-    arr.push(':');
-    arr.push(addZero(date.getSeconds(), 2));
+    var yyyy = date.getFullYear();
+    var MM = addZero(date.getMonth() + 1, 2);
+    var dd = addZero(date.getDate(), 2);
+    var HH = addZero(date.getHours(), 2);
+    var mm = addZero(date.getMinutes(), 2);
+    var ss = addZero(date.getSeconds(), 2);
+    var arr = [yyyy, '-', MM, '-', dd, 'T', HH, ':', mm, ':', ss];
     var str = arr.join('');
     return str;
 };
