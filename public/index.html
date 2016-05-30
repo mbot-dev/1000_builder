@@ -9,21 +9,21 @@
     // Closure
     //------------------------------------------------------------------
     // RPCのエンドポイント
-    var rpc_url = (function () {
+    var rpcURL = (function () {
         var url = 'http://localhost:6001/api/v1';
         return function () {
             return url;
         };
     })();
-    // 検査項目と結果値を格納しているcsvファイルのURI
-    var test_result_csv_url = (function () {
+    // 検査結果を格納しているcsvファイルへのURI
+    var testResultURL = (function () {
         var url = 'http://localhost:6001/test_result.csv';
         return function () {
             return url;
         };
     })();
     // 上記csvをパースした検査項目の結果を入れる配列
-    var test_items = (function () {
+    var tetItems = (function () {
         var items = [];
         return function () {
             return items;
@@ -32,22 +32,23 @@
     //------------------------------------------------------------------
     // 1000-builderへsimpleMMLをポストする（RPC）
     //------------------------------------------------------------------
-    function post(simpleMML) {
+    function post (simpleMML) {
 
-        // JSON-RPC2 へsimpleMMLをセットsる
+        // ポストするデータの本体
+        // JSON-RPC 2.0 の仕様で下記 JSON にする
         var jsonRpc2 = {
-            jsonrpc: '2.0',                                         // must be '2.0'
+            jsonrpc: '2.0',                                         // 必ず '2.0' にする
             method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
-            params: [simpleMML],                                    // 配列にsimpleMMLwp入れる
+            params: [simpleMML],                                    // params は配列で要素はsimpleMMLにする
             id: uuid.v4()                                           // id が必要 MMLの uuidとは別で JSON-RPC2.0 でも必要
         };
-        // RPC を実行する
+        // RPC を実行する (jquery)
         $.ajax({
-            url: rpc_url(),                                         // http://localhost:3000/api/v1
-            contentType: 'application/json',
-            data: JSON.stringify (jsonRpc2),
-            type:"POST",
-            dataType:"json",
+            url: rpcURL(),                                          // ポスト先 http://localhost:3000/api/v1
+            contentType: 'application/json',                        // http ヘッダーの contentType
+            data: JSON.stringify (jsonRpc2),                        // jquery の場合は JSON を string にしている
+            type: 'POST',                                           // http method
+            dataType: 'json',
             success: function (result) {
             },
             error: function (err,status,thrown) {
@@ -114,41 +115,48 @@
     function simplePrescription () {
         // 服薬開始日
         var startDate = nowAsDate();    // YYYY-MM-DD
-        return {
-            contentType: 'prescription',
-            medication: [
-                {
-                    issuedTo: 'external',                           //
-                    medicine: 'マーズレン S 顆粒',                    // 処方薬
-                    medicineCode: '612320261',                      // 処方薬
-                    medicineCodeSystem: 'YJ',                       // コード体系
-                    dose: 1,                                        // 1回の量
-                    doseUnit: 'g',                                  // 単位
-                    frequencyPerDay: 2,                             // 1日の内服回数
-                    startDate: startDate,                           // 服薬開始日 YYYY-MM-DD
-                    duration: 7,                                    // 7日分
-                    instruction: '内服2回 朝夜食後に',                 // 用法
-                    PRN: false,                                     // 頓用=false
-                    brandSubstitutionPermitted: true,               // ジェネリック可
-                    longTerm: false                                 // 臨時処方
-                },
-                {
-                    issuedTo: 'external',
-                    medicine: 'メトリジン錠 2 mg',
-                    medicineCode: '612160027',
-                    medicineCodeSystem: 'YJ',
-                    dose: 2,                                        // 1回の量
-                    doseUnit: '錠',                                 // 単位
-                    frequencyPerDay: 2,                             // 1日の内服回数
-                    startDate: startDate,                           // 服薬開始日
-                    duration: 14,                                   // 14日分
-                    instruction: '内服2回 朝夜食後に',                 // 用法
-                    PRN: false,                                     // 頓用=false
-                    brandSubstitutionPermitted: false,              // ジェネリック
-                    longTerm: true                                  // 長期処方
-                }
-            ]
+
+        // リターンする simplePrescription
+        var simple = {
+            contentType: 'prescription',                    // prescriptionにする
+            medication: []                                  // 処方の配列
         };
+
+        var med = {
+            issuedTo: 'external',                           // 院外処方: external 院内処方: internal
+            medicine: 'マーズレン S 顆粒',                    // 処方薬
+            medicineCode: '612320261',                      // 処方薬のコード
+            medicineCodeSystem: 'YJ',                       // コード体系
+            dose: 1,                                        // 1回の量
+            doseUnit: 'g',                                  // 単位
+            frequencyPerDay: 2,                             // 1日の内服回数
+            startDate: startDate,                           // 服薬開始日 YYYY-MM-DD
+            duration: 7,                                    // 7日分
+            instruction: '内服2回 朝夜食後に',                 // 用法
+            PRN: false,                                     // 頓用=false
+            brandSubstitutionPermitted: true,               // ジェネリック可
+            longTerm: false                                 // 臨時処方
+        };
+        simple.medication.push(med);                        // 配列へ格納
+
+        med = {
+            issuedTo: 'external',                           // 院外処方: external 院内処方: internal
+            medicine: 'メトリジン錠 2 mg',                    // 処方薬
+            medicineCode: '612160027',                      // 処方薬のコード
+            medicineCodeSystem: 'YJ',                       // コード体系
+            dose: 2,                                        // 1回の量
+            doseUnit: '錠',                                 // 単位
+            frequencyPerDay: 2,                             // 1日の内服回数
+            startDate: startDate,                           // 服薬開始日
+            duration: 14,                                   // 14日分
+            instruction: '内服2回 朝夜食後に',                 // 用法
+            PRN: false,                                     // 頓用=false
+            brandSubstitutionPermitted: false,              // ジェネリック不可
+            longTerm: true                                  // 長期処方
+        };
+        simple.medication.push(med);                        // 配列へ格納
+
+        return simple;
     };
 
     // 病名
@@ -160,7 +168,7 @@
         var startDate = toDateString(now);                      // 開始日
 
         return {
-            contentType: 'registeredDiagnosis',
+            contentType: 'registeredDiagnosis',             // registeredDiagnosisにする
             diagnosis: 'colon carcinoid',
             code: 'C189-.006',
             system: 'ICD10',
@@ -174,36 +182,39 @@
     // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
     function createTestItems (content) {
         var items = [];
+        var lineArray = [];
+        var simpleItem = {};
         // リターン区切りでline by line
         var lines = content.split("\n");
-        // 最初の行を除く
+        // 最初の行はヘッダーなので除く
         lines.shift();
         lines.forEach(function (entry) {
             // この行をカンマ区切りで配列に格納する
-            var arr = entry.split(/\s*,\s*/);
+            lineArray = entry.split(/\s*,\s*/);
             // この行のテスト項目
-            var simpleItem = {};
-            simpleItem.spcCode = arr[0];              // 検体コード
-            simpleItem.spcName = arr[1];              // 検体名
-            simpleItem.testCode = arr[2];             // コード
-            simpleItem.testName = arr[3];             // テスト項目名
-            simpleItem.testResult = arr[4];           // 結果値
+            simpleItem = {
+                spcCode: lineArray[0],              // 検体コード
+                spcName: lineArray[1],              // 検体名
+                testCode: lineArray[2],             // コード
+                testName: lineArray[3],             // テスト項目名
+                testResult: lineArray[4]            // 結果値
+            };
 
-            if (arr[5] !== '') {
-                simpleItem.unit = arr[5];              // 単位
+            if (lineArray[5] !== '') {
+                simpleItem.unit = lineArray[5];              // 単位
             }
-            if (arr[6] !== '' ) {
-                simpleItem.low = arr[6];               // 下限値
+            if (lineArray[6] !== '' ) {
+                simpleItem.low = lineArray[6];               // 下限値
             }
-            if (arr[7] !== '' ) {
-                simpleItem.up = arr[7];                // 上限値
+            if (lineArray[7] !== '' ) {
+                simpleItem.up = lineArray[7];                // 上限値
             }
-            if (arr[8] !== '' ) {
-                simpleItem.out = arr[8];               // 判定フラグ
+            if (lineArray[8] !== '' ) {
+                simpleItem.out = lineArray[8];               // 判定フラグ
             }
-            if (arr[9] !== '' && arr[10] !== '') {
-                simpleItem.memoCode = arr[9];          // メモコード
-                simpleItem.memo = arr[10];             // メモ
+            if (lineArray[9] !== '' && lineArray[10] !== '') {
+                simpleItem.memoCode = lineArray[9];          // メモコード
+                simpleItem.memo = lineArray[10];             // メモ
             }
             items.push(simpleItem);
         });
@@ -215,11 +226,11 @@
     function readTestResult () {
 
         return new Promise (function (resolve, reject) {
-            if (test_items().length > 0) {
-                resolve(test_items());
+            if (tetItems().length > 0) {
+                resolve(tetItems());
             } else {
                 $.ajax ({
-                    url: test_result_csv_url(),
+                    url: testResultURL(),
                     type:"GET",
                     success: function (result) {
                     },
@@ -230,9 +241,9 @@
                         // 結果値
                         var items = createTestItems(xhr.responseText);
                         items.forEach (function (entry) {
-                            test_items().push(entry);
+                            tetItems().push(entry);
                         });
-                        resolve(test_items());
+                        resolve(tetItems());
                     }
                 });
             }
@@ -284,8 +295,18 @@
 
         simpleLabTest (function (simpleTest) {
             // staffs
-            var patient = simplePatient();
-            var creator = simpleCreator();
+            var patient = simplePatient();              // 患者
+            var creator = simpleCreator();              // 医師
+            var confirmDate = simpleTest.reportTime;    // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
+            var uid = uuid.v4();                        // MML文書の UUID
+            var simpleMML = {                           // POST = simpleMML
+                patient: patient,                       // 患者
+                creator: creator,                       // 医師
+                uuid: uid,                              // UUID
+                confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
+                content: [simpleTest]                   // 中身をこのsimpleTestにする
+            };
+
             // 表示
             var arr = [];
             arr.push('<pre>');
@@ -309,18 +330,7 @@
             arr.push('</pre>');
             var text = arr.join('');
             $('#simpleBox').html(text);
-            // MMLコンテナを作る
-            var confirmDate = simpleTest.reportTime;    // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
-            var uid = uuid.v4();                        // MMLには uuid が必要
-            var simpleMML = {
-                patient: patient,                       // 対象患者
-                creator: creator,                       // 担当医（診察した医師）
-                mmlInfo: {                              // 簡単なメタ情報をつける
-                    uuid: uid,                              // UUIDを発行
-                    confirmDate: confirmDate                // 確定日時 YYYY-MM-DDTHH:mm:ss
-                },
-                content: [simpleTest]                   // 中身をこのsimpleTestにする
-            };
+
             // POST する
             post(simpleMML);
         });
@@ -329,9 +339,19 @@
     // 病名情報をセットする
     function showDiagnosis () {
         // staffs
-        var patient = simplePatient();
-        var creator = simpleCreator();
-        var diagnosis = simpleDiagnosis();
+        var patient = simplePatient();              // 患者
+        var creator = simpleCreator();              // 医師
+        var diagnosis = simpleDiagnosis();          // 病名
+        var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+        var uid = uuid.v4();                        // MML文書の UUID
+        var simpleMML = {                           // POST = simpleMML
+            patient: patient,                       // 患者
+            creator: creator,                       // 医師
+            uuid: uid,                              // UUID
+            confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
+            content: [diagnosis]                    // 中身をこのdiagnosisにする
+        };
+
         // 表示
         var arr = [];
         arr.push('<pre>');
@@ -355,18 +375,7 @@
         arr.push('</pre>');
         var text = arr.join('');
         $('#simpleBox').html(text);
-        // MMLコンテナを作る
-        var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
-        var uid = uuid.v4();                        // MMLには uuid が必要
-        var simpleMML = {
-            patient: patient,                       // 対象患者
-            creator: creator,                       // 担当医（診察した医師）
-            mmlInfo: {                              // 簡単なメタ情報をつける
-                uuid: uid,                              // UUIDを発行
-                confirmDate: confirmDate                // 確定日時 YYYY-MM-DDTHH:mm:ss
-            },
-            content: [diagnosis]                    // 中身をこのdiagnosisにする
-        };
+
         // POST する
         post(simpleMML);
     };
@@ -374,9 +383,19 @@
     // 処方情報をセットする
     function showPrescription () {
         // staffs
-        var patient = simplePatient();
-        var creator = simpleCreator();
-        var prescription = simplePrescription();
+        var patient = simplePatient();              // 患者
+        var creator = simpleCreator();              // 医師
+        var prescription = simplePrescription();    // 処方せん
+        var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
+        var uid = uuid.v4();                        // MML文書の UUID
+        var simpleMML = {                           // POST = simpleMML
+            patient: patient,                       // 患者
+            creator: creator,                       // 医師
+            uuid: uid,                              // UUID
+            confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
+            content: [prescription]                 // 中身をこのprescriptionにする
+        };
+
         // 表示
         var arr = [];
         arr.push('<pre>');
@@ -400,18 +419,7 @@
         arr.push('</pre>');
         var text = arr.join('');
         $('#simpleBox').html(text);
-        // MMLコンテナを作る
-        var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
-        var uid = uuid.v4();                        // MMLには uuid が必要
-        var simpleMML = {
-            patient: patient,                       // 対象患者
-            creator: creator,                       // 担当医（診察した医師）
-            mmlInfo: {                              // 簡単なメタ情報をつける
-                uuid: uid,                              // UUIDを発行
-                confirmDate: confirmDate                // 確定日時 YYYY-MM-DDTHH:mm:ss
-            },
-            content: [prescription]                 // 中身をこのprescriptionにする
-        };
+
         // POST する
         post(simpleMML);
     };

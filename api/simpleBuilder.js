@@ -786,7 +786,8 @@ exports.buildMML = (simpleMML) => {
     var simpleMML = {
         patient: simplePatient,
         creator: simpleCreator,
-        mmlInfo: {},
+        uuid: uuid,
+        confirmDate: confirmDate,
         content: [{simplePrescription} | {simpleDiagnosis} | {simpleTest}]
     };
     ***************************************************/
@@ -802,9 +803,6 @@ exports.buildMML = (simpleMML) => {
 
     // このMMLのcreatorInfoを生成する
     var creatorInfo = buildCreatorInfo(simpleMML.creator);
-
-    // メタ情報
-    var mmlInfo = simpleMML.mmlInfo;
 
     // Header
     var mmlHeader = {
@@ -824,17 +822,19 @@ exports.buildMML = (simpleMML) => {
         }
     };
 
-    // 患者情報が含まれているかどうかのフラグ
-    var hasPatientModule = false;
-    var addPatientModule = false;               // 設定が必要
+    // docInfoを生成する際のもとにする上hぷ
     var baseDocInfo = {
-        confirmDate: mmlInfo.confirmDate,       // 確定日時はMMLの確定日時
-        groupId: mmlInfo.uuid                   // groupingId = 含まれているMMLのuuid
+        confirmDate: simpleMML.confirmDate,       // 確定日時はMMLの確定日時
+        groupId: simpleMML.uuid                   // groupingId = 含まれているMMLのuuid
     };
 
     // MML 規格のdocInfo でbaseDocInfoを基に生成される
     // MML のモジュール単位に付加される
-    var docInfo;
+    var docInfo = {};
+
+    // 患者情報が含まれているかどうかのフラグ
+    var hasPatientModule = false;
+    var addPatientModule = false;               // 設定が必要
 
     // simpleMMLのcontent配列をイテレート
     // content: [simplePrescription | simpleDiagnosis | simpleTest]
@@ -887,12 +887,10 @@ exports.buildMML = (simpleMML) => {
 
     // 患者情報がなかった場合は先頭へ追加する
     if (addPatientModule && !hasPatientModule) {
-        var simple = {
-            contentModuleType: 'patientInfo',
-            uuid: uuid.v4(),                                // UUIDを発行
-            confirmDate: createDate                         // 確定日時 YYYY-MM-DDTHH:mm:ss
-        };
-        docInfo = buildDocInfo(simple, creatorInfo, defaultAccessRight);
+        baseDocInfo.contentModuleType = 'patientInfo';
+        baseDocInfo.uuid = uuid.v4();
+        baseDocInfo.confirmDate = createDate;
+        docInfo = buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
         result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
     }
 
