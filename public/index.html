@@ -32,7 +32,7 @@
     //------------------------------------------------------------------
     // 1000-builderへsimpleMMLをポストする（RPC）
     //------------------------------------------------------------------
-    function post (simpleMML) {
+    var post = function (simpleMML) {
 
         // ポストするデータの本体
         // JSON-RPC 2.0 の仕様で下記 JSON にする
@@ -70,7 +70,7 @@
     };
 
     // 患者
-    function simplePatient () {
+    var simplePatient = function () {
         return {
             id: '0516',                                        // 施設(病院)内で発番されている患者Id
             idType: 'facility',                                // 施設固有のIdであることを示す
@@ -91,7 +91,7 @@
     };
 
     // 医師等
-    function simpleCreator () {
+    var simpleCreator = function () {
         return {
             id: '201605',                                      // 施設で付番されている医師のId
             idType: 'facility',                                // 施設固有のIdであることを示す
@@ -112,7 +112,7 @@
     };
 
     // 処方せん
-    function simplePrescription () {
+    var simplePrescription = function () {
         // 服薬開始日
         var startDate = nowAsDate();    // YYYY-MM-DD
 
@@ -161,7 +161,7 @@
 
     // 病名
     // 1病名毎に1モジュール
-    function simpleDiagnosis () {
+    var simpleDiagnosis = function () {
         var now = new Date();
         var endDate = toDateString(now);                        // 終了日 = 今
         now.setDate(now.getDate() - 30);                        // 30日前が
@@ -180,7 +180,7 @@
     };
 
     // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
-    function createTestItems (content) {
+    var createTestItems = function (content) {
         var items = [];
         var lineArray = [];
         var simpleItem = {};
@@ -223,28 +223,19 @@
 
     // 検査結果値のCSVファイル（test_result.csv）を読む
     // HTTP コールなので Promise
-    function readTestResult () {
+    var readTestResult = function () {
 
         return new Promise (function (resolve, reject) {
             if (tetItems().length > 0) {
                 resolve(tetItems());
             } else {
-                $.ajax ({
-                    url: testResultURL(),
-                    type:"GET",
-                    success: function (result) {
-                    },
-                    error: function (err,status,thrown) {
-                        reject(err);
-                    },
-                    complete: function (xhr,status) {
-                        // 結果値
-                        var items = createTestItems(xhr.responseText);
-                        items.forEach (function (entry) {
-                            tetItems().push(entry);
-                        });
-                        resolve(tetItems());
-                    }
+                $.get (testResultURL(), function (data, status) {
+                    // 結果値
+                    var items = createTestItems(data);
+                    items.forEach (function (entry) {
+                        tetItems().push(entry);
+                    });
+                    resolve(tetItems());
                 });
             }
         });
@@ -252,7 +243,7 @@
 
     // 検体検査 この関数のみ callback を引数に取る
     // 検査結果値をファイルから読み込むため
-    function simpleLabTest (callback) {
+    var simpleLabTest = function (callback) {
 
         readTestResult().then (function (items) {
             // 検査を依頼した人　すなわち creator
@@ -291,7 +282,7 @@
     };
 
     // 検査情報をセットする
-    function showLabTest () {
+    var showLabTest = function () {
 
         simpleLabTest (function (simpleTest) {
             // staffs
@@ -337,7 +328,7 @@
     };
 
     // 病名情報をセットする
-    function showDiagnosis () {
+    var showDiagnosis = function () {
         // staffs
         var patient = simplePatient();              // 患者
         var creator = simpleCreator();              // 医師
@@ -381,7 +372,7 @@
     };
 
     // 処方情報をセットする
-    function showPrescription () {
+    var showPrescription = function () {
         // staffs
         var patient = simplePatient();              // 患者
         var creator = simpleCreator();              // 医師
@@ -425,7 +416,7 @@
     };
 
     // selectionが変更された
-    function changeModule (selection) {
+    var changeModule = function (selection) {
         if (selection.value === 'prescription') {
             showPrescription();
         } else if (selection.value === 'registeredDiagnosis') {

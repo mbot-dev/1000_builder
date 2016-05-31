@@ -8,14 +8,14 @@ const mmlBuilder = require('../lib/mmlBuilder');
 var router = express.Router();
 
 // RPC method
-function rpcMethod(simpleMML) {
+var rpcMethod = (simpleMML, callback) => {
     var mmlObj = simpleBuilder.buildMML(simpleMML);
     var mml = mmlBuilder.build(mmlObj);
-    return mml;
+    callback (mml);
 };
 
 // Returns error object
-function buildError(code, message, id) {
+var buildError = (code, message, id) => {
     return {
         jsonrpc: '2.0',
         error: {
@@ -27,7 +27,7 @@ function buildError(code, message, id) {
 };
 
 // RPC route
-router.post(config.rpc.path, function (req, res) {
+router.post (config.rpc.path, function (req, res) {
 
     try {
         var body = req.body;
@@ -52,15 +52,15 @@ router.post(config.rpc.path, function (req, res) {
         if (rpcId === 'undefined') {
             // No response;
         } else {
-            var arg = body.params[0];          // argmentはsimplMML一つ
             // call rpc method
-            var mml = rpcMethod(arg);
-            var response = {
-                jsonrpc: '2.0',
-                result: mml,
-                id: rpcId
-            };
-            res.send(response);
+            rpcMethod(body.params[0], (mml) => {
+                var response = {
+                    jsonrpc: '2.0',
+                    result: mml,
+                    id: rpcId
+                };
+                res.send(response);
+            });
         }
 
     } catch (err) {

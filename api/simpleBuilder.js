@@ -9,7 +9,7 @@ const utils = require('../lib/utils');
  * @param {string} - idType MML0024(全国統一:national 地域:local 施設固有:facility)
  * @param {string} - facilityId 医療機関のId
  */
-function buildPersonId (pid, idType, facilityId) {
+var buildPersonId = (pid, idType, facilityId) => {
     // idTypeが施設固有の場合(===facility) tableIdに施設Idを設定する
     return {
         value: pid,                     // 付番されているId
@@ -25,7 +25,7 @@ function buildPersonId (pid, idType, facilityId) {
  * @param {simpleCreator} simpleCreator
  * @returns {CreatorInfo}
  */
-function buildCreatorInfo (simpleCreator) {
+var buildCreatorInfo = (simpleCreator) => {
     /******************************************************
     var simpleCreator = {
         id: '',
@@ -202,7 +202,7 @@ function buildCreatorInfo (simpleCreator) {
  * @param {patientName} patientName - 患者氏名
  * @returns {[]} AccessRight の配列
  */
-function buildDefaultAccessRight (patientId, patientName) {
+var buildDefaultAccessRight = (patientId, patientName) => {
     // 記載者施設に無期限全ての権限を与える
     var accessRightForCreatorFacility = {
         attr: {
@@ -251,7 +251,7 @@ function buildDefaultAccessRight (patientId, patientName) {
  * @params {[]} defaultAccessRight - このプロジェクトのデフォルトアクセス権
  * @returns {docInfo}
  */
-function buildDocInfo (baseDocInfo, creatorInfo, defaultAccessRight) {
+var buildDocInfo = (baseDocInfo, creatorInfo, defaultAccessRight) => {
     /***************************************
     var simpleDocInfo = {
         contentModuleType: '',
@@ -332,7 +332,7 @@ function buildDocInfo (baseDocInfo, creatorInfo, defaultAccessRight) {
  * @param {simplePatient}
  * @returns {PatientModule}
  */
-function buildPatientModule(simplePatient) {
+var buildPatientModule = (simplePatient) => {
     /********************************************************************
     var simplePatient = {
         id: '',                                         // Id
@@ -467,7 +467,7 @@ function buildPatientModule(simplePatient) {
  * @param {simpleDiagnosis} simpleDiagnosis
  * @returns {RegisteredDiagnosisModule}
  */
-function buildRegisteredDiagnosisModule (simpleDiagnosis) {
+var buildRegisteredDiagnosisModule = (simpleDiagnosis) => {
     /****************************************************
     var simpleDiagnosis = {
         diagnosis: '',
@@ -526,7 +526,7 @@ function buildRegisteredDiagnosisModule (simpleDiagnosis) {
  * @param {simplePrescription} simplePrescription
  * @returns {[external, internal]}
  */
-function buildPrescriptionModule (simplePrescription) {
+var buildPrescriptionModule = (simplePrescription) => {
     /**********************************************************
     var simplePrescription = {
         medication: [{issuedTo: '',                  // 院外処方:external 院内処方:internal
@@ -617,7 +617,7 @@ function buildPrescriptionModule (simplePrescription) {
  * @param {simpleTest} simpleTest
  * @returns {TestModule}
  */
-function buildTestModule (simpleTest) {
+var buildTestModule = (simpleTest) => {
     /***********************************
     var simpleTest = {
         registId: registId,                             // 検査Id 　運用で決める
@@ -831,6 +831,7 @@ exports.buildMML = (simpleMML) => {
     // MML 規格のdocInfo でbaseDocInfoを基に生成される
     // MML のモジュール単位に付加される
     var docInfo = {};
+    var content = {};
 
     // 患者情報が含まれているかどうかのフラグ
     var hasPatientModule = false;
@@ -838,18 +839,18 @@ exports.buildMML = (simpleMML) => {
 
     // simpleMMLのcontent配列をイテレート
     // content: [simplePrescription | simpleDiagnosis | simpleTest]
-    simpleMML.content.forEach((content) => {
+    simpleMML.content.forEach((entry) => {
 
         // contentModuleTypeをセットする
-        baseDocInfo.contentModuleType = content.contentType;
+        baseDocInfo.contentModuleType = entry.contentType;
 
-        if (content.contentType === 'prescription') {
+        if (entry.contentType === 'prescription') {
 
             // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
-            var arr = buildPrescriptionModule(content);
+            var arr = buildPrescriptionModule(entry);
 
             // 結果は配列で返る
-            arr.forEach((prescription) => {  // uuid のbug!
+            arr.forEach((prescription) => {
 
                 // それに薬が入っていたらModuleItemへ加える
                 if (prescription.medication.length > 0) {
@@ -861,26 +862,26 @@ exports.buildMML = (simpleMML) => {
                 }
             });
 
-        } else if (content.contentType === 'registeredDiagnosis') {
+        } else if (entry.contentType === 'registeredDiagnosis') {
             baseDocInfo.uuid = uuid.v4();
             docInfo = buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
-            var rd = buildRegisteredDiagnosisModule(content);
-            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: rd});
+            content = buildRegisteredDiagnosisModule(entry);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
 
-        } else if (content.contentType === 'test') {
+        } else if (entry.contentType === 'test') {
             // 検体検査のcreatorは検査会社の代表
-            var creator = buildCreatorInfo(content.labCenter);
+            var creator = buildCreatorInfo(entry.labCenter);
             // それがdocInfoにセットされる
             baseDocInfo.uuid = uuid.v4();
             docInfo = buildDocInfo(baseDocInfo, creator, defaultAccessRight);
-            var test = buildTestModule(content);
-            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: test});
+            content = buildTestModule(entry);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
 
-        } else if (content.contentType === 'patientInfo') {
+        } else if (entry.contentType === 'patientInfo') {
             baseDocInfo.uuid = uuid.v4();
             docInfo = buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
-            var pm = buildPatientModule(content);
-            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: pm});
+            content = buildPatientModule(entry);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             hasPatientModule = true;
         }
     });

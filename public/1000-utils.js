@@ -1,7 +1,7 @@
 "use strict";
 
 // https://gist.github.com/sente/1083506
-function formatXml (xml) {
+var formatXml = function (xml) {
     var formatted = '';
     var reg = /(>)(<)(\/*)/g;
     xml = xml.replace(reg, '$1\r\n$2$3');
@@ -32,17 +32,17 @@ function formatXml (xml) {
     return formatted;
 };
 
-function addQuote (value) {
+var addQuote = function (value) {
     var arr =['\"', value, '\"'];
     return arr.join('');
 };
 
-function addSingleQuote (value) {
+var addSingleQuote = function (value) {
     var arr =['\'', value, '\''];
     return arr.join('');
 };
 
-function addZero (x, n) {
+var addZero = function (x, n) {
     while (x.toString().length < n) {
         x = '0' + x;
     }
@@ -50,17 +50,16 @@ function addZero (x, n) {
 };
 
 // yyyy-MM-dd
-function toDateString (date) {
+var toDateString = function (date) {
     var yyyy = date.getFullYear();
     var MM = addZero(date.getMonth() + 1, 2);
     var dd = addZero(date.getDate(), 2);
     var arr = [yyyy, '-', MM, '-', dd];
-    var str = arr.join('');
-    return str;
+    return arr.join('');
 };
 
 // yyyy-MM-ddTHH:mm:ss
-function toDateTimeString (date) {
+var toDateTimeString = function (date) {
     var yyyy = date.getFullYear();
     var MM = addZero(date.getMonth() + 1, 2);
     var dd = addZero(date.getDate(), 2);
@@ -68,14 +67,13 @@ function toDateTimeString (date) {
     var mm = addZero(date.getMinutes(), 2);
     var ss = addZero(date.getSeconds(), 2);
     var arr = [yyyy, '-', MM, '-', dd, 'T', HH, ':', mm, ':', ss];
-    var str = arr.join('');
-    return str;
+    return arr.join('');
 };
 
-function nowAsDateTime () {
+var nowAsDateTime = function () {
     return toDateTimeString(new Date());
 };
 
-function nowAsDate () {
+var nowAsDate = function () {
     return toDateString(new Date());
 };

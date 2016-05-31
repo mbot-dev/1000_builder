@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 // express router として /api/rpcRouter.js で実装
 app.use(rpcRouter);
 
-app.get('/', function(req, res){
+app.get('/', (req, res) => {
   res.sendfile(__dirname + '/public/index.html');
 });
 
