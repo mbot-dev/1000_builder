@@ -417,13 +417,7 @@
 
     // selectionが変更された
     var changeModule = function (selection) {
-        if (selection.value === 'prescription') {
-            showPrescription();
-        } else if (selection.value === 'registeredDiagnosis') {
-            showDiagnosis();
-        } else if (selection.value === 'test') {
-            showLabTest();
-        }
+        window[selection.value]();
     };
     </script>
 </head>
@@ -445,9 +439,9 @@
             <div id="commandBar">
                 <p>クライアントがポストするデータ:
                     <select onchange="changeModule(this);" style="vertical-align:center;">
-                        <option value='prescription'>処 方</option>
-                        <option value='registeredDiagnosis'>病 名</option>
-                        <option value='test'>検 査</option>
+                        <option value='showPrescription'>処 方</option>
+                        <option value='showDiagnosis'>病 名</option>
+                        <option value='showLabTest'>検 査</option>
                     </select>
                 </p>
             </div>

@@ -2,17 +2,10 @@
 
 const express = require('express');
 const config = require('config');
+const utils = require('../lib/utils');
 const simpleBuilder = require('./simpleBuilder');
-const mmlBuilder = require('../lib/mmlBuilder');
 
 var router = express.Router();
-
-// RPC method
-var rpcMethod = (simpleMML, callback) => {
-    var mmlObj = simpleBuilder.buildMML(simpleMML);
-    var mml = mmlBuilder.build(mmlObj);
-    callback (mml);
-};
 
 // Returns error object
 var buildError = (code, message, id) => {
@@ -30,37 +23,31 @@ var buildError = (code, message, id) => {
 router.post (config.rpc.path, function (req, res) {
 
     try {
-        var body = req.body;
-        var rpcId = body.id;
-
         // {jsonrpc: '2.0', method: 'build', params: [simpleMML], id: 'string'}
+        var jsonrpc = req.body.jsonrpc;
+        var method = req.body.method;
+        var params = req.body.params;
+        var rpcId = req.body.id;
+        var response = {
+            jsonrpc: '2.0',
+            id: rpcId
+        };
 
-        if (!body.hasOwnProperty('jsonrpc') || body.jsonrpc !== '2.0') {
+        if (utils.isUndefined(jsonrpc) || jsonrpc !== '2.0') {
             throw buildError(-32600, 'Invalid Request', rpcId);
         }
-        if (!body.hasOwnProperty('method') ) {
+        if (utils.isUndefined(method) ) {
             throw buildError(-32601, 'Method not found', rpcId);
         }
-        if (body.method !== config.rpc.method) {
-            throw buildError(-32600, 'Invalid Request', rpcId);
-        }
-        if (!body.hasOwnProperty('params')) {
+        if (utils.isUndefined(params)) {
             throw buildError(-32600, 'Invalid Request', rpcId);
         }
 
-        // Notification
-        if (rpcId === 'undefined') {
-            // No response;
-        } else {
-            // call rpc method
-            rpcMethod(body.params[0], (mml) => {
-                var response = {
-                    jsonrpc: '2.0',
-                    result: mml,
-                    id: rpcId
-                };
-                res.send(response);
-            });
+        // Notificationでない時応答
+        if (utils.isDefined(rpcId)) {
+            // rpcしてresult: へセット
+            response.result = simpleBuilder[method].apply(simpleBuilder, params);
+            res.send(response);
         }
 
     } catch (err) {
