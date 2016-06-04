@@ -71,47 +71,32 @@
     // 1000-builderへsimpleMMLをポストする（RPC）
     //------------------------------------------------------------------
     var post = function (simpleMML) {
-
-        // ポストするデータの本体
-        // JSON-RPC 2.0 の仕様で下記 JSON にする
+        // ポストするデータの本体: JSON-RPC 2.0 の仕様で下記 JSON にする
         var jsonRpc2 = {
             jsonrpc: '2.0',                                         // 必ず '2.0' にする
             method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
             params: [simpleMML],                                    // params は配列で要素はsimpleMMLにする
             id: uuid.v4()                                           // id が必要 MMLの uuidとは別で JSON-RPC2.0 でも必要
         };
-        // HTTP POST
-        var callRpc = new Promise (function (resolve, reject) {
-            var http = new XMLHttpRequest();
-            var url = rpcURL();                                         // ポスト先 http://localhost:3000/api/v1
-            http.open("POST", url, true);                               // http method
-
-            //Send the proper header information along with the request
-            http.setRequestHeader("Content-type", "application/json");  // http ヘッダーの contentType
-
-            http.onreadystatechange = function() {                      //Call a function when the state changes.
-                if (http.readyState === 4 && http.status === 200) {
-                    resolve(http.responseText);
-                }
+        // POST  with url=rpcURL() contentType="application/json" body=jsonRpc2 as text
+        var http = new XMLHttpRequest();
+        http.open('POST', rpcURL(), true);                               // async = true
+        http.setRequestHeader('Content-type', 'application/json');       // http headder contentType
+        http.onreadystatechange = function () {
+            if (http.readyState === 4 && http.status/100 === 2) {
+                // responseからJSONを生成する
+                var data = JSON.parse(http.responseText);
+                // {jsonRpc2:'jsonRpc2', result:{MML}, id=''} が返ってくるので result: を取り出す
+                data = data.result;
+                // 結果はMML(XML) なので 'pretty print する
+                var xml_formatted = formatXml(data);
+                // 表示するために escapeする
+                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+                // MML4.0 box へ表示する
+                document.getElementById('mmlBox').innerHTML = xml_escaped;
             }
-            http.send(JSON.stringify (jsonRpc2));                   // send jsonRpc2
-        });
-        // execute rpc
-        callRpc.then(function (responseText) {
-            // responseからJSONを生成する
-            var data = JSON.parse(responseText);
-            // {jsonRpc2:'jsonRpc2', result:{MML}, id=''} が返ってくるので result: を取り出す
-            data = data.result;
-            // 結果はMML(XML) なので 'pretty print する
-            var xml_formatted = formatXml(data);
-            // 表示するために escapeする
-            xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
-            // MML4.0 box へ表示する
-            document.getElementById('mmlBox').innerHTML = xml_escaped;
-
-        }, function(err) {
-            alert(err);
-        });
+        }
+        http.send(JSON.stringify(jsonRpc2));
     };
 
     // 処方せん
@@ -181,18 +166,6 @@
             outcome: 'fullyRecovered'
         };
     };
-
-    // 検査結果を取得する HTTP コールなので Promise
-    var readResult = new Promise(function(resolve, reject) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (xhttp.readyState === 4 && xhttp.status === 200) {
-                resolve(xhttp.responseText);
-            }
-        };
-        xhttp.open("GET", testResultURL(), true);
-        xhttp.send();
-    });
 
     // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
     var createTestItems = function (content) {
@@ -265,17 +238,21 @@
             test.testItem = tetItems();
             callback(test);
         } else {
-            readResult.then(function(data) {
-                // 検査結果オブジェクトを生成する
-                var items = createTestItems(data);
-                items.forEach (function (entry) {
-                    tetItems().push(entry);
-                });
-                test.testItem = tetItems();
-                callback(test);
-            }, function(err) {
-                alert(err);
-            });
+            // 検査結果ファイルを読み込んで
+            var http = new XMLHttpRequest();
+            http.open("GET", testResultURL(), true);
+            http.onreadystatechange = function () {
+                if (http.readyState === 4 && http.status/100 === 2) {
+                    // 検査結果オブジェクトを生成する
+                    var items = createTestItems(http.responseText);
+                    items.forEach (function (entry) {
+                        tetItems().push(entry);
+                    });
+                    test.testItem = tetItems();
+                    callback(test);
+                }
+            }
+            http.send();
         }
     };
 
