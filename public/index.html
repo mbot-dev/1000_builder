@@ -1,7 +1,6 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="css/simple.css">
-    <script src="js/jquery-2.2.4.min.js"></script>
     <script src="js/uuid.js"></script>
     <script src="js/1000-utils.js"></script>
     <script type="text/javascript">
@@ -29,6 +28,45 @@
             return items;
         };
     })();
+
+    // 患者
+    var simplePatient = {
+        id: '0516',                                        // 施設(病院)内で発番されている患者Id
+        idType: 'facility',                                // 施設固有のIdであることを示す
+        facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
+        kanjiName: '宮田 奈々',                             // 漢字の氏名
+        kanaName: 'ミヤタ ナナ',                             // カナ
+        romanName: 'Nana Miyata',                          // ローマ字
+        sex: 'femail',                                     // MML0010(女:femail 男:male その他:other 不明:unknown)
+        birthday: '1994-11-26',                            // 生年月日
+        maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
+        nationality: 'JPN',                                // 国籍 オプション
+        zipCode: '000-0000',                               // 郵便番号
+        address: '横浜市中区日本大通り 1-23-4-567',            // 住所
+        telephone: '054-078-7934',                         // 電話番号
+        mobile: '090-2710-1564',                           // モバイル
+        email: 'miyata_nana@example.com'                   // 電子メール オプション
+    };
+
+    // 医師等
+    var simpleCreator = {
+        id: '201605',                                      // 施設で付番されている医師のId
+        idType: 'facility',                                // 施設固有のIdであることを示す
+        kanjiName: '青山 慶二',                             // 医師名
+        prefix: 'Professor',                               // 肩書き等 オプション
+        degree: 'MD/PhD',                                  // 学位 オプション
+        facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
+        facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027(ca|insurance|monbusho|JMARI|OID)から選ぶ
+        facilityName: 'シルク内科',                          // 施設名
+        facilityZipCode: '231-0023',                       // 施設郵便番号
+        facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
+        facilityPhone: '045-571-6572',                     // 施設電話番号
+        departmentId: '01',                                // 医科用:MML0028 歯科用:MML0030 から選ぶ
+        departmentIdType: 'medical',                       // 医科用の診療科コード:medical 歯科用の診療科コード:dental を指定 MML0029(medical|dental|facility)から選ぶ
+        departmentName: '第一内科',                         // 診療科名
+        license: 'doctor'                                  // 医療資格 MML0026から選ぶ
+    };
+
     //------------------------------------------------------------------
     // 1000-builderへsimpleMMLをポストする（RPC）
     //------------------------------------------------------------------
@@ -42,73 +80,38 @@
             params: [simpleMML],                                    // params は配列で要素はsimpleMMLにする
             id: uuid.v4()                                           // id が必要 MMLの uuidとは別で JSON-RPC2.0 でも必要
         };
-        // RPC を実行する (jquery)
-        $.ajax({
-            url: rpcURL(),                                          // ポスト先 http://localhost:3000/api/v1
-            contentType: 'application/json',                        // http ヘッダーの contentType
-            data: JSON.stringify (jsonRpc2),                        // jquery の場合は JSON を string にしている
-            type: 'POST',                                           // http method
-            dataType: 'json',
-            success: function (result) {
-            },
-            error: function (err,status,thrown) {
-                alert ("this syntax sucks!! " + " ERROR: " + err + " STATUS: " + status + " " + thrown );
-            },
-            complete: function (xhr, status) {
-                // responseからJSONを生成する
-                var data = $.parseJSON(xhr.responseText);
-                // {jsonRpc2:'jsonRpc2', result:{MML}, id=''} が返ってくるので result: を取り出す
-                data = data.result;
-                // 結果はMML(XML) なので 'pretty print する
-                var xml_formatted = formatXml(data);
-                // 表示するために escapeする
-                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
-                // MML4.0 box へ表示する
-                $('#mmlBox').html(xml_escaped);
+        // HTTP POST
+        var callRpc = new Promise (function (resolve, reject) {
+            var http = new XMLHttpRequest();
+            var url = rpcURL();                                         // ポスト先 http://localhost:3000/api/v1
+            http.open("POST", url, true);                               // http method
+
+            //Send the proper header information along with the request
+            http.setRequestHeader("Content-type", "application/json");  // http ヘッダーの contentType
+
+            http.onreadystatechange = function() {                      //Call a function when the state changes.
+                if (http.readyState === 4 && http.status === 200) {
+                    resolve(http.responseText);
+                }
             }
+            http.send(JSON.stringify (jsonRpc2));                   // send jsonRpc2
         });
-    };
+        // execute rpc
+        callRpc.then(function (responseText) {
+            // responseからJSONを生成する
+            var data = JSON.parse(responseText);
+            // {jsonRpc2:'jsonRpc2', result:{MML}, id=''} が返ってくるので result: を取り出す
+            data = data.result;
+            // 結果はMML(XML) なので 'pretty print する
+            var xml_formatted = formatXml(data);
+            // 表示するために escapeする
+            xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+            // MML4.0 box へ表示する
+            document.getElementById('mmlBox').innerHTML = xml_escaped;
 
-    // 患者
-    var simplePatient = function () {
-        return {
-            id: '0516',                                        // 施設(病院)内で発番されている患者Id
-            idType: 'facility',                                // 施設固有のIdであることを示す
-            facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
-            kanjiName: '宮田 奈々',                             // 漢字の氏名
-            kanaName: 'ミヤタ ナナ',                             // カナ
-            romanName: 'Nana Miyata',                          // ローマ字
-            sex: 'femail',                                     // MML0010(女:femail 男:male その他:other 不明:unknown)
-            birthday: '1994-11-26',                            // 生年月日
-            maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
-            nationality: 'JPN',                                // 国籍 オプション
-            zipCode: '000-0000',                               // 郵便番号
-            address: '横浜市中区日本大通り 1-23-4-567',            // 住所
-            telephone: '054-078-7934',                         // 電話番号
-            mobile: '090-2710-1564',                           // モバイル
-            email: 'miyata_nana@example.com'                   // 電子メール オプション
-        };
-    };
-
-    // 医師等
-    var simpleCreator = function () {
-        return {
-            id: '201605',                                      // 施設で付番されている医師のId
-            idType: 'facility',                                // 施設固有のIdであることを示す
-            kanjiName: '青山 慶二',                             // 医師名
-            prefix: 'Professor',                               // 肩書き等 オプション
-            degree: 'MD/PhD',                                  // 学位 オプション
-            facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
-            facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027(ca|insurance|monbusho|JMARI|OID)から選ぶ
-            facilityName: 'シルク内科',                          // 施設名
-            facilityZipCode: '231-0023',                       // 施設郵便番号
-            facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
-            facilityPhone: '045-571-6572',                     // 施設電話番号
-            departmentId: '01',                                // 医科用:MML0028 歯科用:MML0030 から選ぶ
-            departmentIdType: 'medical',                       // 医科用の診療科コード:medical 歯科用の診療科コード:dental を指定 MML0029(medical|dental|facility)から選ぶ
-            departmentName: '第一内科',                         // 診療科名
-            license: 'doctor'                                  // 医療資格 MML0026から選ぶ
-        };
+        }, function(err) {
+            alert(err);
+        });
     };
 
     // 処方せん
@@ -179,6 +182,18 @@
         };
     };
 
+    // 検査結果を取得する HTTP コールなので Promise
+    var readResult = new Promise(function(resolve, reject) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                resolve(xhttp.responseText);
+            }
+        };
+        xhttp.open("GET", testResultURL(), true);
+        xhttp.send();
+    });
+
     // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
     var createTestItems = function (content) {
         var items = [];
@@ -221,15 +236,7 @@
         return items;
     };
 
-    // 検査結果を取得する HTTP コールなので Promise
-    var readResult = new Promise(function(resolve, reject) {
-        $.get (testResultURL(), function (data, status) {
-            (status == 'success') ? resolve(data) : reject(status);
-        });
-    });
-
     var simpleLabTest = function (callback) {
-        var creator = simpleCreator();
         var test = {
             contentType: 'test',
             registId: uuid.v4(),                            // 検査Id 　運用で決める
@@ -238,8 +245,8 @@
             reportStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
             reportStatusName: '最終報告',                    // 報告状態
             codeSystem: 'YBS_2016',                         // 検査コード体系名
-            facilityName: creator.facilityName,             // 検査依頼施設
-            facilityId: creator.facilityId,                 // 検査依頼施設
+            facilityName: simpleCreator.facilityName,       // 検査依頼施設
+            facilityId: simpleCreator.facilityId,           // 検査依頼施設
             facilityIdType: 'JMARI',                        // 検査依頼施設
             labCenter: {
                 id: '303030',                                // 検査実施会社内での Id
@@ -277,13 +284,11 @@
 
         simpleLabTest (function (simpleTest) {
             // staffs
-            var patient = simplePatient();              // 患者
-            var creator = simpleCreator();              // 医師
             var confirmDate = simpleTest.reportTime;    // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
             var uid = uuid.v4();                        // MML文書の UUID
             var simpleMML = {                           // POST = simpleMML
-                patient: patient,                       // 患者
-                creator: creator,                       // 医師
+                patient: simplePatient,                 // 患者
+                creator: simpleCreator,                 // 医師
                 uuid: uid,                              // UUID
                 confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
                 content: [simpleTest]                   // 中身をこのsimpleTestにする
@@ -295,13 +300,13 @@
             arr.push('// 患者');
             arr.push('\n');
             arr.push('var simplePatient = ');
-            arr.push(JSON.stringify(patient, null, 4));
+            arr.push(JSON.stringify(simplePatient, null, 4));
             arr.push(';');
             arr.push('\n');
             arr.push('// 医師');
             arr.push('\n');
             arr.push('var simpleCreator = ');
-            arr.push(JSON.stringify(creator, null, 4));
+            arr.push(JSON.stringify(simpleCreator, null, 4));
             arr.push(';');
             arr.push('\n');
             arr.push('// 検査');
@@ -311,7 +316,7 @@
             arr.push(';');
             arr.push('</pre>');
             var text = arr.join('');
-            $('#simpleBox').html(text);
+            document.getElementById('simpleBox').innerHTML = text;
 
             // POST する
             post(simpleMML);
@@ -321,14 +326,12 @@
     // 病名情報をセットする
     var showDiagnosis = function () {
         // staffs
-        var patient = simplePatient();              // 患者
-        var creator = simpleCreator();              // 医師
         var diagnosis = simpleDiagnosis();          // 病名
         var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
         var uid = uuid.v4();                        // MML文書の UUID
         var simpleMML = {                           // POST = simpleMML
-            patient: patient,                       // 患者
-            creator: creator,                       // 医師
+            patient: simplePatient,                 // 患者
+            creator: simpleCreator,                 // 医師
             uuid: uid,                              // UUID
             confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
             content: [diagnosis]                    // 中身をこのdiagnosisにする
@@ -340,13 +343,13 @@
         arr.push('// 患者');
         arr.push('\n');
         arr.push('var simplePatient = ');
-        arr.push(JSON.stringify(patient, null, 4));
+        arr.push(JSON.stringify(simplePatient, null, 4));
         arr.push(';');
         arr.push('\n');
         arr.push('// 医師');
         arr.push('\n');
         arr.push('var simpleCreator = ');
-        arr.push(JSON.stringify(creator, null, 4));
+        arr.push(JSON.stringify(simpleCreator, null, 4));
         arr.push(';');
         arr.push('\n');
         arr.push('// 病名');
@@ -356,7 +359,7 @@
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
-        $('#simpleBox').html(text);
+        document.getElementById('simpleBox').innerHTML = text;
 
         // POST する
         post(simpleMML);
@@ -365,14 +368,12 @@
     // 処方情報をセットする
     var showPrescription = function () {
         // staffs
-        var patient = simplePatient();              // 患者
-        var creator = simpleCreator();              // 医師
         var prescription = simplePrescription();    // 処方せん
         var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
         var uid = uuid.v4();                        // MML文書の UUID
         var simpleMML = {                           // POST = simpleMML
-            patient: patient,                       // 患者
-            creator: creator,                       // 医師
+            patient: simplePatient,                 // 患者
+            creator: simpleCreator,                 // 医師
             uuid: uid,                              // UUID
             confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
             content: [prescription]                 // 中身をこのprescriptionにする
@@ -384,13 +385,13 @@
         arr.push('// 患者');
         arr.push('\n');
         arr.push('var simplePatient = ');
-        arr.push(JSON.stringify(patient,null,4));
+        arr.push(JSON.stringify(simplePatient,null,4));
         arr.push(';');
         arr.push('\n');
         arr.push('// 医師');
         arr.push('\n');
         arr.push('var simpleCreator = ');
-        arr.push(JSON.stringify(creator,null,4));
+        arr.push(JSON.stringify(simpleCreator,null,4));
         arr.push(';');
         arr.push('\n');
         arr.push('// 処方せん');
@@ -400,7 +401,7 @@
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
-        $('#simpleBox').html(text);
+        document.getElementById('simpleBox').innerHTML = text;
 
         // POST する
         post(simpleMML);

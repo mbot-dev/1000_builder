@@ -6,7 +6,9 @@ var formatXml = function (xml) {
     var reg = /(>)(<)(\/*)/g;
     xml = xml.replace(reg, '$1\r\n$2$3');
     var pad = 0;
-    jQuery.each(xml.split('\r\n'), function(index, node) {
+    var lines = xml.split('\r\n');
+    //jQuery.each(xml.split('\r\n'), function(index, node) {
+    lines.every (function(node, index, lines) {
         var indent = 0;
         if (node.match( /.+<\/\w[^>]*>$/ )) {
             indent = 0;
@@ -27,6 +29,8 @@ var formatXml = function (xml) {
 
         formatted += padding + node + '\r\n';
         pad += indent;
+
+        return true;
     });
 
     return formatted;
