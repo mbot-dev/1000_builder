@@ -42,6 +42,9 @@ router.post (config.rpc.path, function (req, res) {
         if (utils.isUndefined(params)) {
             throw buildError(-32600, 'Invalid Request', rpcId);
         }
+        if (!simpleBuilder.hasOwnProperty(method)) {
+            throw buildError(-32600, 'Invalid Request', rpcId);
+        }
 
         // Notificationでない時応答
         if (utils.isDefined(rpcId)) {
