@@ -344,11 +344,11 @@ module.exports = {
             kanjiName: '',
             kanaName: '',
             romanName: '',
-            sex: '',                                        // MML0010(femail male other unknown)
-            birthday: '',
+            gender: '',                                        // MML0010(femail male other unknown)
+            dateOfBirth: '',
             maritalStatus: '',                              // MML0011
             nationality: '',
-            zipCode: '',
+            postalCode: '',
             address: '',
             telephone: '',
             mobile: '',
@@ -365,8 +365,8 @@ module.exports = {
                     Id: id
                 }
             },
-            birthday: simplePatient.birthday,
-            sex: simplePatient.sex,                               // MML0010(femail male other unknown)
+            birthday: simplePatient.dateOfBirth,
+            sex: simplePatient.gender,                     // MML0010(femail male other unknown)
             personName: []
             //nationality: {value: 'JPN'},                 // オブジェクト
             //marital: 'single',                           // MML0011
@@ -427,8 +427,8 @@ module.exports = {
                     addressClass: 'home',                     // 住所の種類コード MML0002 を使用 homeでいいかどうか
                     tableId: 'MML0025'                        // 上記の表記法を規定するテーブル名 MML0025
                 },
-                full: simplePatient.address,                 // 一連住所
-                zip: simplePatient.zipCode                   // 郵便番号
+                full: simplePatient.address,                  // 一連住所
+                zip: simplePatient.postalCode                 // 郵便番号
             });
         }
 
@@ -477,8 +477,8 @@ module.exports = {
             code: '',
             system: '',
             category: '',
-            startDate: '',
-            endDate: '',
+            dateOfOnset: '',
+            dateOfRemission: '',
             outcome: ''
         };**************************************************/
 
@@ -491,8 +491,8 @@ module.exports = {
                 }
             }
             //categories: [],
-            //startDate: startDate,
-            //endDate: endDate,
+            //startDate: dateOfOnset,
+            //endDate: dateOfRemission,
             //outcome: outcome
         };
 
@@ -507,13 +507,13 @@ module.exports = {
         }
 
         // 開始日
-        if (simpleDiagnosis.hasOwnProperty('startDate')) {
-            registeredDiagnosisModule.startDate = simpleDiagnosis.startDate;
+        if (simpleDiagnosis.hasOwnProperty('dateOfOnset')) {
+            registeredDiagnosisModule.startDate = simpleDiagnosis.dateOfOnset;
         }
 
         // 終了日
-        if (simpleDiagnosis.hasOwnProperty('endDate')) {
-            registeredDiagnosisModule.endDate = simpleDiagnosis.endDate;
+        if (simpleDiagnosis.hasOwnProperty('dateOfRemission')) {
+            registeredDiagnosisModule.endDate = simpleDiagnosis.dateOfRemission;
         }
 
         // 転帰
@@ -623,30 +623,32 @@ module.exports = {
     buildTestModule: function (simpleTest) {
         /***********************************
         var simpleTest = {
-            registId: registId,                             // 検査Id 　運用で決める
-            registTime: registTime,                         // 受付日時
-            reportTime: reportTime,                         // 報告日時
-            reportStatusCode: 'final',                      // 報告状態 コード
-            reportStatusName: '最終報告',                    // 報告状態
-            codeSystem: 'YBS_2016',                         // 検査コード体系名
-            facilityName: simpleCreator.facilityName,       // 検査依頼施設
-            facilityId: simpleCreator.facilityId,           // 検査依頼施設
-            facilityIdType: 'JMARI',                        // 検査依頼施設
-            labCenter: {
-                id: '303030',                                // 検査実施会社内での Id
-                idType: 'facility',                          // 施設で付番されているIdであることを示す
-                kanjiName: '石山 由美子',                      // 検査実施施設の代表 なんちゃって個人情報から 代表とは?
-                facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
-                facilityIdType: 'OID',                       // MML0027 OID 方式
-                facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
-                facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
-                facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
-                facilityPhone: '045-000-0072',               // 検査実施会社の電話
-                license: 'lab'                               // MML0026 他に?
-            }
-            testItem: []
+            context: {
+                issuedId: issuedId,                             // 検査Id 　運用で決める
+                issuedTime: issuedTime,                         // 受付日時
+                resultIssued: resultIssued,                     // 報告日時
+                resultStatusCode: 'final',                      // 報告状態 コード
+                resultStatus: '最終報告',                        // 報告状態
+                codeSystem: 'YBS_2016',                         // 検査コード体系名
+                facilityName: simpleCreator.facilityName,       // 検査依頼施設
+                facilityId: simpleCreator.facilityId,           // 検査依頼施設
+                facilityIdType: 'JMARI',                        // 検査依頼施設
+                laboratory: {
+                    id: '303030',                                // 検査実施会社内での Id
+                    idType: 'facility',                          // 施設で付番されているIdであることを示す
+                    kanjiName: '石山 由美子',                      // 検査実施施設の代表 なんちゃって個人情報から 代表とは?
+                    facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
+                    facilityIdType: 'OID',                       // MML0027 OID 方式
+                    facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
+                    facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
+                    facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
+                    facilityPhone: '045-000-0072',               // 検査実施会社の電話
+                    license: 'lab'                               // MML0026 他に?
+                }
+            },
+            testResult: []
         };
-        var simpleItem = {
+        var simpleResult = {
             spcCode: '',                  // 検体コード
             spcName: '',                  // 検体名
             testCode: '',                 // コード
@@ -660,56 +662,59 @@ module.exports = {
             memo: ''                      // メモ
         };
         ***********************************/
+        var context = simpleTest.context;
+        var currentSpc = '';                // パース中の検体コード
+        var currentLabTest = {};            // パース中の MML labTest
+        var item = {};                      // テスト項目（名称、結果値等）
+        var numValue = false;               // 数値結果かどうか ToDo..
+        var itemMemo = {};                  // テスト項目のメモ
+
         var testModule = {
             information: {
                 attr: {
-                    registId: simpleTest.registId,
+                    registId: context.issuedId,
                     //sampleTime: testDate,
-                    registTime: simpleTest.registTime,
-                    reportTime: simpleTest.reportTime
+                    registTime: context.issuedTime,
+                    reportTime: context.resultIssued
                 },
                 reportStatus: {
-                    value: simpleTest.reportStatusName,
+                    value: context.resultStatus,
                     attr: {
-                        statusCode: simpleTest.reportStatusCode,
+                        statusCode: context.resultStatusCode,
                         statusCodeId: 'mmlLb0001'
                     }
                 },
                 facility: {
-                    value: simpleTest.facilityName,                       // 依頼施設
+                    value: context.facilityName,                       // 依頼施設
                     attr: {
-                        facilityCode: simpleTest.facilityId,               // 依頼施設コード
-                        facilityCodeId: simpleTest.facilityIdType          // 用いたコード体系の名称を記載
+                        facilityCode: context.facilityId,               // 依頼施設コード
+                        facilityCodeId: context.facilityIdType          // 用いたコード体系の名称を記載
                     }
                 },
                 laboratoryCenter: {
-                    value: simpleTest.labCenter.facilityName,             // 検査実施施設
+                    value: context.laboratory.facilityName,             // 検査実施施設
                     attr: {
-                        centerCode: simpleTest.labCenter.facilityId,       // ユーザー指定
-                        centerCodeId: simpleTest.labCenter.facilityIdType  // 用いたテーブル名を入力
+                        centerCode: context.laboratory.facilityId,       // ユーザー指定
+                        centerCodeId: context.laboratory.facilityIdType  // 用いたテーブル名を入力
                     }
                 }
             },
             laboTest: []
         };
 
-        // パース中の検体コードとwrapperのlabTest
-        var currentSpc = '';
-        var currentLabTest = {};
-
         // イテレイト
-        simpleTest.testItem.forEach((entry) => {
+        simpleTest.testResult.forEach((entry) => {
 
             // 検体が変化したら、新規にlabTestを生成しモジュールに加える
             // i.e 検査モジュールは検体単位に分かれる
             if (entry.spcCode !== currentSpc) {
                 currentLabTest = {
-                    specimen: {                               // 検体情報
+                    specimen: {                                 // 検体情報
                         specimenName: {
                             value: entry.spcName,               // 検体材料
                             attr: {
                                 spCode: entry.spcCode,           // ユーザー指定
-                                spCodeId: simpleTest.codeSystem  // 用いたテーブル名を入力
+                                spCodeId: context.codeSystem    // 用いたテーブル名を入力
                             }
                         }
                     },
@@ -720,35 +725,35 @@ module.exports = {
             }
 
             // テスト項目を作成し currentLabTestのitem[]に追加する
-            var item = {
+            item = {
                 itemName: {
-                    value: entry.testName,
+                    value: entry.name,              // テスト項目名称
                     attr: {
-                        itCode: entry.testCode,
-                        itCodeId: simpleTest.codeSystem
+                        itCode: entry.code,         // コード
+                        itCodeId: context.codeSystem
                     }
                 },
-                value: entry.testResult
+                value: entry.value                  // 結果値
             };
             currentLabTest.item.push(item);
 
             // numValue = (単位!=='');
-            var numValue = (entry.hasOwnProperty('unit'));
+            numValue = (entry.hasOwnProperty('unit'));
 
             if (numValue) {
                 item.numValue = {
-                    value: entry.testResult
+                    value: entry.value
                 };
-                if (entry.hasOwnProperty('low') ||
-                entry.hasOwnProperty('up') ||
+                if (entry.hasOwnProperty('lowerLimit') ||
+                entry.hasOwnProperty('upperLimit') ||
                 entry.hasOwnProperty('out')) {
 
                     item.numValue.attr = {};
-                    if (entry.hasOwnProperty('low')) {
-                        item.numValue.attr.low = entry.low;
+                    if (entry.hasOwnProperty('lowerLimit')) {
+                        item.numValue.attr.low = entry.lowerLimit;
                     }
-                    if (entry.hasOwnProperty('up')) {
-                        item.numValue.attr.up = entry.up;
+                    if (entry.hasOwnProperty('upperLimit')) {
+                        item.numValue.attr.up = entry.upperLimit;
                     }
                     if (entry.hasOwnProperty('out')) {
                         item.numValue.attr.out = entry.out;
@@ -764,18 +769,18 @@ module.exports = {
 
             if (entry.hasOwnProperty('memoCode') && entry.hasOwnProperty('memo')) {
                 item.itemMemo = [];
-                var itemMemo = {
-                    value: entry.memo,                              // 項目コメント値
+                itemMemo = {
+                    value: entry.memo,                               // 項目コメント値
                     attr: {
-                        imCodeName: simpleTest.codeSystem,           // 項目コメント名称
+                        imCodeName: context.codeSystem,              // 項目コメント名称
                         imCode: entry.memoCode,                      // ユーザー指定
-                        mCodeId: simpleTest.codeSystem               // 用いたテーブル名を入力
+                        mCodeId: context.codeSystem                  // 用いたテーブル名を入力
                     }
                 };
                 item.itemMemo.push(itemMemo);
             }
         });
-
+        //console.log('module count = ' + testModule.laboTest.length);
         return testModule;
     },
 
@@ -784,13 +789,15 @@ module.exports = {
       * @param {simpleMml} - simpleMml
       * @returns {MML}
      */
-    build: function (simpleMML) {
+    build: function (simpleComposition) {
         /***************************************************
-        var simpleMML = {
-            patient: simplePatient,
-            creator: simpleCreator,
-            uuid: uuid,
-            confirmDate: confirmDate,
+        var simpleComposition = {
+            context: {
+                uuid: uuid,
+                confirmDate: confirmDate,
+                patient: simplePatient,
+                creator: simpleCreator
+            },
             content: [{simplePrescription} | {simpleDiagnosis} | {simpleTest}]
         };
         ***************************************************/
@@ -798,14 +805,17 @@ module.exports = {
         // このMMLの生成日
         var createDate = utils.nowAsDateTime();
 
+        // context
+        var context = simpleComposition.context;
+
         // 患者情報モジュールを生成する
-        var patientModule = this.buildPatientModule(simpleMML.patient);
+        var patientModule = this.buildPatientModule(context.patient);
 
         // デフォルトのアクセス権を生成する
-        var defaultAccessRight = this.buildDefaultAccessRight(simpleMML.patient.id,simpleMML.patient.kanjiName);
+        var defaultAccessRight = this.buildDefaultAccessRight(context.patient.id, context.patient.kanjiName);
 
         // このMMLのcreatorInfoを生成する
-        var creatorInfo = this.buildCreatorInfo(simpleMML.creator);
+        var creatorInfo = this.buildCreatorInfo(context.creator);
 
         // Header
         var mmlHeader = {
@@ -827,8 +837,8 @@ module.exports = {
 
         // docInfoを生成する際のもとにする上hぷ
         var baseDocInfo = {
-            confirmDate: simpleMML.confirmDate,       // 確定日時はMMLの確定日時
-            groupId: simpleMML.uuid                   // groupingId = 含まれているMMLのuuid
+            confirmDate: context.confirmDate,       // 確定日時はMMLの確定日時
+            groupId: context.uuid                   // groupingId = 含まれているMMLのuuid
         };
 
         // MML 規格のdocInfo でbaseDocInfoを基に生成される
@@ -842,12 +852,12 @@ module.exports = {
 
         // simpleMMLのcontent配列をイテレート
         // content: [simplePrescription | simpleDiagnosis | simpleTest]
-        simpleMML.content.forEach((entry) => {
+        simpleComposition.content.forEach((entry) => {
 
-            // contentModuleTypeをセットする
-            baseDocInfo.contentModuleType = entry.contentType;
+            if (entry.contentType === 'Medication') {
 
-            if (entry.contentType === 'prescription') {
+                // contentModuleTypeをセットする
+                baseDocInfo.contentModuleType = 'prescription';
 
                 // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
                 var arr = this.buildPrescriptionModule(entry);
@@ -865,22 +875,25 @@ module.exports = {
                     }
                 });
 
-            } else if (entry.contentType === 'registeredDiagnosis') {
+            } else if (entry.contentType === 'Medical Diagnosis') {
+                baseDocInfo.contentModuleType = 'registeredDiagnosis';
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
                 content = this.buildRegisteredDiagnosisModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
 
-            } else if (entry.contentType === 'test') {
+            } else if (entry.contentType === 'Laboratory Report') {
                 // 検体検査のcreatorは検査会社の代表
-                var creator = this.buildCreatorInfo(entry.labCenter);
+                var creator = this.buildCreatorInfo(entry.context.laboratory);
                 // それがdocInfoにセットされる
+                baseDocInfo.contentModuleType = 'test';
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creator, defaultAccessRight);
                 content = this.buildTestModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
 
-            } else if (entry.contentType === 'patientInfo') {
+            } else if (entry.contentType === 'Patient Information') {
+                baseDocInfo.contentModuleType = 'patientInfo';
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
                 content = this.buildPatientModule(entry);

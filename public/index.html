@@ -22,10 +22,10 @@
         };
     })();
     // 上記csvをパースした検査項目の結果を入れる配列
-    var tetItems = (function () {
-        var items = [];
+    var testResults = (function () {
+        var results = [];
         return function () {
-            return items;
+            return results;
         };
     })();
 
@@ -37,11 +37,11 @@
         kanjiName: '宮田 奈々',                             // 漢字の氏名
         kanaName: 'ミヤタ ナナ',                             // カナ
         romanName: 'Nana Miyata',                          // ローマ字
-        sex: 'femail',                                     // MML0010(女:femail 男:male その他:other 不明:unknown)
-        birthday: '1994-11-26',                            // 生年月日
+        gender: 'femail',                                  // MML0010(女:femail 男:male その他:other 不明:unknown)
+        dateOfBirth: '1994-11-26',                         // 生年月日
         maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
         nationality: 'JPN',                                // 国籍 オプション
-        zipCode: '000-0000',                               // 郵便番号
+        postalCode: '000-0000',                            // 郵便番号
         address: '横浜市中区日本大通り 1-23-4-567',            // 住所
         telephone: '054-078-7934',                         // 電話番号
         mobile: '090-2710-1564',                           // モバイル
@@ -68,14 +68,14 @@
     };
 
     //------------------------------------------------------------------
-    // 1000-builderへsimpleMMLをポストする（RPC）
+    // 1000-builderへsimpleCompositionをポストする（RPC）
     //------------------------------------------------------------------
-    var post = function (simpleMML) {
+    var post = function (simpleComposition) {
         // ポストするデータの本体: JSON-RPC 2.0 の仕様で下記 JSON にする
         var jsonRpc2 = {
             jsonrpc: '2.0',                                         // 必ず '2.0' にする
             method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
-            params: [simpleMML],                                    // params は配列で要素はsimpleMMLにする
+            params: [simpleComposition],                            // params は配列で要素はsimpleCompositionにする
             id: uuid.v4()                                           // id が必要 MMLの uuidとは別で JSON-RPC2.0 でも必要
         };
         // POST  with url=rpcURL() contentType="application/json" body=jsonRpc2 as text
@@ -106,7 +106,7 @@
 
         // リターンする simplePrescription
         var simple = {
-            contentType: 'prescription',                    // prescriptionにする
+            contentType: 'Medication',                      // Medication
             medication: []                                  // 処方の配列
         };
 
@@ -151,18 +151,18 @@
     // 1病名毎に1モジュール
     var simpleDiagnosis = function () {
         var now = new Date();
-        var endDate = toDateString(now);                        // 終了日 = 今
+        var dateOfRemission = toDateString(now);                // 終了日 = 今
         now.setDate(now.getDate() - 30);                        // 30日前が
-        var startDate = toDateString(now);                      // 開始日
+        var dateOfOnset = toDateString(now);                    // 開始日
 
         return {
-            contentType: 'registeredDiagnosis',             // registeredDiagnosisにする
+            contentType: 'Medical Diagnosis',                   // Medical Diagnosis
             diagnosis: 'colon carcinoid',
             code: 'C189-.006',
             system: 'ICD10',
             category: 'mainDiagnosis',
-            startDate: startDate,
-            endDate: endDate,
+            dateOfOnset: dateOfOnset,
+            dateOfRemission: dateOfRemission,
             outcome: 'fullyRecovered'
         };
     };
@@ -176,26 +176,28 @@
         var lines = content.split("\n");
         // 最初の行はヘッダーなので除く
         lines.shift();
-        lines.forEach(function (entry) {
+        lines.every(function (entry, index, lines) {
+            if (entry === '') {
+                return false;
+            }
             // この行をカンマ区切りで配列に格納する
             lineArray = entry.split(/\s*,\s*/);
             // この行のテスト項目
             simpleItem = {
-                spcCode: lineArray[0],              // 検体コード
-                spcName: lineArray[1],              // 検体名
-                testCode: lineArray[2],             // コード
-                testName: lineArray[3],             // テスト項目名
-                testResult: lineArray[4]            // 結果値
+                spcCode: lineArray[0],                      // 検体コード
+                spcName: lineArray[1],                      // 検体名
+                code: lineArray[2],                         // コード
+                name: lineArray[3],                         // テスト項目名
+                value: lineArray[4]                         // 結果値
             };
-
             if (lineArray[5] !== '') {
                 simpleItem.unit = lineArray[5];              // 単位
             }
             if (lineArray[6] !== '' ) {
-                simpleItem.low = lineArray[6];               // 下限値
+                simpleItem.lowerLimit = lineArray[6];        // 下限値
             }
             if (lineArray[7] !== '' ) {
-                simpleItem.up = lineArray[7];                // 上限値
+                simpleItem.upperLimit = lineArray[7];        // 上限値
             }
             if (lineArray[8] !== '' ) {
                 simpleItem.out = lineArray[8];               // 判定フラグ
@@ -205,37 +207,40 @@
                 simpleItem.memo = lineArray[10];             // メモ
             }
             items.push(simpleItem);
+            return true;
         });
         return items;
     };
 
     var simpleLabTest = function (callback) {
-        var test = {
-            contentType: 'test',
-            registId: uuid.v4(),                            // 検査Id 　運用で決める
-            registTime: nowAsDateTime(),                    // 受付日時
-            reportTime: nowAsDateTime(),                    // 報告日時
-            reportStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
-            reportStatusName: '最終報告',                    // 報告状態
-            codeSystem: 'YBS_2016',                         // 検査コード体系名
-            facilityName: simpleCreator.facilityName,       // 検査依頼施設
-            facilityId: simpleCreator.facilityId,           // 検査依頼施設
-            facilityIdType: 'JMARI',                        // 検査依頼施設
-            labCenter: {
-                id: '303030',                                // 検査実施会社内での Id
-                idType: 'facility',                          // 施設で付番されているIdであることを示す
-                kanjiName: '石山 由美子',                      // 検査実施施設の代表 代表とは?
-                facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
-                facilityIdType: 'OID',                       // MML0027 OID 方式
-                facilityName: 'ベイスターズ・ラボ',             // 検査実施会社の名称
-                facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
-                facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
-                facilityPhone: '045-000-0072',               // 検査実施会社の電話
-                license: 'lab'                               // MML0026 他に?
+        var laboratoryTest = {
+            contentType: 'Laboratory Report',
+            context: {
+                issuedId: uuid.v4(),                            // 検査Id 　運用で決める
+                issuedTime: nowAsDateTime(),                    // 受付日時
+                resultIssued: nowAsDateTime(),                  // 報告日時
+                resultStatus: '最終報告',                        // 報告状態
+                resultStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
+                codeSystem: 'YBS_2016',                         // 検査コード体系名
+                facilityName: simpleCreator.facilityName,       // 検査依頼施設
+                facilityId: simpleCreator.facilityId,           // 検査依頼施設
+                facilityIdType: 'JMARI',                        // 検査依頼施設
+                laboratory: {
+                    id: '303030',                                // 検査実施会社内での Id
+                    idType: 'facility',                          // 施設で付番されているIdであることを示す
+                    kanjiName: '石山 由美子',                      // 検査実施施設の代表 代表とは?
+                    facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
+                    facilityIdType: 'OID',                       // MML0027 OID 方式
+                    facilityName: 'ベイサイド・ラボ',               // 検査実施会社の名称
+                    facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
+                    facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
+                    facilityPhone: '045-000-0072',               // 検査実施会社の電話
+                    license: 'lab'                               // MML0026 他に?
+                }
             }
         };
-        if (tetItems().length > 0) {
-            test.testItem = tetItems();
+        if (testResults().length > 0) {
+            laboratoryTest.testResult = testResults();
             callback(test);
         } else {
             // 検査結果ファイルを読み込んで
@@ -246,10 +251,10 @@
                     // 検査結果オブジェクトを生成する
                     var items = createTestItems(http.responseText);
                     items.forEach (function (entry) {
-                        tetItems().push(entry);
+                        testResults().push(entry);
                     });
-                    test.testItem = tetItems();
-                    callback(test);
+                    laboratoryTest.testResult = testResults();
+                    callback(laboratoryTest);
                 }
             }
             http.send();
@@ -261,42 +266,42 @@
 
         simpleLabTest (function (simpleTest) {
             // staffs
-            var confirmDate = simpleTest.reportTime;    // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
+            var confirmDate = simpleTest.resultIssued;  // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
             var uid = uuid.v4();                        // MML文書の UUID
-            var simpleMML = {                           // POST = simpleMML
-                patient: simplePatient,                 // 患者
-                creator: simpleCreator,                 // 医師
-                uuid: uid,                              // UUID
-                confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
+            var simpleComposition = {                   // POST = simpleComposition
+                context: {
+                    uuid: uid,                          // UUID
+                    confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+                    patient: simplePatient,             // 患者
+                    creator: simpleCreator              // 医師
+                },
                 content: [simpleTest]                   // 中身をこのsimpleTestにする
             };
-
             // 表示
             var arr = [];
             arr.push('<pre>');
             arr.push('// 患者');
             arr.push('\n');
             arr.push('var simplePatient = ');
-            arr.push(JSON.stringify(simplePatient, null, 4));
+            arr.push(prettyJSON(simplePatient));
             arr.push(';');
             arr.push('\n');
             arr.push('// 医師');
             arr.push('\n');
             arr.push('var simpleCreator = ');
-            arr.push(JSON.stringify(simpleCreator, null, 4));
+            arr.push(prettyJSON(simpleCreator));
             arr.push(';');
             arr.push('\n');
             arr.push('// 検査');
             arr.push('\n');
             arr.push('var simpleTest = ');
-            arr.push(JSON.stringify(simpleTest, null, 4));
+            arr.push(prettyJSON(simpleTest));
             arr.push(';');
             arr.push('</pre>');
             var text = arr.join('');
             document.getElementById('simpleBox').innerHTML = text;
-
             // POST する
-            post(simpleMML);
+            post(simpleComposition);
         });
     };
 
@@ -306,40 +311,40 @@
         var diagnosis = simpleDiagnosis();          // 病名
         var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
         var uid = uuid.v4();                        // MML文書の UUID
-        var simpleMML = {                           // POST = simpleMML
-            patient: simplePatient,                 // 患者
-            creator: simpleCreator,                 // 医師
-            uuid: uid,                              // UUID
-            confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
+        var simpleComposition = {                   // POST = simpleComposition
+            context: {
+                uuid: uid,                          // UUID
+                confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+                patient: simplePatient,             // 患者
+                creator: simpleCreator              // 医師
+            },
             content: [diagnosis]                    // 中身をこのdiagnosisにする
         };
-
         // 表示
         var arr = [];
         arr.push('<pre>');
         arr.push('// 患者');
         arr.push('\n');
         arr.push('var simplePatient = ');
-        arr.push(JSON.stringify(simplePatient, null, 4));
+        arr.push(prettyJSON(simplePatient));
         arr.push(';');
         arr.push('\n');
         arr.push('// 医師');
         arr.push('\n');
         arr.push('var simpleCreator = ');
-        arr.push(JSON.stringify(simpleCreator, null, 4));
+        arr.push(prettyJSON(simpleCreator));
         arr.push(';');
         arr.push('\n');
         arr.push('// 病名');
         arr.push('\n');
         arr.push('var simpleDiagnosis = ');
-        arr.push(JSON.stringify(diagnosis, null, 4));
+        arr.push(prettyJSON(diagnosis));
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
         document.getElementById('simpleBox').innerHTML = text;
-
         // POST する
-        post(simpleMML);
+        post(simpleComposition);
     };
 
     // 処方情報をセットする
@@ -348,40 +353,40 @@
         var prescription = simplePrescription();    // 処方せん
         var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
         var uid = uuid.v4();                        // MML文書の UUID
-        var simpleMML = {                           // POST = simpleMML
-            patient: simplePatient,                 // 患者
-            creator: simpleCreator,                 // 医師
-            uuid: uid,                              // UUID
-            confirmDate: confirmDate,               // 確定日時 YYYY-MM-DDTHH:mm:ss
+        var simpleComposition = {                   // POST = simpleComposition
+            context: {
+                uuid: uid,                          // UUID
+                confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+                patient: simplePatient,             // 患者
+                creator: simpleCreator              // 医師
+            },
             content: [prescription]                 // 中身をこのprescriptionにする
         };
-
         // 表示
         var arr = [];
         arr.push('<pre>');
         arr.push('// 患者');
         arr.push('\n');
         arr.push('var simplePatient = ');
-        arr.push(JSON.stringify(simplePatient,null,4));
+        arr.push(prettyJSON(simplePatient));
         arr.push(';');
         arr.push('\n');
         arr.push('// 医師');
         arr.push('\n');
         arr.push('var simpleCreator = ');
-        arr.push(JSON.stringify(simpleCreator,null,4));
+        arr.push(prettyJSON(simpleCreator));
         arr.push(';');
         arr.push('\n');
         arr.push('// 処方せん');
         arr.push('\n');
         arr.push('var simplePrescription = ');
-        arr.push(JSON.stringify(prescription, null, 4));
+        arr.push(prettyJSON(prescription));
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
         document.getElementById('simpleBox').innerHTML = text;
-
         // POST する
-        post(simpleMML);
+        post(simpleComposition);
     };
 
     // selectionが変更された

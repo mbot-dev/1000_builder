@@ -46,6 +46,29 @@ var addSingleQuote = function (value) {
     return arr.join('');
 };
 
+var hasProperty = function (obj, property) {
+    if (typeof obj !== 'object') {
+        return false;
+    }
+    var arr = property.split('.');
+    var test = obj;
+    var has = true;
+    arr.every ((entry, index, arr) => {
+        if (test.hasOwnProperty(entry)) {
+            test = test[entry];
+            return true;
+        } else {
+            has = false;
+            return false;
+        }
+    });
+    return has;
+};
+
+var prettyJSON = function (json) {
+    return JSON.stringify(json, null, 4);
+}
+
 var addZero = function (x, n) {
     while (x.toString().length < n) {
         x = '0' + x;
