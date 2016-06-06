@@ -241,7 +241,7 @@
         };
         if (testResults().length > 0) {
             laboratoryTest.testResult = testResults();
-            callback(test);
+            callback(laboratoryTest);
         } else {
             // 検査結果ファイルを読み込んで
             var http = new XMLHttpRequest();
