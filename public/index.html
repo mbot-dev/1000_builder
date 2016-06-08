@@ -9,14 +9,16 @@
     //------------------------------------------------------------------
     // RPCのエンドポイント
     var rpcURL = (function () {
-        var url = 'http://localhost:6001/api/v1';
+        //var url = 'http://localhost:6001/api/v1';
+        var url = 'https://1000-builder.au-syd.mybluemix.net/api/v1';
         return function () {
             return url;
         };
     })();
     // 検査結果を格納しているcsvファイルへのURI
     var testResultURL = (function () {
-        var url = 'http://localhost:6001/test_result.csv';
+        //var url = 'http://localhost:6001/test_result.csv';
+        var url = 'https://1000-builder.au-syd.mybluemix.net/test_result.csv';
         return function () {
             return url;
         };
@@ -119,7 +121,7 @@
             doseUnit: 'g',                                  // 単位
             frequencyPerDay: 2,                             // 1日の内服回数
             startDate: startDate,                           // 服薬開始日 YYYY-MM-DD
-            duration: 7,                                    // 7日分
+            duration: 'P30D',                                 // 7日分 ToDo
             instruction: '内服2回 朝夜食後に',                 // 用法
             PRN: false,                                     // 頓用=false
             brandSubstitutionPermitted: true,               // ジェネリック可
@@ -136,7 +138,7 @@
             doseUnit: '錠',                                 // 単位
             frequencyPerDay: 2,                             // 1日の内服回数
             startDate: startDate,                           // 服薬開始日
-            duration: 14,                                   // 14日分
+            duration: 'P30D',                                 // 14日分 ToDo
             instruction: '内服2回 朝夜食後に',                 // 用法
             PRN: false,                                     // 頓用=false
             brandSubstitutionPermitted: false,              // ジェネリック不可

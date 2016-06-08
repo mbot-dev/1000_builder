@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const uuid = require('node-uuid');
 const utils = require('../lib/utils');
@@ -21,6 +21,58 @@ module.exports = {
                 tableId: (idType === 'facility') ? facilityId : 'MML0024'
             }
         };
+    },
+
+    buildPersonName: function (repCode, fullName) {
+        return {
+            attr: {
+                repCode: repCode,                          // 表記法 (漢字:I カナ:P ローマ字:A)
+                tableId: 'MML0025'                         // 表記法を規定するテーブル名 MML0025
+            },
+            fullname: fullName                             // フルネーム
+        };
+    },
+    buildPersonNameWithKanji: function (fullName) {
+        return this.buildPersonName('I', fullName);
+    },
+    buildPersonNameWithKana: function (fullName) {
+        return this.buildPersonName('P', fullName);
+    },
+    buildPersonNameWithRoman: function (fullName) {
+        return this.buildPersonName('A', fullName);
+    },
+
+    buildAddress: function (addClass, postalCode, address) {
+        return {
+            attr: {
+                repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
+                addressClass: addClass,                   // 住所の種類コード MML0002 を使用
+                tableId: 'MML0025'                        // 上記の表記法を規定するテーブル名 MML0025
+            },
+            full: address,                                // 一連住所
+            zip: postalCode                               // 郵便番号
+        };
+    },
+    buildBusinessAddress: function (postalCode, address) {
+        return this.buildAddress('business', postalCode, address);
+    },
+    buildHomeAddress: function (postalCode, address) {
+        return this.buildAddress('home', postalCode, address);
+    },
+
+    buildPhone: function (type, phoneNumber) {
+        return {
+            attr: {
+                telEquipType: type                        // 装置の種類コード MML0003から使用
+            },
+            full: phoneNumber                             // 一連電話番号
+        };
+    },
+    buildTelephone: function (phoneNumber) {
+        return this.buildPhone('PH', phoneNumber);
+    },
+    buildMobile: function (phoneNumber) {
+        return this.buildPhone('CR', phoneNumber);
     },
 
     /**
@@ -54,31 +106,13 @@ module.exports = {
         // 作成者氏名
         var creatorNames = [];
         if (simpleCreator.hasOwnProperty('kanjiName')) {
-            creatorNames.push({
-                attr: {
-                    repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // 表記法を規定するテーブル名 MML0025
-                },
-                fullname: simpleCreator.kanjiName            // フルネーム
-            });
+            creatorNames.push(this.buildPersonNameWithKanji(simpleCreator.kanjiName));
         }
         if (simpleCreator.hasOwnProperty('kanaName')) {
-            creatorNames.push({
-                attr: {
-                    repCode: 'P',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // 表記法を規定するテーブル名 MML0025
-                },
-                fullname: simpleCreator.kanaName             // フルネーム
-            });
+            creatorNames.push(this.buildPersonNameWithKana(simpleCreator.kanaName));
         }
         if (simpleCreator.hasOwnProperty('romanName')) {
-            creatorNames.push({
-                attr: {
-                    repCode: 'A',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // 表記法を規定するテーブル名 MML0025
-                },
-                fullname: simpleCreator.romanName            // フルネーム
-            });
+            creatorNames.push(this.buildPersonNameWithRoman(simpleCreator.romanName));
         }
 
         // 肩書きなど
@@ -120,23 +154,10 @@ module.exports = {
         };
 
         // 医療機関住所
-        var facilityAddress = {
-            attr: {
-                repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                addressClass: 'business',                 // 住所の種類コード MML0002 を使用
-                tableId: 'MML0025'                        // 上記の表記法を規定するテーブル名 MML0025
-            },
-            full: simpleCreator.facilityAddress,         // 一連住所
-            zip: simpleCreator.facilityZipCode           // 郵便番号
-        };
+        var facilityAddress = this.buildBusinessAddress(simpleCreator.facilityZipCode, simpleCreator.facilityAddress);
 
         // 医療機関電話番号
-        var facilityPhone = {
-            attr: {
-                telEquipType: 'PH'                        // 装置の種類コード MML0003から使用
-            },
-            full: simpleCreator.facilityPhone            // 一連電話番号
-        };
+        var facilityPhone = this.buildTelephone(simpleCreator.facilityPhone);
 
         // creator(医師)個人情報
         var personalizedInfo = {
@@ -377,35 +398,15 @@ module.exports = {
 
         // 漢字氏名
         if (simplePatient.hasOwnProperty('kanjiName')) {
-            patientModule.personName.push({
-                attr: {
-                    repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // 表記法を規定するテーブル名 MML0025
-                },
-                fullname: simplePatient.kanjiName            // フルネーム
-            });
+            patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.kanjiName));
         }
-
         // かな/カナ氏名
         if (simplePatient.hasOwnProperty('kanaName')) {
-            patientModule.personName.push({
-                attr: {
-                    repCode: 'P',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // 表記法を規定するテーブル名 MML0025
-                },
-                fullname: simplePatient.kanaName             // フルネーム
-            });
+            patientModule.personName.push(this.buildPersonNameWithKana(simplePatient.kanaName));
         }
-
         // ローマ字氏名
         if (simplePatient.hasOwnProperty('romanName')) {
-            patientModule.personName.push({
-                attr: {
-                    repCode: 'A',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // 表記法を規定するテーブル名 MML0025
-                },
-                fullname: simplePatient.romanName             // フルネーム
-            });
+            patientModule.personName.push(this.buildPersonNameWithRoman(simplePatient.romanName));
         }
 
         // 国籍
@@ -421,15 +422,7 @@ module.exports = {
         // 患者住所
         if (simplePatient.hasOwnProperty('address')) {
             patientModule.addresses = [];
-            patientModule.addresses.push({
-                attr: {
-                    repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    addressClass: 'home',                     // 住所の種類コード MML0002 を使用 homeでいいかどうか
-                    tableId: 'MML0025'                        // 上記の表記法を規定するテーブル名 MML0025
-                },
-                full: simplePatient.address,                  // 一連住所
-                zip: simplePatient.postalCode                 // 郵便番号
-            });
+            patientModule.addresses.push(this.buildHomeAddress(simplePatient.postalCode, simplePatient.address));
         }
 
         // 患者電子メールアドレス
@@ -444,21 +437,10 @@ module.exports = {
             patientModule.phones = [];
 
             if (simplePatient.hasOwnProperty('telephone')) {
-                patientModule.phones.push({
-                    attr: {
-                        telEquipType: 'PH'                        // 装置の種類コード MML0003から使用
-                    },
-                    full: simplePatient.telephone                // 一連電話番号
-                });
+                patientModule.phones.push(this.buildTelephone(simplePatient.telephone));
             }
-
             if (simplePatient.hasOwnProperty('mobile')) {
-                patientModule.phones.push({
-                    attr: {
-                        telEquipType: 'CR'                        // 装置の種類コード MML0003から使用
-                    },
-                    full: simplePatient.mobile                   // 一連電話番号
-                });
+                patientModule.phones.push(this.buildMobile(simplePatient.mobile));
             }
         }
 
