@@ -23,6 +23,7 @@ module.exports = {
         };
     },
 
+    // 人名
     buildPersonName: function (repCode, fullName) {
         return {
             attr: {
@@ -42,6 +43,7 @@ module.exports = {
         return this.buildPersonName('A', fullName);
     },
 
+    // 住所
     buildAddress: function (addClass, postalCode, address) {
         return {
             attr: {
@@ -60,6 +62,7 @@ module.exports = {
         return this.buildAddress('home', postalCode, address);
     },
 
+    // 電話番号
     buildPhone: function (type, phoneNumber) {
         return {
             attr: {
@@ -73,6 +76,139 @@ module.exports = {
     },
     buildMobile: function (phoneNumber) {
         return this.buildPhone('CR', phoneNumber);
+    },
+
+    // 施設情報
+    buildFacility: function(fId, idType, fName) {
+        // 施設名称 漢字
+        var facilityName = {
+            value: fName,
+            attr: {
+                repCode: 'I',                       // 表記法 (漢字:I カナ:P ローマ字:A)
+                tableId: 'MML0025'                  // MML0025
+            }
+        };
+        // 施設Id
+        var facilityId = {
+            value: fId,                             // 施設に付番されているId type属性に発番元（体系）を記載する
+            attr: {
+                type: idType,                       // MML0027 (認証局:ca 保険医療機関コード:insurance 文科省大学付属病院施設区分:monbusyo 日本医師会総合政策研究コード:JMARI)
+                tableId: 'MML0027'                  // MML0027
+            }
+        };
+        return {
+            name: [facilityName],                   // 施設名 Name の配列
+            Id: facilityId                          // 施設ID
+        };
+    },
+
+    // 診療科情報
+    buildDepartment: function(dId, idType, dName) {
+        // 診療科Id
+        var deptId = {
+            value: dId,                             // medicalの場合はMML0028 dentalの場合はMML0030を参照
+            attr: {
+                type: idType,                       // MML0029 (医科診療科コード:medical 歯科診療科コード:dental 施設内ユーザー定義診療科コード:facility)
+                tableId: 'MML0029'
+            }
+        };
+        // 診療科名称 漢字
+        var deptName = {
+            value: dName,
+            attr: {
+                repCode: 'I',                        // 表記法 (漢字:I カナ:P ローマ字:A)
+                tableId: 'MML0025'                   // MML0025
+            }
+        };
+        // 診療科情報
+        return {
+            name: [deptName],                         // 診療科名 Name の配列
+            Id: deptId                                // 診療科ID
+        };
+    },
+    buildMedicalDepartment: function(dId, dName) {
+        return this.buildDepartment(dId, 'medical', dName);
+    },
+    buildDentalDepartment: function(dId, dName) {
+        return this.buildDepartment(dId, 'dental', dName);
+    },
+    buildFacilityDepartment: function(dId, dName) {
+        return this.buildDepartment(dId, 'facility', dName);
+    },
+
+    // creator(医師)個人情報
+    buildPersonalizedInfo: function (person) {
+        // 作成者(creator)Id
+        var creatorId = this.buildPersonId(person.id, person.idType, person.facilityId);
+
+        // 作成者氏名
+        var creatorNames = [];
+        if (person.hasOwnProperty('kanjiName')) {
+            creatorNames.push(this.buildPersonNameWithKanji(person.kanjiName));
+        }
+        if (person.hasOwnProperty('kanaName')) {
+            creatorNames.push(this.buildPersonNameWithKana(person.kanaName));
+        }
+        if (person.hasOwnProperty('romanName')) {
+            creatorNames.push(this.buildPersonNameWithRoman(person.romanName));
+        }
+
+        // 肩書きなど
+        if (person.hasOwnProperty('prefix')) {
+            creatorNames.forEach((entry) => {
+                entry.prefix = person.prefix;
+            });
+        }
+
+        // 学位
+        if (person.hasOwnProperty('degree')) {
+            creatorNames.forEach((entry) => {
+                entry.degree = person.degree;
+            });
+        }
+
+        // 施設情報
+        var facility = this.buildFacility(person.facilityId, person.facilityIdType, person.facilityName);
+
+        // 医療機関住所
+        var facilityAddress = this.buildBusinessAddress(person.facilityZipCode, person.facilityAddress);
+
+        // 医療機関電話番号
+        var facilityPhone = this.buildTelephone(person.facilityPhone);
+
+        // creator(医師)個人情報
+        var personalizedInfo = {
+            Id: creatorId,                               // ID情報
+            personName: creatorNames,                    // 人名 Name の配列
+            Facility: facility,                          // 施設情報 Facility
+            //Department: department,                      // 診療科情報 Department
+            addresses: [facilityAddress],                // 住所
+            //emailAddresses: [email],                   // 電子メール
+            phones: [facilityPhone]                      // 電話番号
+        };
+
+        // 診療科情報
+        if (person.hasOwnProperty('departmentId')) {
+            var department = this.buildDepartment(person.departmentId, person.departmentIdType, person.departmentName);
+            personalizedInfo.Department = department;
+        }
+
+        // 電子メールもセット可能
+        if (person.hasOwnProperty('email')) {
+            personalizedInfo.emailAddresses = [person.email];
+        }
+
+        return personalizedInfo;
+    },
+
+    // 医療資格
+    buildCreatorLicense: function (license) {
+        return {
+            value: license,                                // 生成者の資格 MML0026を使用
+            attr: {
+                tableId: 'MML0026'                        // 生成者の資格を規定するテーブル名 MML0026
+            }
+        };
     },
 
     /**
@@ -100,124 +236,17 @@ module.exports = {
             license: ''                                  // MML0026
         };******************************************************/
 
-        // 作成者(creator)Id
-        var creatorId = this.buildPersonId(simpleCreator.id, simpleCreator.idType, simpleCreator.facilityId);
-
-        // 作成者氏名
-        var creatorNames = [];
-        if (simpleCreator.hasOwnProperty('kanjiName')) {
-            creatorNames.push(this.buildPersonNameWithKanji(simpleCreator.kanjiName));
-        }
-        if (simpleCreator.hasOwnProperty('kanaName')) {
-            creatorNames.push(this.buildPersonNameWithKana(simpleCreator.kanaName));
-        }
-        if (simpleCreator.hasOwnProperty('romanName')) {
-            creatorNames.push(this.buildPersonNameWithRoman(simpleCreator.romanName));
-        }
-
-        // 肩書きなど
-        if (simpleCreator.hasOwnProperty('prefix')) {
-            creatorNames.forEach((entry) => {
-                entry.prefix = simpleCreator.prefix;
-            });
-        }
-
-        // 学位
-        if (simpleCreator.hasOwnProperty('degree')) {
-            creatorNames.forEach((entry) => {
-                entry.degree = simpleCreator.degree;
-            });
-        }
-
-        // 施設Id
-        var facilityId = {
-            value: simpleCreator.facilityId,             // 施設に付番されているId type属性に発番元（体系）を記載する
-            attr: {
-                type: simpleCreator.facilityIdType,       // MML0027 (認証局:ca 保険医療機関コード:insurance 文科省大学付属病院施設区分:monbusyo 日本医師会総合政策研究コード:JMARI)
-                tableId: 'MML0027'                        // MML0027
-            }
-        };
-
-        // 施設名称 漢字
-        var facilityName = {
-            value: simpleCreator.facilityName,
-            attr: {
-                repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                tableId: 'MML0025'                        // MML0025
-            }
-        };
-
-        // 施設情報
-        var facility = {
-            name: [facilityName],                        // 施設名 Name の配列
-            Id: facilityId                               // 施設ID
-        };
-
-        // 医療機関住所
-        var facilityAddress = this.buildBusinessAddress(simpleCreator.facilityZipCode, simpleCreator.facilityAddress);
-
-        // 医療機関電話番号
-        var facilityPhone = this.buildTelephone(simpleCreator.facilityPhone);
-
         // creator(医師)個人情報
-        var personalizedInfo = {
-            Id: creatorId,                               // ID情報
-            personName: creatorNames,                    // 人名 Name の配列
-            Facility: facility,                          // 施設情報 Facility
-            //Department: department,                      // 診療科情報 Department
-            addresses: [facilityAddress],                // 住所
-            //emailAddresses: [email],                   // 電子メール
-            phones: [facilityPhone]                      // 電話番号
-        };
-
-        if (simpleCreator.hasOwnProperty('departmentId')) {
-
-            // 診療科Id
-            var deptId = {
-                value: simpleCreator.departmentId,           // medicalの場合はMML0028 dentalの場合はMML0030を参照
-                attr: {
-                    type: simpleCreator.departmentIdType,     // MML0029 (医科診療科コード:medical 歯科診療科コード:dental 施設内ユーザー定義診療科コード:facility)
-                    tableId: 'MML0029'
-                }
-            };
-
-            // 診療科名称 漢字
-            var deptName = {
-                value: simpleCreator.departmentName,
-                attr: {
-                    repCode: 'I',                             // 表記法 (漢字:I カナ:P ローマ字:A)
-                    tableId: 'MML0025'                        // MML0025
-                }
-            };
-
-            // 診療科情報
-            var department = {
-                name: [deptName],                            // 診療科名 Name の配列
-                Id: deptId                                   // 診療科ID
-            };
-            personalizedInfo.Department = department;
-        }
-
-        // 電子メールもセット可能
-        if (simpleCreator.hasOwnProperty('email')) {
-            personalizedInfo.emailAddresses = [simpleCreator.email];
-        }
+        var personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
 
         // 医療資格
-        var creatorLicense = {
-            value: simpleCreator.license,                // 生成者の資格 MML0026を使用
-            attr: {
-                tableId: 'MML0026'                        // 生成者の資格を規定するテーブル名 MML0026
-            }
-        };
+        var creatorLicense = this.buildCreatorLicense(simpleCreator.license);
 
         // 作成者情報
-        var creatorInfo = {
+        return {
             PersonalizedInfo: personalizedInfo,          // 個人情報形式 PersonalizedInfo
             creatorLicense: [creatorLicense]             // 生成者の資格 creatorLicenseの配列
         };
-
-        return creatorInfo;
     },
 
     /**
@@ -365,7 +394,7 @@ module.exports = {
             kanjiName: '',
             kanaName: '',
             romanName: '',
-            gender: '',                                        // MML0010(femail male other unknown)
+            gender: '',                                     // MML0010(femail male other unknown)
             dateOfBirth: '',
             maritalStatus: '',                              // MML0011
             nationality: '',
@@ -514,7 +543,7 @@ module.exports = {
     buildPrescriptionModule: function (simplePrescription) {
         /**********************************************************
         var simplePrescription = {
-            medication: [{issuedTo: '',                  // 院外処方:external 院内処方:internal
+            medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
             medicine: '',                             // 処方薬
             medicineCode: '',                         // 処方薬のコード
             medicineCodeystem: '',                    // コード体系
@@ -768,7 +797,7 @@ module.exports = {
 
     /**
       * MML を生成する
-      * @param {simpleMml} - simpleMml
+      * @param {simpleComposition} - simpleComposition
       * @returns {MML}
      */
     build: function (simpleComposition) {
