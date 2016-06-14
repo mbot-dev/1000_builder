@@ -1,5 +1,4 @@
 'use strict';
-
 const uuid = require('node-uuid');
 const utils = require('../lib/utils');
 const mmlBuilder = require('../lib/mmlBuilder');
@@ -43,7 +42,7 @@ module.exports = {
         return this.buildPersonName('A', fullName);
     },
 
-    // 住所
+    // 住所 漢字のみ
     buildAddress: function (addClass, postalCode, address) {
         return {
             attr: {
@@ -78,7 +77,7 @@ module.exports = {
         return this.buildPhone('CR', phoneNumber);
     },
 
-    // 施設情報
+    // 施設情報 MMLで病院は施設で表現 漢字のみ
     buildFacility: function(fId, idType, fName) {
         // 施設名称 漢字
         var facilityName = {
@@ -136,7 +135,7 @@ module.exports = {
         return this.buildDepartment(dId, 'facility', dName);
     },
 
-    // creator(医師)個人情報
+    // creator(医師等)個人情報
     buildPersonalizedInfo: function (person) {
         // 作成者(creator)Id
         var creatorId = this.buildPersonId(person.id, person.idType, person.facilityId);

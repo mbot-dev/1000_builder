@@ -1,7 +1,7 @@
 "use strict";
 
 // https://gist.github.com/sente/1083506
-var formatXml = function (xml) {
+function formatXml (xml) {
     var formatted = '';
     var reg = /(>)(<)(\/*)/g;
     xml = xml.replace(reg, '$1\r\n$2$3');
@@ -36,24 +36,24 @@ var formatXml = function (xml) {
     return formatted;
 };
 
-var addQuote = function (value) {
+function addQuote (value) {
     var arr =['\"', value, '\"'];
     return arr.join('');
 };
 
-var addSingleQuote = function (value) {
+function addSingleQuote (value) {
     var arr =['\'', value, '\''];
     return arr.join('');
 };
 
-var hasProperty = function (obj, property) {
+function hasProperty (obj, property) {
     if (typeof obj !== 'object') {
         return false;
     }
     var arr = property.split('.');
     var test = obj;
     var has = true;
-    arr.every ((entry, index, arr) => {
+    arr.every (function (entry, index, arr) {
         if (test.hasOwnProperty(entry)) {
             test = test[entry];
             return true;
@@ -65,11 +65,11 @@ var hasProperty = function (obj, property) {
     return has;
 };
 
-var prettyJSON = function (json) {
+function prettyJSON (json) {
     return JSON.stringify(json, null, 4);
-}
+};
 
-var addZero = function (x, n) {
+function addZero (x, n) {
     while (x.toString().length < n) {
         x = '0' + x;
     }
@@ -77,7 +77,7 @@ var addZero = function (x, n) {
 };
 
 // yyyy-MM-dd
-var toDateString = function (date) {
+function toDateString (date) {
     var yyyy = date.getFullYear();
     var MM = addZero(date.getMonth() + 1, 2);
     var dd = addZero(date.getDate(), 2);
@@ -86,7 +86,7 @@ var toDateString = function (date) {
 };
 
 // yyyy-MM-ddTHH:mm:ss
-var toDateTimeString = function (date) {
+function toDateTimeString (date) {
     var yyyy = date.getFullYear();
     var MM = addZero(date.getMonth() + 1, 2);
     var dd = addZero(date.getDate(), 2);
@@ -97,10 +97,10 @@ var toDateTimeString = function (date) {
     return arr.join('');
 };
 
-var nowAsDateTime = function () {
+function nowAsDateTime () {
     return toDateTimeString(new Date());
 };
 
-var nowAsDate = function () {
+function nowAsDate () {
     return toDateString(new Date());
 };
