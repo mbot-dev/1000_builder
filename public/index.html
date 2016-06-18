@@ -1,43 +1,50 @@
+<!DOCTYPE html>
 <html>
 <head>
     <title>1000-Builder</title>
-	   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="css/simple.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+    <link type="text/css" rel="stylesheet" href="/css/simple.css">
+    <script type="text/javascript" src="js/uuid.js"></script>
+    <script type="text/javascript" src="js/1000-utils.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
 </head>
-<body>
-    <div id="headerBar">
-        <h1>1000 Years Builder</h1><a href="https://github.com/mbot-dev/1000_builder"><img src="image/GitHub-Mark-Light-32px.png"></a>
+<body onload="showPrescription();">
+    <div class="w3-container w3-blue">
+        <h1 class="w3-center">千年ビルダー</h1><a href="https://github.com/mbot-dev/1000_builder"><img src="image/GitHub-Mark-Light-64px.png" style="width: 32px;height: 32px;position: absolute;top: 22px;right: 22px;opacity: 0.9;"></a>
     </div>
-    <div id="content">
-        <div id="topSection">
+    <div class="w3-container w3-margin">
+        <div class="w3-container">
             <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテプロジェクトが必要とするMML4.0形式のデータを生成するサーバーアプリケーションです。</p>
             <h3>利用イメージ</h3>
             <ul>
                 <li>患者さんがクリニックを受診しました。</li>
                 <li>医師は処方せんを出しました。</li>
             </ul>
-            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。左側がポストするデータ（選択可能）、右側がMML4.0にエンコードされたデータです。</p>
+            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。左側がポストするデータ、右側がMML4.0にエンコードされたデータです。</p>
         </div>
-        <div id="dataHeader">
-            <div id="commandBar">
-                <p>クライアントがポストするデータ:
-                    <select onchange="changeModule(this);" style="vertical-align:center;">
-                        <option value='showPrescription'>処 方</option>
-                        <option value='showDiagnosis'>病 名</option>
-                        <option value='showLabTest'>検 査</option>
-                    </select>
-                </p>
+        <div class="w3-row-padding">
+            <p class="w3-half">クライアントがポストするデータ:
+                <select onchange="changeModule(this);">
+                    <option value='showPrescription'>処 方</option>
+                    <option value='showDiagnosis'>病 名</option>
+                    <option value='showLabTest'>検 査</option>
+                </select>
+            </p>
+            <div class="w3-half">
+                <p>サーバーが生成した MML4.0</p>
             </div>
-            <div id="mmlBar"><p>サーバーが生成した MML4.0</p></div>
-            <div style="clear:both;"></div>
         </div>
-        <!-- -->
-        <div id="simpleBox"></div>
-        <div id="mmlBox"></div>
-        <!-- -->
-        <div id="bottomSection">
+        <div class="w3-row-padding">
+            <div class="w3-half w3-small w3-topbar w3-bottombar w3-border-gray mb-simple">
+            </div>
+            <div class="w3-half w3-small w3-topbar w3-bottombar w3-border-gray mb-mml">
+            </div>
+        </div>
+        <div class="w3-container">
             <p>　</p>
-            <p style="font-size:small;text-align:center;">サンプルデータの個人名には<a href="http://kazina.com/dummy/">なんちゃって個人情報</a>を使用しています。</p>
+            <p class="w3-small w3-center">サンプルデータの個人名には<a href="http://kazina.com/dummy/">なんちゃって個人情報</a>を使用しています。</p>
             <h3>データ利用</h3>
             <ul>
                 <li>サーバーが生成したMMLを千年カルテプロジェクトに送信します。</li>
@@ -75,11 +82,8 @@
             </ul>
         </div>
     </div>
-    <div id="footerBar">
-        <p>©2016 Kazushi Minagawa.</p>
+    <div class="w3-container w3-blue">
+        <p class="w3-center">&copy;2016 Kazushi Minagawa</p>
     </div>
-    <script type="text/javascript" src="js/uuid.js"></script>
-    <script type="text/javascript" src="js/1000-utils.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
 </body>
 </html>

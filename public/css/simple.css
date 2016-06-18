@@ -1,10 +1,5 @@
 body {
-  padding: 0;
-  margin: 0;
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: medium;
-  line-height: 1.5;
-  color: #606c71;
+    color: #606c71;
 }
 a {
   color: #1e6bb8;
@@ -14,65 +9,5 @@ a:hover {
   text-decoration: underline;
 }
 
-#headerBar {
-    width: 100%;
-    height: 64px;
-    background-color: #2d80d2;
-    line-height: 64px;
-}
-#headerBar h1 {
-    color: white;
-    text-align: center;
-}
-#headerBar img {
-    width: 24px;
-    height: 24px;
-    position: absolute;
-    top: 20px;
-    right: 32px;
-    opacity: 0.9;
-}
-#content{
-    width: 80%;
-    margin: auto;
-}
-#topSection{
-    width: 100%;
-}
-#dataHeader{
-    width: 100%;
-}
-#commandBar{
-    float: left;
-    width: 33%;
-}
-#mmlBar{
-    float: right;
-    width: 63%;
-}
-#simpleBox{
-    width: 33.0%;
-    float: left;
-    border: 1px solid #606c71;
-    overflow: auto;
-    padding: 3px 3px 3px 3px;
-}
-#mmlBox{
-    width: 63.0%;
-    float: right;
-    font-size: small;
-    border: 1px solid #606c71;
-    overflow: auto;
-    padding: 3px 3px 3px 3px;
-}
-#bottomSection{
-    clear: both;
-    width: 100%;
-}
-#footerBar{
-    width: 100%;
-    height: 32px;
-    text-align: center;
-    line-height: 32px;
-    font-size: small;
-}
+.mb-simple {};
+.mb-mml {};    
