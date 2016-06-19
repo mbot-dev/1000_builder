@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html>
+<htm
 <head>
-    <title>1000-Builder</title>
+    <title>1000 Years Builder</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css" rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+    <link type="text/css" rel="stylesheet" href="/css/w3.css">
     <link type="text/css" rel="stylesheet" href="/css/simple.css">
     <script type="text/javascript" src="js/uuid.js"></script>
     <script type="text/javascript" src="js/1000-utils.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
 </head>
 <body onload="showPrescription();">
-    <div class="w3-container w3-blue">
-        <h1 class="w3-center">千年ビルダー</h1><a href="https://github.com/mbot-dev/1000_builder"><img src="image/GitHub-Mark-Light-64px.png" style="width: 32px;height: 32px;position: absolute;top: 22px;right: 22px;opacity: 0.9;"></a>
-    </div>
+    <header class="w3-container w3-blue">
+        <h2 class="w3-center">千年ビルダー</h2><a href="https://github.com/mbot-dev/1000_builder"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
+    </header>
     <div class="w3-container w3-margin">
         <div class="w3-container">
             <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテプロジェクトが必要とするMML4.0形式のデータを生成するサーバーアプリケーションです。</p>
-            <h3>利用イメージ</h3>
+            <h4>利用イメージ</h4>
             <ul>
                 <li>患者さんがクリニックを受診しました。</li>
                 <li>医師は処方せんを出しました。</li>
@@ -37,15 +37,17 @@
             </div>
         </div>
         <div class="w3-row-padding">
-            <div class="w3-half w3-small w3-topbar w3-bottombar w3-border-gray mb-simple">
+            <div class="w3-half w3-small w3-topbar w3-bottombar w3-border-gray">
+                <div id="simple_box"></div> <!-- Simple json to prepare -->
             </div>
-            <div class="w3-half w3-small w3-topbar w3-bottombar w3-border-gray mb-mml">
+            <div class="w3-half w3-small w3-topbar w3-bottombar w3-border-gray">
+                <div id="mml_box"></div> <!-- MML instance created -->
             </div>
         </div>
         <div class="w3-container">
             <p>　</p>
             <p class="w3-small w3-center">サンプルデータの個人名には<a href="http://kazina.com/dummy/">なんちゃって個人情報</a>を使用しています。</p>
-            <h3>データ利用</h3>
+            <h4>データ利用</h4>
             <ul>
                 <li>サーバーが生成したMMLを千年カルテプロジェクトに送信します。</li>
                 <li>この時デフォルトで次のアクセス権が設定されます。
@@ -56,7 +58,7 @@
                     </ul>
                 </li>
             </ul>
-            <h3>このサーバーの目的</h3>
+            <h4>このサーバーの目的</h4>
             <p>MMLは医療情報を1000年に渡って活用できるようにするため、情報を多くの名前空間と深い階層によって定義しています。これをサポートするのは、新規のアプリケーションであっても既存の製品であっても、かなりのコストが必要です。千年ビルダーはそこへシンプルなAPIを提供します。クライアントがポストするのは簡単なJSONで、属性は殆どが自明なものばかりです。
                 したがって、
             </p>
@@ -65,7 +67,7 @@
                 <li>千年基盤はこのサーバーだけを検証すればよく、信頼性が向上し、コストが下がります。</li>
                 <li>モバイルアプリからの送信も容易となり、院内の全ての場所、薬局、介護、リハビリ等、医療連携の幅が広がります。</li>
             </ul>
-            <h3>クライアントの開発資料</h3>
+            <h4>クライアントの開発資料</h4>
             <uL>
                 <li><a href="https://github.com/mbot-dev/1000_builder/wiki/simple">Wiki</a> に仕様及び設定ガイドがあります。</li>
                 <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
@@ -73,7 +75,7 @@
                 <li>プロジェクトに参加するとこれと同等のサーバーが SaaS で提供されます。</li>
                 <li>MML インスタンスの<a href="https://1000-validator.au-syd.mybluemix.net/">バリデーション・チェックはこちら</a>で行うことができます。</li>
             </ul>
-            <h3>関連情報</h3>
+            <h4>関連情報</h4>
             <ul>
                 <li><a href="https://www.facebook.com/gEHR-398609153661839/">千年カルテプロジェクト</a></li>
                 <li><a href="http://www.medxml.net/MML40j/mml4.html">MML4.0</a></li>
@@ -82,8 +84,8 @@
             </ul>
         </div>
     </div>
-    <div class="w3-container w3-blue">
-        <p class="w3-center">&copy;2016 Kazushi Minagawa</p>
-    </div>
+    <footer class="w3-container w3-blue">
+        <p class="w3-center">&copy;2016 Kazushi Minagawa.</p>
+    </footer>
 </body>
 </html>

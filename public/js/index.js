@@ -22,20 +22,14 @@ var testResults = (function () {
         return results;
     };
 })();
-// SimpleBox 要素を取得するためのclass名
-var simpleBoxClass = (function () {
-    var str = 'w3-half w3-small w3-topbar w3-bottombar w3-border-gray mb-simple';
-    return function() {
-        return str;
-    };
-})();
-// MMLBox 要素を取得するためのclass名
-var mmlBoxClass = (function () {
-    var str = 'w3-half w3-small w3-topbar w3-bottombar w3-border-gray mb-mml';
-    return function() {
-        return str;
-    };
-})();
+
+var simpleBox = function () {
+    return document.getElementById('simple_box');
+};
+
+var mmlBox = function () {
+    return document.getElementById('mml_box');
+};
 
 // 患者
 var simplePatient = {
@@ -101,7 +95,7 @@ var post = function (simpleComposition) {
             // 表示するために escapeする
             xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
             // MML4.0 box へ表示する
-            document.getElementsByClassName(mmlBoxClass())[0].innerHTML = xml_escaped;
+            mmlBox().innerHTML = xml_escaped;
         }
     }
     http.send(JSON.stringify(jsonRpc2));
@@ -306,7 +300,7 @@ var showLabTest = function () {
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
-        document.getElementsByClassName(simpleBoxClass())[0].innerHTML = text;
+        simpleBox().innerHTML = text;
         // POST する
         post(simpleComposition);
     });
@@ -349,7 +343,7 @@ var showDiagnosis = function () {
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
-    document.getElementsByClassName(simpleBoxClass())[0].innerHTML = text;
+    simpleBox().innerHTML = text;
     // POST する
     post(simpleComposition);
 };
@@ -391,7 +385,7 @@ var showPrescription = function () {
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
-    document.getElementsByClassName(simpleBoxClass())[0].innerHTML = text;
+    simpleBox().innerHTML = text;
     // POST する
     post(simpleComposition);
 };
