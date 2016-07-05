@@ -4,6 +4,7 @@ const express = require('express');
 const config = require('config');
 const utils = require('../lib/utils');
 const simpleBuilder = require('./simpleBuilder');
+const DEBUG = false;
 
 var router = express.Router();
 
@@ -53,6 +54,10 @@ router.post (config.rpc.path, function (req, res) {
         if (utils.isDefined(rpcId)) {
             // rpcしてresult: へセット
             response.result = simpleBuilder[method].apply(simpleBuilder, params);
+            if (DEBUG) {
+                var utf8_length = Buffer.byteLength(response.result, 'utf8');
+                console.log((utf8_length / 1024) + 'KB');
+            }
             res.send(response);
         }
 

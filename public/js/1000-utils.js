@@ -34,17 +34,17 @@ function formatXml (xml) {
     });
 
     return formatted;
-};
+}
 
 function addQuote (value) {
     var arr =['\"', value, '\"'];
     return arr.join('');
-};
+}
 
 function addSingleQuote (value) {
     var arr =['\'', value, '\''];
     return arr.join('');
-};
+}
 
 function hasProperty (obj, property) {
     if (typeof obj !== 'object') {
@@ -63,18 +63,18 @@ function hasProperty (obj, property) {
         }
     });
     return has;
-};
+}
 
 function prettyJSON (json) {
     return JSON.stringify(json, null, 4);
-};
+}
 
 function addZero (x, n) {
     while (x.toString().length < n) {
         x = '0' + x;
     }
     return x;
-};
+}
 
 // yyyy-MM-dd
 function toDateString (date) {
@@ -83,7 +83,7 @@ function toDateString (date) {
     var dd = addZero(date.getDate(), 2);
     var arr = [yyyy, '-', MM, '-', dd];
     return arr.join('');
-};
+}
 
 // yyyy-MM-ddTHH:mm:ss
 function toDateTimeString (date) {
@@ -95,12 +95,12 @@ function toDateTimeString (date) {
     var ss = addZero(date.getSeconds(), 2);
     var arr = [yyyy, '-', MM, '-', dd, 'T', HH, ':', mm, ':', ss];
     return arr.join('');
-};
+}
 
 function nowAsDateTime () {
     return toDateTimeString(new Date());
-};
+}
 
 function nowAsDate () {
     return toDateString(new Date());
-};
+}

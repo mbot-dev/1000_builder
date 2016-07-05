@@ -1,5 +1,9 @@
 body {
-    color: #606c71;
+    /* color: #606c71; */
+    color: #404040;
+    text-shadow:1px 1px 1px 1px rgba(0,0,0,0.005);
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
 }
 a {
   color: #1e6bb8;
