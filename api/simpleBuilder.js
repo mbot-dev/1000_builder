@@ -794,6 +794,127 @@ module.exports = {
         return testModule;
     },
 
+    buildVitalSignModule: function (simpleVitalSign) {
+        // 必須属性
+        var vitalSign = {
+            item: [],
+            observedTime: simpleVitalSign.observedTime
+        };
+        // item
+        simpleVitalSign.item.forEach ((entry) => {
+            var item = {
+                itemName: entry.itemName                // mmlVs01
+            };
+            if (entry.hasOwnProperty('value')) {
+                item.value = entry.value;
+            }
+            if (entry.hasOwnProperty('numValue')) {
+                item.numValue = entry.numValue;
+            }
+            if (entry.hasOwnProperty('unit')) {
+                item.unit = entry.unit;                 // mmlVs02
+            }
+            if (entry.hasOwnProperty('itemMemo')) {
+                var arr = [];
+                entry.itemMemo.forEach((e) => {
+                    arr.push(e);
+                });
+                item.itemMemo = arr;
+            }
+            vitalSign.item.push(item);
+        });
+        // Context
+        if (simpleVitalSign.hasOwnProperty('context')) {
+            var target =　simpleVitalSign.context;
+            vitalSign.context = {};
+            // facility
+            if (target.hasOwnProperty('facility')) {
+                var facility = {
+                    value: target.facility,
+                    attr: {
+                        facilityCode: target.facilityCode,
+                        facilityCodeId: target.facilityCodeId
+                    }
+                };
+                vitalSign.context.facility = facility;
+            }
+            // department
+            if (target.hasOwnProperty('department')) {
+                var department = {
+                    value: target.department
+                };
+                if (target.hasOwnProperty('depCode')) {
+                    department.attr = {
+                        depCode: target.depCode,            // MML0028から選択
+                        depCodeId: 'MML0028'                // 医科用診療科コード
+                    };
+                }
+                vitalSign.context.department = department;
+            }
+            // ward
+            if (target.hasOwnProperty('ward')) {
+                var ward = {
+                    value: target.ward
+                };
+                if (target.hasOwnProperty('wardCode') || target.hasOwnProperty('wardCodeId')) {
+                    ward.attr = {};
+                    if (target.hasOwnProperty('wardCode')) {
+                        ward.attr.wardCode = target.wardCode;
+                    }
+                    if (target.hasOwnProperty('wardCodeId')) {
+                        ward.attr.wardCodeId = target.wardCodeId;
+                    }
+                }
+                vitalSign.context.ward = ward;
+            }
+            // observer
+            if (target.hasOwnProperty('observer')) {
+                var observer = {
+                    value: target.observer
+                };
+                if (target.hasOwnProperty('obsCode') || target.hasOwnProperty('obsCodeId')) {
+                    observer.attr = {};
+                    if (target.hasOwnProperty('obsCode')) {
+                        observer.attr.obsCode = target.obsCode;
+                    }
+                    if (target.hasOwnProperty('obsCodeId')) {
+                        observer.attr.obsCodeId = target.obsCodeId;
+                    }
+                }
+                vitalSign.context.observer = observer;
+            }
+        }
+        // protocol
+        if (simpleVitalSign.hasOwnProperty('protocol')) {
+            var target = simpleVitalSign.protocol;
+            vitalSign.protocol = {};
+            if (target.hasOwnProperty('procedure')) {
+                vitalSign.protocol.procedure = target.procedure;
+            }
+            if (target.hasOwnProperty('position')) {
+                vitalSign.protocol.position = target.position;      // mmlVs03
+            }
+            if (target.hasOwnProperty('device')) {
+                vitalSign.protocol.device = target.device;
+            }
+            if (target.hasOwnProperty('bodyLocation')) {
+                vitalSign.protocol.bodyLocation = target.bodyLocation;
+            }
+            if (target.hasOwnProperty('protMemo')) {
+                vitalSign.protocol.protMemo = [];
+                target.protMemo.forEach((pm) => {
+                    vitalSign.protocol.protMemo.push(pm);
+                });
+            }
+        }
+        // vsMemo
+        if (simpleVitalSign.hasOwnProperty('vsMemo')) {
+            vitalSign.vsMemo = simpleVitalSign.vsMemo;
+        }
+        // console.log(JSON.stringify(vitalSign, null, 4));
+        return vitalSign;
+    },
+
     /**
       * MML を生成する
       * @param {simpleComposition} - simpleComposition
@@ -861,20 +982,16 @@ module.exports = {
         var addPatientModule = false;               // 設定が必要
 
         // simpleMMLのcontent配列をイテレート
-        // content: [simplePrescription | simpleDiagnosis | simpleTest]
+        // content: [simplePrescription | simpleDiagnosis | simpleTest simpleVitalSign]
         simpleComposition.content.forEach((entry) => {
 
             if (entry.contentType === 'Medication') {
-
                 // contentModuleTypeをセットする
                 baseDocInfo.contentModuleType = 'prescription';
-
                 // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
                 var arr = this.buildPrescriptionModule(entry);
-
                 // 結果は配列で返る
                 arr.forEach((prescription) => {
-
                     // それに薬が入っていたらModuleItemへ加える
                     if (prescription.medication.length > 0) {
                         // MML 規格によりModule単位にuuidを付番する
@@ -884,14 +1001,12 @@ module.exports = {
                         result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
                     }
                 });
-
             } else if (entry.contentType === 'Medical Diagnosis') {
                 baseDocInfo.contentModuleType = 'registeredDiagnosis';
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
                 content = this.buildRegisteredDiagnosisModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-
             } else if (entry.contentType === 'Laboratory Report') {
                 // 検体検査のcreatorは検査会社の代表
                 var creator = this.buildCreatorInfo(entry.context.laboratory);
@@ -901,7 +1016,6 @@ module.exports = {
                 docInfo = this.buildDocInfo(baseDocInfo, creator, defaultAccessRight);
                 content = this.buildTestModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-
             } else if (entry.contentType === 'Patient Information') {
                 baseDocInfo.contentModuleType = 'patientInfo';
                 baseDocInfo.uuid = uuid.v4();
@@ -909,9 +1023,14 @@ module.exports = {
                 content = this.buildPatientModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
                 hasPatientModule = true;
+            } else if (entry.contentType === 'Vital Sign') {
+                baseDocInfo.contentModuleType = 'vitalsign';
+                baseDocInfo.uuid = uuid.v4();
+                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                content = this.buildVitalSignModule(entry);
+                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
         });
-
         // 患者情報がなかった場合は先頭へ追加する
         if (addPatientModule && !hasPatientModule) {
             baseDocInfo.contentModuleType = 'patientInfo';
@@ -920,7 +1039,6 @@ module.exports = {
             docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
             result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
         }
-
         return mmlBuilder.build(result);
     }
 };

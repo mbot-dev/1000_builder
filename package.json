@@ -19,8 +19,7 @@
     "config": "^1.20.3",
     "express": "^4.13.4",
     "morgan": "^1.7.0",
-    "node-uuid": "^1.4.7",
-    "pretty-data2": "^0.40.1"
+    "node-uuid": "^1.4.7"
   },
   "engines": {
     "node": "4.4.4"

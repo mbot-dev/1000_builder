@@ -168,6 +168,36 @@ var simpleDiagnosis = function () {
     };
 };
 
+// Vital Sign
+var simpleVitalSign = function () {
+    var vitalSign = {
+        contentType: 'Vital Sign',
+        context: {
+            observer: '花田 綾子',
+        },
+        item: [],
+        observedTime: nowAsDateTime(),
+        protocol: {
+            position: 'sitting',         // mmlVs03
+            device: 'Apple Watch',
+            bodyLocation: '右腕'
+        }
+    };
+    // 収縮期血圧
+    vitalSign.item.push({
+        itemName: 'Systolic blood pressure',    // mmlVs01
+        numValue: 135,
+        unit: 'mmHg'                            // mmlVs02
+    });
+    // 拡張期血圧
+    vitalSign.item.push({
+        itemName: 'Diastolic blood pressure',   // mmlVs01
+        numValue: 80,
+        unit: 'mmHg'                            // mmlVs02
+    });
+    return vitalSign;
+};
+
 // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
 var createTestItems = function (content) {
     var items = [];
@@ -260,6 +290,48 @@ var simpleLabTest = function (callback) {
         }
         http.send();
     }
+};
+
+// バイタルサイン情報をセットする
+var showVitalSign = function () {
+    // staffs
+    var vitalSign = simpleVitalSign();          // バイタルサイン
+    var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+    var uid = uuid.v4();                        // MML文書の UUID
+    var simpleComposition = {                   // POST = simpleComposition
+        context: {
+            uuid: uid,                          // UUID
+            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            patient: simplePatient,             // 患者
+            creator: simpleCreator              // 医師
+        },
+        content: [vitalSign]                    // 中身をこのvitalSignにする
+    };
+    // 表示
+    var arr = [];
+    arr.push('<pre>');
+    arr.push('// 患者');
+    arr.push('\n');
+    arr.push('var simplePatient = ');
+    arr.push(prettyJSON(simplePatient));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 医師');
+    arr.push('\n');
+    arr.push('var simpleCreator = ');
+    arr.push(prettyJSON(simpleCreator));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// バイタルサイン');
+    arr.push('\n');
+    arr.push('var simpleVitalSign = ');
+    arr.push(prettyJSON(vitalSign));
+    arr.push(';');
+    arr.push('</pre>');
+    var text = arr.join('');
+    simpleBox().innerHTML = text;
+    // POST する
+    post(simpleComposition);
 };
 
 // 検査情報をセットする
