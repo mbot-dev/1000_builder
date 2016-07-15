@@ -22,12 +22,13 @@
                 <li>患者さんがクリニックを受診しました。</li>
                 <li>医師は処方せんを出しました。</li>
             </ul>
-            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.0にエンコードされたデータを返します。下記では、処方・病名・検査のポストデータとその結果を見ることができます。</p>
+            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.0にエンコードされたデータを返します。下記では、処方・病名・検査・バイタルサインのポストデータとその結果を見ることができます。</p>
         </div>
         <div class="w3-row-padding">
             <p class="w3-half">クライアントがポストするデータ:
                 <select onchange="changeModule(this);">
                     <option value='showPrescription'>処 方</option>
+                    <option value='showInjection'>注 射</option>
                     <option value='showDiagnosis'>病 名</option>
                     <option value='showLabTest'>検 査</option>
                     <option value='showVitalSign'>バイタルサイン</option>

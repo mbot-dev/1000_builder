@@ -1,4 +1,5 @@
 'use strict';
+
 const uuid = require('node-uuid');
 const utils = require('../lib/utils');
 const mmlBuilder = require('../lib/mmlBuilder');
@@ -625,6 +626,86 @@ module.exports = {
         return [external, internal];
     },
 
+    buildInjectionModule: function (simpleInjection) {
+        /**********************************************************
+        var simpleInjection = {
+            medication: [],
+            narcoticPrescriptionLicenseNumber: '',
+            comment: ''
+        };
+        var medicationObj = {
+            medicine: '',                             // 薬剤名称
+            medicineCode: '',                         // 薬剤コード
+            medicineCodeystem: '',                    // コード体系
+            dose: '',
+            doseUnit: '',
+            startDateTime: '',
+            endDateTime: '',
+            instruction: '',
+            route: '',
+            site: '',
+            deliveryMethod: '',
+            batchNo: '',
+            additionalInstruction: ''
+        };
+        ************************************************************/
+        var injection = {
+            medication: []
+        };
+
+        simpleInjection.medication.forEach((entry) => {
+            var medication = {
+                medicine: {
+                    name: entry.medicine,
+                    code: [{
+                        value: entry.medicineCode,
+                        attr: {
+                            system: entry.medicineCodeSystem
+                        }
+                    }]
+                },
+                dose: entry.dose,                       // 1回の量
+                doseUnit: entry.doseUnit                // 単位
+            };
+            // 投与開始日時
+            if (entry.hasOwnProperty('startDateTime')) {
+                medication.startDateTime = entry.startDateTime;
+            }
+            // 投与修了日時
+            if (entry.hasOwnProperty('endDateTime')) {
+                medication.endDateTime = entry.endDateTime;
+            }
+            // 用法指示
+            if (entry.hasOwnProperty('instruction')) {
+                medication.instruction = entry.instruction;
+            }
+            // 投与経路
+            if (entry.hasOwnProperty('route')) {
+                medication.route = entry.route;
+            }
+            // 投与部位
+            if (entry.hasOwnProperty('site')) {
+                medication.site = entry.site;
+            }
+            // 注射方法
+            if (entry.hasOwnProperty('deliveryMethod')) {
+                medication.deliveryMethod = entry.deliveryMethod;
+            }
+            // 処方番号
+            if (entry.hasOwnProperty('batchNo')) {
+                medication.batchNo = entry.batchNo;
+            }
+            // 追加指示，コメント
+            if (entry.hasOwnProperty('additionalInstruction')) {
+                medication.additionalInstruction = entry.additionalInstruction;
+            }
+            injection.medication.push(medication);
+        });
+        // 麻薬施用者番号
+        // コメント
+        return injection;
+    },
+
     /**
      * TestModule を生成する
      * @param {simpleTest} simpleTest
@@ -932,29 +1013,22 @@ module.exports = {
             content: [{simplePrescription} | {simpleDiagnosis} | {simpleTest}]
         };
         ***************************************************/
-
         // このMMLの生成日
         var createDate = utils.nowAsDateTime();
-
         // context
         var context = simpleComposition.context;
-
         // 患者情報モジュールを生成する
         var patientModule = this.buildPatientModule(context.patient);
-
         // デフォルトのアクセス権を生成する
         var defaultAccessRight = this.buildDefaultAccessRight(context.patient.id, context.patient.kanjiName);
-
         // このMMLのcreatorInfoを生成する
         var creatorInfo = this.buildCreatorInfo(context.creator);
-
         // Header
         var mmlHeader = {
             CreatorInfo: creatorInfo,                    // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
             masterId: patientModule.uniqueInfo.masterId, // masterId
             toc: []                                      // tocItem の配列
         };
-
         // MML
         var result = {
             attr: {
@@ -965,26 +1039,21 @@ module.exports = {
                 MmlModuleItem: []
             }
         };
-
         // docInfoを生成する際のもとにする上hぷ
         var baseDocInfo = {
             confirmDate: context.confirmDate,       // 確定日時はMMLの確定日時
             groupId: context.uuid                   // groupingId = 含まれているMMLのuuid
         };
-
         // MML 規格のdocInfo でbaseDocInfoを基に生成される
         // MML のモジュール単位に付加される
         var docInfo = {};
         var content = {};
-
         // 患者情報が含まれているかどうかのフラグ
         var hasPatientModule = false;
         var addPatientModule = false;               // 設定が必要
-
         // simpleMMLのcontent配列をイテレート
         // content: [simplePrescription | simpleDiagnosis | simpleTest simpleVitalSign]
         simpleComposition.content.forEach((entry) => {
-
             if (entry.contentType === 'Medication') {
                 // contentModuleTypeをセットする
                 baseDocInfo.contentModuleType = 'prescription';
@@ -1028,6 +1097,13 @@ module.exports = {
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
                 content = this.buildVitalSignModule(entry);
+                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
+            } else if (entry.contentType === 'Injection') {
+                baseDocInfo.contentModuleType = 'injection';
+                baseDocInfo.uuid = uuid.v4();
+                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                content = this.buildInjectionModule(entry);
+                //console.log(content);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
         });

@@ -148,6 +148,62 @@ var simplePrescription = function () {
     return simple;
 };
 
+var simpleInjection = function () {
+    // 生成する simpleInjection
+    var simple = {
+        contentType: 'Injection',                       // Injection
+        medication: []                                  // 処方の配列
+    };
+    // 投与開始日時
+    var start = new Date();                             // 投与開始日時
+    var end = new Date();
+    end.setHours(start.getHours() + 2);                 // 投与終了日時
+    var med = {
+        medicine: 'ラクテック 500ml',                     // 薬剤名称
+        medicineCode: '12304155',                       // 薬剤コード
+        medicineCodeystem: 'YJ',                        // コード体系
+        dose: '500',                                    // 用量
+        doseUnit: 'ml',                                 // 単位
+        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss
+        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss
+        instruction: '2時間で投与する',                    // 用法指示
+        route: '右前腕静脈ルート',                         // 投与経路
+        site: '右前腕',                                  // 投与部位
+        deliveryMethod: '点滴静注',                       // 注射方法
+        batchNo: '1'                                    // 処方番号
+    };
+    simple.medication.push(med);
+    med = {
+        medicine: 'ビタメジン静注用',                      // 薬剤名称
+        medicineCode: '553300555',                      // 薬剤コード
+        medicineCodeystem: 'YJ',                        // コード体系
+        dose: '1',
+        doseUnit: 'V',
+        batchNo: '1'
+    };
+    simple.medication.push(med);
+    // 投与開始、終了日時
+    start = new Date();                                 // 投与開始日時
+    end = new Date();
+    end.setHours(start.getHours() + 1);                 // 投与終了日時
+    med = {
+        medicine: 'セファメジンα 2g キット',               // 薬剤名称
+        medicineCode: '14433344',                       // 薬剤コード
+        medicineCodeystem: 'YJ',                        // コード体系
+        dose: '1',                                      // 用量
+        doseUnit: 'V',                                  // 単位
+        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss
+        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss
+        instruction: '1時間で投与する',                    // 用法指示
+        route: '右前腕静脈ルート',                         // 投与経路
+        site: '右前腕',                                   // 投与部位
+        deliveryMethod: '点滴静注',                       // 注射方法
+        batchNo: '1'                                    // 処方番号
+    };
+    simple.medication.push(med);
+    return simple;
+};
+
 // 病名
 // 1病名毎に1モジュール
 var simpleDiagnosis = function () {
@@ -417,6 +473,48 @@ var showDiagnosis = function () {
     var text = arr.join('');
     simpleBox().innerHTML = text;
     // POST する
+    post(simpleComposition);
+};
+
+// 処方情報をセットする
+var showInjection = function () {
+    // staffs
+    var injection = simpleInjection();          // 注射記録
+    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
+    var uid = uuid.v4();                        // MML文書の UUID
+    var simpleComposition = {                   // send = simpleComposition
+        context: {
+            uuid: uid,                          // UUID
+            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            patient: simplePatient,             // 患者
+            creator: simpleCreator              // 医師
+        },
+        content: [injection]                    // content: [injection]
+    };
+    // 表示
+    var arr = [];
+    arr.push('<pre>');
+    arr.push('// 患者');
+    arr.push('\n');
+    arr.push('var simplePatient = ');
+    arr.push(prettyJSON(simplePatient));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 医師');
+    arr.push('\n');
+    arr.push('var simpleCreator = ');
+    arr.push(prettyJSON(simpleCreator));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 注射記録');
+    arr.push('\n');
+    arr.push('var simpleInjection = ');
+    arr.push(prettyJSON(injection));
+    arr.push(';');
+    arr.push('</pre>');
+    var text = arr.join('');
+    simpleBox().innerHTML = text;
+    // send する
     post(simpleComposition);
 };
 

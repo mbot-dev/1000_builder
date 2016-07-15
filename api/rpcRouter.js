@@ -21,7 +21,7 @@ var buildError = (code, message, id) => {
 };
 
 // RPC route
-router.post (config.rpc.path, function (req, res) {
+router.post (config.rpc.path, (req, res) => {
 
     try {
         // {jsonrpc: '2.0', method: 'build', params: [simpleMML], id: 'string'}
