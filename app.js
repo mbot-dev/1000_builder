@@ -6,6 +6,7 @@ const jwt = require('jwt-simple');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cfenv = require('cfenv');
+const config = require('config');
 const logger = require('./log/logger');
 const db = require('./db/db');
 const simpleBuilder = require('./api/simpleBuilder');
@@ -16,9 +17,22 @@ const TOKENTIME = 120 * 60; // in seconds
 
 const app = express();
 const appEnv = cfenv.getAppEnv();
+if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+	app.enable('trust proxy');
+	app.use ((req, res, next) => {
+        if (req.secure) {
+			// request was via https, so do no special handling
+			next();
+        } else {
+			// request was via http, so redirect to https
+			res.redirect('https://' + req.headers.host + req.url);
+        }
+	});
+}
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/public'));
+app.use(morgan(':remote-addr - :remote-user [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/index.html');
 });

@@ -2,5 +2,6 @@
   "rpc": {
       "path": "/api/v1",
       "method": "build"
-  }
+  },
+  "production": true
 }

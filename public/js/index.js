@@ -1,30 +1,14 @@
-
-var token_type = null;
-var access_token = null;
 //------------------------------------------------------------------
-// Closure
+// Global object app context
 //------------------------------------------------------------------
-// RPCのエンドポイント
-var rpcURL = (function () {
-    var url = 'http://localhost:6001/1000/simple/v1';
-    return function () {
-        return url;
-    };
-})();
-// 検査結果を格納しているcsvファイルへのURI
-var testResultURL = (function () {
-    var url = 'http://localhost:6001/test_result.csv';
-    return function () {
-        return url;
-    };
-})();
-// 上記csvをパースした検査項目の結果を入れる配列
-var testResults = (function () {
-    var results = [];
-    return function () {
-        return results;
-    };
-})();
+var appCtx = {
+    oauth2: 'http://localhost:6001/oauth2/token',
+    token_type: '',
+    access_token: '',
+    simple_url: 'http://localhost:6001/1000/simple/v1',
+    csv_url: 'http://localhost:6001/test_result.csv',
+    test_results: []
+};
 
 var simpleBox = function () {
     return document.getElementById('simple_box');
@@ -77,8 +61,8 @@ var simpleCreator = {
 //------------------------------------------------------------------
 var post = function (simpleComposition) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', rpcURL(), true);
-    xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);    // Authorization: Bearer access_token
+    xhr.open('POST', appCtx.simple_url, true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);    // Authorization: Bearer access_token
     xhr.setRequestHeader('Content-type', 'application/json');           // contentType
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -325,21 +309,21 @@ var simpleLabTest = function (callback) {
             }
         }
     };
-    if (testResults().length > 0) {
-        laboratoryTest.testResult = testResults();
+    if (appCtx.test_results.length > 0) {
+        laboratoryTest.testResult = appCtx.test_results;
         callback(laboratoryTest);
     } else {
         // 検査結果ファイルを読み込んで
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", testResultURL(), true);
+        xhr.open("GET", appCtx.csv_url, true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status/100 === 2) {
                 // 検査結果オブジェクトを生成する
                 var items = createTestItems(xhr.responseText);
                 items.forEach (function (entry) {
-                    testResults().push(entry);
+                    appCtx.test_results.push(entry);
                 });
-                laboratoryTest.testResult = testResults();
+                laboratoryTest.testResult = appCtx.test_results;
                 callback(laboratoryTest);
             }
         }
@@ -564,14 +548,14 @@ var changeModule = function (selection) {
     window[selection.value]();
 };
 
+// Client Credentials Grant flow of the OAuth 2 specification
 var login = function () {
-    var oauth2 = 'http://localhost:6001/oauth2/token';
     var consumer = 'xvz1evFS4wEEPTGEFPHBog';
     var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
     var base64 = btoa(consumer+':'+secret);
     var params = 'grant_type=client_credentials';
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', oauth2, true);
+    xhr.open('POST', appCtx.oauth2, true);
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader("Content-length", params.length);
@@ -581,8 +565,8 @@ var login = function () {
                 alert(new Error('Failed to login, status code: ' + xhr.status));
             } else {
                 var data = JSON.parse(xhr.responseText);
-                token_type = data.token_type;
-                access_token = data.access_token;
+                appCtx.token_type = data.token_type;
+                appCtx.access_token = data.access_token;
                 showPrescription();
             }
         }
