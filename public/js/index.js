@@ -1,9 +1,12 @@
+
+var token_type = null;
+var access_token = null;
 //------------------------------------------------------------------
 // Closure
 //------------------------------------------------------------------
 // RPCのエンドポイント
 var rpcURL = (function () {
-    var url = 'http://localhost:6001/api/v1';
+    var url = 'http://localhost:6001/1000/simple/v1';
     return function () {
         return url;
     };
@@ -73,32 +76,28 @@ var simpleCreator = {
 // 1000-builderへsimpleCompositionをポストする（RPC）
 //------------------------------------------------------------------
 var post = function (simpleComposition) {
-    // ポストするデータの本体: JSON-RPC 2.0 の仕様で下記 JSON にする
-    var jsonRpc2 = {
-        jsonrpc: '2.0',                                         // 必ず '2.0' にする
-        method: 'build',                                        // rpc の method名 'build'  <-- 千年ビルダーの仕様
-        params: [simpleComposition],                            // params は配列で要素はsimpleCompositionにする
-        id: uuid.v4()                                           // id が必要 MMLの uuidとは別で JSON-RPC2.0 でも必要
-    };
-    // POST  with url=rpcURL() contentType="application/json" body=jsonRpc2 as text
-    var http = new XMLHttpRequest();
-    http.open('POST', rpcURL(), true);                               // async = true
-    http.setRequestHeader('Content-type', 'application/json');       // http headder contentType
-    http.onreadystatechange = function () {
-        if (http.readyState === 4 && http.status/100 === 2) {
-            // responseからJSONを生成する
-            var data = JSON.parse(http.responseText);
-            // {jsonRpc2:'jsonRpc2', result:{MML}, id=''} が返ってくるので result: を取り出す
-            data = data.result;
-            // 結果はMML(XML) なので 'pretty print する
-            var xml_formatted = formatXml(data);
-            // 表示するために escapeする
-            xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
-            // MML4.0 box へ表示する
-            mmlBox().innerHTML = xml_escaped;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', rpcURL(), true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);    // Authorization: Bearer access_token
+    xhr.setRequestHeader('Content-type', 'application/json');           // contentType
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status < 200 || xhr.status > 299) {
+                alert(new Error('Failed to post, status code: ' + xhr.status));
+            } else {
+                // responseからJSONを生成する
+                var data = JSON.parse(xhr.responseText);
+                data = data.mml;
+                // 結果はMML(XML) なので 'pretty print する
+                var xml_formatted = formatXml(data);
+                // 表示するために escapeする
+                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+                // MML4.0 box へ表示する
+                mmlBox().innerHTML = xml_escaped;
+            }
         }
     }
-    http.send(JSON.stringify(jsonRpc2));
+    xhr.send(JSON.stringify(simpleComposition));
 };
 
 // 処方せん
@@ -331,12 +330,12 @@ var simpleLabTest = function (callback) {
         callback(laboratoryTest);
     } else {
         // 検査結果ファイルを読み込んで
-        var http = new XMLHttpRequest();
-        http.open("GET", testResultURL(), true);
-        http.onreadystatechange = function () {
-            if (http.readyState === 4 && http.status/100 === 2) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", testResultURL(), true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status/100 === 2) {
                 // 検査結果オブジェクトを生成する
-                var items = createTestItems(http.responseText);
+                var items = createTestItems(xhr.responseText);
                 items.forEach (function (entry) {
                     testResults().push(entry);
                 });
@@ -344,7 +343,7 @@ var simpleLabTest = function (callback) {
                 callback(laboratoryTest);
             }
         }
-        http.send();
+        xhr.send();
     }
 };
 
@@ -563,4 +562,30 @@ var showPrescription = function () {
 // selectionが変更された
 var changeModule = function (selection) {
     window[selection.value]();
+};
+
+var login = function () {
+    var oauth2 = 'http://localhost:6001/oauth2/token';
+    var consumer = 'xvz1evFS4wEEPTGEFPHBog';
+    var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
+    var base64 = btoa(consumer+':'+secret);
+    var params = 'grant_type=client_credentials';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', oauth2, true);
+    xhr.setRequestHeader('Authorization', 'Basic ' + base64);
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader("Content-length", params.length);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status < 200 || xhr.status > 299) {
+                alert(new Error('Failed to login, status code: ' + xhr.status));
+            } else {
+                var data = JSON.parse(xhr.responseText);
+                token_type = data.token_type;
+                access_token = data.access_token;
+                showPrescription();
+            }
+        }
+    }
+    xhr.send(params);
 };
