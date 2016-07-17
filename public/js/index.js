@@ -5,6 +5,7 @@ var appCtx = {
     oauth2: 'http://localhost:6001/oauth2/token',
     token_type: '',
     access_token: '',
+    expires_in: 0,
     simple_url: 'http://localhost:6001/1000/simple/v1',
     csv_url: 'http://localhost:6001/test_result.csv',
     test_results: []
@@ -67,7 +68,8 @@ var post = function (simpleComposition) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status < 200 || xhr.status > 299) {
-                alert(new Error('Failed to post, status code: ' + xhr.status));
+                var err = JSON.parse(xhr.responseText);
+                alert(new Error(err.error + ' ' + xhr.status));
             } else {
                 // responseからJSONを生成する
                 var data = JSON.parse(xhr.responseText);
@@ -549,25 +551,33 @@ var changeModule = function (selection) {
 };
 
 // Client Credentials Grant flow of the OAuth 2 specification
+// Must use HTTPS endpoints in production
 var login = function () {
     var consumer = 'xvz1evFS4wEEPTGEFPHBog';
     var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
     var base64 = btoa(consumer+':'+secret);
-    var params = 'grant_type=client_credentials';
+    var params = encodeURI('grant_type=client_credentials');
     var xhr = new XMLHttpRequest();
     xhr.open('POST', appCtx.oauth2, true);
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
-    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader("Content-length", params.length);
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status < 200 || xhr.status > 299) {
-                alert(new Error('Failed to login, status code: ' + xhr.status));
+                var err = JSON.parse(xhr.responseText);
+                alert(new Error(err.error + ' ' + xhr.status));
             } else {
                 var data = JSON.parse(xhr.responseText);
-                appCtx.token_type = data.token_type;
-                appCtx.access_token = data.access_token;
-                showPrescription();
+                if (data.hasOwnProperty('token_type') &&
+                        data.token_type === 'bearer' &&
+                        data.hasOwnProperty('access_token')) {
+                    appCtx.token_type = data.token_type;
+                    appCtx.access_token = data.access_token;
+                    appCtx.expires_in = data.expires_in;
+                    showPrescription();
+                } else {
+                    alert(new Error('Unexpected server response'));
+                }
             }
         }
     }

@@ -1,7 +1,12 @@
 {
-  "rpc": {
-      "path": "/api/v1",
-      "method": "build"
+  "path": {
+      "oauth2": "/oauth2/token",
+      "simple": "/1000/simple/v1"
   },
-  "production": true
+  "jwt": {
+      "token_type": "bearer",
+      "iss": "1000-builder",
+      "secret": "2c16b34375ff386d97a01d9a5df554c3053ebfd5b8eb323bd19870fa9f2671df",
+      "expires": 7200
+  }
 }

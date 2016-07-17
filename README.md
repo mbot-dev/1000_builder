@@ -28,8 +28,9 @@
 
 ### クライアント-サーバ間の通信仕様
 
-  * 通信方式:　リモートプロシジャーコール
-  * 仕様:　JSON-RPC 2.0
+  * 通信方式:　REST
+  * エンドポイント:　/1000/simple/v1
+  * メソッド: POST のみ
   * 具体例:　/public/index.html の post()
 
 
@@ -57,7 +58,7 @@
 
 ### サーバープログラムの概要
 
-  * RPC エンドポイント:　/api/rpcRouter.js
+  * REST API:　/api/simpleRouter.js
   * ポストデータを中間オブジェクト（MMLのXML要素に対応）に変換:　/api/simpleBuilder.js
   * 中間オブジェクトを手動でXMLに変換:　/lib/内の各Builder.js
 
