@@ -36,6 +36,13 @@ function formatXml (xml) {
     return formatted;
 }
 
+function prettyXml(xml) {
+    var xml_formatted = formatXml(xml);
+    // 表示するために escapeする
+    return xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
+}
+
+
 function addQuote (value) {
     var arr =['\"', value, '\"'];
     return arr.join('');

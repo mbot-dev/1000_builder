@@ -2,12 +2,12 @@
 // Global object app context
 //------------------------------------------------------------------
 var appCtx = {
-    oauth2: 'http://localhost:6001/oauth2/token',
+    oauth2: '/oauth2/token',
     token_type: '',
     access_token: '',
     expires_in: 0,
-    simple_url: 'http://localhost:6001/1000/simple/v1',
-    csv_url: 'http://localhost:6001/test_result.csv',
+    simple_url: '/1000/simple/v1',
+    csv_url: '/test_result.csv',
     test_results: []
 };
 
@@ -73,13 +73,8 @@ var post = function (simpleComposition) {
             } else {
                 // responseからJSONを生成する
                 var data = JSON.parse(xhr.responseText);
-                data = data.mml;
                 // 結果はMML(XML) なので 'pretty print する
-                var xml_formatted = formatXml(data);
-                // 表示するために escapeする
-                xml_escaped = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
-                // MML4.0 box へ表示する
-                mmlBox().innerHTML = xml_escaped;
+                mmlBox().innerHTML = prettyXml(data.mml);
             }
         }
     }
@@ -551,7 +546,9 @@ var changeModule = function (selection) {
 };
 
 // Client Credentials Grant flow of the OAuth 2 specification
+// https://tools.ietf.org/html/rfc6749#section-4.4
 // Must use HTTPS endpoints in production
+// consumer key and secret below are invalid in production stage
 var login = function () {
     var consumer = 'xvz1evFS4wEEPTGEFPHBog';
     var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
