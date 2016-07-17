@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cfenv = require('cfenv');
 const logger = require('./log/logger');
+const indexRouter = require('./api/indexRouter');
 const authRouter = require('./api/authRouter');
 const simpleRouter = require('./api/simpleRouter');
 
@@ -27,12 +28,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(':remote-addr - :remote-user [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));
 app.use(express.static(__dirname + '/public'));
+app.use(indexRouter);
 app.use(authRouter);
 app.use(simpleRouter);
-
-app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/index.html');
-});
 
 // Start Server
 server.on('request', app);

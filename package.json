@@ -14,17 +14,17 @@
   "author": "Kazushi Minagawa",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.15.1",
-    "cfenv": "1.0.x",
-    "config": "^1.20.3",
-    "express": "^4.13.4",
+    "body-parser": "^1.15.2",
+    "cfenv": "^1.0.3",
+    "config": "^1.21.0",
+    "express": "^4.14.0",
     "jwt-simple": "^0.5.0",
     "morgan": "^1.7.0",
     "node-uuid": "^1.4.7",
     "winston": "^2.2.0"
   },
   "engines": {
-    "node": "4.4.6"
+    "node": "4.4.7"
   },
   "devDependencies": {
     "chai": "^3.5.0"
