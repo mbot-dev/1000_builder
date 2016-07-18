@@ -1,6 +1,5 @@
 'use strict';
 
-const server = require('http').createServer();
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -33,8 +32,7 @@ app.use(authRouter);
 app.use(simpleRouter);
 
 // Start Server
-server.on('request', app);
-server.listen(appEnv.port, appEnv.bind, () => {
+const server = app.listen(appEnv.port, appEnv.bind, () => {
     var info = ['Listening on ', server.address().address, ':', server.address().port].join('');
     logger.info(info);
 });
