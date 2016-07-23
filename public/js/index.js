@@ -2,21 +2,101 @@
 // Global object app context
 //------------------------------------------------------------------
 var appCtx = {
-    oauth2: '/oauth2/token',
-    token_type: '',
-    access_token: '',
-    expires_in: 0,
-    simple_url: '/1000/simple/v1',
-    csv_url: '/test_result.csv',
-    test_results: []
+    access_token: '',           // アクセストークン
+    expires_in: 0,              // トークンの有効期間（秒）このデモでは使用しない
+    test_results: []            // デモ固有で検査結果を格納する配列
 };
 
+//------------------------------------------------------------------
+// Simpleデータ及びMMLを表示するDOM
+//------------------------------------------------------------------
 var simpleBox = function () {
     return document.getElementById('simple_box');
 };
 
 var mmlBox = function () {
     return document.getElementById('mml_box');
+};
+
+//------------------------------------------------------------------
+// Client Credentials Grant flow of the OAuth 2 specification
+// https://tools.ietf.org/html/rfc6749#section-4.4
+// Must use HTTPS endpoints in production
+// consumer key and secret below are invalid in production stage
+//------------------------------------------------------------------
+var getAccessToken = function (callback) {
+    var xhr = new XMLHttpRequest();
+    // プロジェクトから支給された consumer key
+    var consumerKey = 'xvz1evFS4wEEPTGEFPHBog';
+    // プロジェクトから支給された secret
+    var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
+    // 上記二つをコロンで連結し base64 でエンコードする
+    var base64 = btoa(consumerKey + ':'　+　secret);
+    // ポストするデータは grant_type=client_credentials で URL エンコードする
+    var data = encodeURI('grant_type=client_credentials');
+    // ポスト先は /oauth2/token
+    xhr.open('POST', '/oauth2/token', true);
+    // Basic 認証用の HTTP Header をセットする
+    xhr.setRequestHeader('Authorization', 'Basic ' + base64);
+    // Content type は application/x-www-form-urlencoded
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=utf-8');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status / 100 !== 2) {
+                // HTTP Status が200番台でない時
+                var err = JSON.parse(xhr.responseText);
+                alert(new Error(err.error + ' ' + xhr.status));
+                callback(err);
+            } else {
+                // レスポンスをパースしてJSONを得る {token_type: 'bearer', access_token: ''トークン'', expires_in: ''有効期間秒''}
+                var token = JSON.parse(xhr.responseText);
+                if (token.token_type === 'bearer' && token.hasOwnProperty('access_token')) {
+                    // tokenをappCtxに保存
+                    appCtx.access_token = token.access_token;
+                    appCtx.expires_in = token.expires_in;
+                    callback(null);
+                } else {
+                    alert(new Error('Unexpected server response'));
+                    callback(err);
+                }
+            }
+        }
+    }
+    xhr.send(data);
+};
+
+//------------------------------------------------------------------
+// 1000-builderへsimpleCompositionをポストする
+//------------------------------------------------------------------
+var post = function (simpleComposition) {
+    var xhr = new XMLHttpRequest();
+    // ポスト先 /1000/simple/v1
+    xhr.open('POST', '/1000/simple/v1', true);
+    // Authorizationヘッダーを Bearer access_token にセットする
+    xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
+    // contentType = json
+    xhr.setRequestHeader('Content-type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status / 100 === 4) {
+                // access tokenが失効しているかemptyなので再取得
+                getAccessToken(function(err) {
+                    if (!err) {
+                        // 取得できたら再帰してpostする
+                        post(simpleComposition);
+                    }
+                });
+            } else if (xhr.status / 100 === 2) {
+                // response = 200, responseからJSONを生成する
+                var data = JSON.parse(xhr.responseText);
+                // 結果はMML(XML) なので 'pretty print する
+                mmlBox().innerHTML = prettyXml(data.mml);
+            } else {
+                alert(new Error(xhr.status));
+            }
+        }
+    }
+    xhr.send(JSON.stringify(simpleComposition));
 };
 
 // 患者
@@ -57,34 +137,10 @@ var simpleCreator = {
     license: 'doctor'                                  // 医療資格 MML0026から選ぶ
 };
 
-//------------------------------------------------------------------
-// 1000-builderへsimpleCompositionをポストする（RPC）
-//------------------------------------------------------------------
-var post = function (simpleComposition) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', appCtx.simple_url, true);
-    xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);    // Authorization: Bearer access_token
-    xhr.setRequestHeader('Content-type', 'application/json');           // contentType
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status < 200 || xhr.status > 299) {
-                var err = JSON.parse(xhr.responseText);
-                alert(new Error(err.error + ' ' + xhr.status));
-            } else {
-                // responseからJSONを生成する
-                var data = JSON.parse(xhr.responseText);
-                // 結果はMML(XML) なので 'pretty print する
-                mmlBox().innerHTML = prettyXml(data.mml);
-            }
-        }
-    }
-    xhr.send(JSON.stringify(simpleComposition));
-};
-
 // 処方せん
 var simplePrescription = function () {
     // 服薬開始日
-    var startDate = nowAsDate();    // YYYY-MM-DD
+    var startDate = nowAsDate();                        // YYYY-MM-DD
     // リターンする simplePrescription
     var simple = {
         contentType: 'Medication',                      // Medication
@@ -100,7 +156,7 @@ var simplePrescription = function () {
         doseUnit: 'g',                                  // 単位
         frequencyPerDay: 2,                             // 1日の内服回数
         startDate: startDate,                           // 服薬開始日 YYYY-MM-DD
-        duration: 'P30D',                                 // 7日分 ToDo
+        duration: 'P30D',                               // 30日分
         instruction: '内服2回 朝夜食後に',                 // 用法
         PRN: false,                                     // 頓用=false
         brandSubstitutionPermitted: true,               // ジェネリック可
@@ -117,7 +173,7 @@ var simplePrescription = function () {
         doseUnit: '錠',                                 // 単位
         frequencyPerDay: 2,                             // 1日の内服回数
         startDate: startDate,                           // 服薬開始日
-        duration: 'P30D',                                 // 14日分 ToDo
+        duration: 'P30D',                               // 30日分
         instruction: '内服2回 朝夜食後に',                 // 用法
         PRN: false,                                     // 頓用=false
         brandSubstitutionPermitted: false,              // ジェネリック不可
@@ -128,6 +184,7 @@ var simplePrescription = function () {
     return simple;
 };
 
+// 注射
 var simpleInjection = function () {
     // 生成する simpleInjection
     var simple = {
@@ -204,36 +261,6 @@ var simpleDiagnosis = function () {
     };
 };
 
-// Vital Sign
-var simpleVitalSign = function () {
-    var vitalSign = {
-        contentType: 'Vital Sign',
-        context: {
-            observer: '花田 綾子',
-        },
-        item: [],
-        observedTime: nowAsDateTime(),
-        protocol: {
-            position: 'sitting',         // mmlVs03
-            device: 'Apple Watch',
-            bodyLocation: '右腕'
-        }
-    };
-    // 収縮期血圧
-    vitalSign.item.push({
-        itemName: 'Systolic blood pressure',    // mmlVs01
-        numValue: 135,
-        unit: 'mmHg'                            // mmlVs02
-    });
-    // 拡張期血圧
-    vitalSign.item.push({
-        itemName: 'Diastolic blood pressure',   // mmlVs01
-        numValue: 80,
-        unit: 'mmHg'                            // mmlVs02
-    });
-    return vitalSign;
-};
-
 // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する下請け
 var createTestItems = function (content) {
     var items = [];
@@ -279,6 +306,7 @@ var createTestItems = function (content) {
     return items;
 };
 
+// 検査
 var simpleLabTest = function (callback) {
     var laboratoryTest = {
         contentType: 'Laboratory Report',
@@ -312,7 +340,7 @@ var simpleLabTest = function (callback) {
     } else {
         // 検査結果ファイルを読み込んで
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", appCtx.csv_url, true);
+        xhr.open("GET", '/test_result.csv', true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status/100 === 2) {
                 // 検査結果オブジェクトを生成する
@@ -328,20 +356,50 @@ var simpleLabTest = function (callback) {
     }
 };
 
-// バイタルサイン情報をセットする
-var showVitalSign = function () {
+// Vital Sign
+var simpleVitalSign = function () {
+    var vitalSign = {
+        contentType: 'Vital Sign',
+        context: {
+            observer: '花田 綾子',
+        },
+        item: [],
+        observedTime: nowAsDateTime(),
+        protocol: {
+            position: 'sitting',         // mmlVs03
+            device: 'Apple Watch',
+            bodyLocation: '右腕'
+        }
+    };
+    // 収縮期血圧
+    vitalSign.item.push({
+        itemName: 'Systolic blood pressure',    // mmlVs01
+        numValue: 135,
+        unit: 'mmHg'                            // mmlVs02
+    });
+    // 拡張期血圧
+    vitalSign.item.push({
+        itemName: 'Diastolic blood pressure',   // mmlVs01
+        numValue: 80,
+        unit: 'mmHg'                            // mmlVs02
+    });
+    return vitalSign;
+};
+
+// 処方情報をセットする
+var showPrescription = function () {
     // staffs
-    var vitalSign = simpleVitalSign();          // バイタルサイン
-    var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+    var prescription = simplePrescription();    // 処方せん
+    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
     var uid = uuid.v4();                        // MML文書の UUID
     var simpleComposition = {                   // POST = simpleComposition
-        context: {
+        context: {                              // 文脈
             uuid: uid,                          // UUID
             confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 患者
             creator: simpleCreator              // 医師
         },
-        content: [vitalSign]                    // 中身をこのvitalSignにする
+        content: [prescription]                 // 臨床データ
     };
     // 表示
     var arr = [];
@@ -358,10 +416,94 @@ var showVitalSign = function () {
     arr.push(prettyJSON(simpleCreator));
     arr.push(';');
     arr.push('\n');
-    arr.push('// バイタルサイン');
+    arr.push('// 処方せん');
     arr.push('\n');
-    arr.push('var simpleVitalSign = ');
-    arr.push(prettyJSON(vitalSign));
+    arr.push('var simplePrescription = ');
+    arr.push(prettyJSON(prescription));
+    arr.push(';');
+    arr.push('</pre>');
+    var text = arr.join('');
+    simpleBox().innerHTML = text;
+    // POST する
+    post(simpleComposition);
+};
+
+// 処方情報をセットする
+var showInjection = function () {
+    // staffs
+    var injection = simpleInjection();          // 注射記録
+    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
+    var uid = uuid.v4();                        // MML文書の UUID
+    var simpleComposition = {                   // send = simpleComposition
+        context: {
+            uuid: uid,                          // UUID
+            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            patient: simplePatient,             // 患者
+            creator: simpleCreator              // 医師
+        },
+        content: [injection]                    // content: [injection]
+    };
+    // 表示
+    var arr = [];
+    arr.push('<pre>');
+    arr.push('// 患者');
+    arr.push('\n');
+    arr.push('var simplePatient = ');
+    arr.push(prettyJSON(simplePatient));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 医師');
+    arr.push('\n');
+    arr.push('var simpleCreator = ');
+    arr.push(prettyJSON(simpleCreator));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 注射記録');
+    arr.push('\n');
+    arr.push('var simpleInjection = ');
+    arr.push(prettyJSON(injection));
+    arr.push(';');
+    arr.push('</pre>');
+    var text = arr.join('');
+    simpleBox().innerHTML = text;
+    // send する
+    post(simpleComposition);
+};
+
+// 病名情報をセットする
+var showDiagnosis = function () {
+    // staffs
+    var diagnosis = simpleDiagnosis();          // 病名
+    var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+    var uid = uuid.v4();                        // MML文書の UUID
+    var simpleComposition = {                   // POST = simpleComposition
+        context: {
+            uuid: uid,                          // UUID
+            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            patient: simplePatient,             // 患者
+            creator: simpleCreator              // 医師
+        },
+        content: [diagnosis]                    // 中身をこのdiagnosisにする
+    };
+    // 表示
+    var arr = [];
+    arr.push('<pre>');
+    arr.push('// 患者');
+    arr.push('\n');
+    arr.push('var simplePatient = ');
+    arr.push(prettyJSON(simplePatient));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 医師');
+    arr.push('\n');
+    arr.push('var simpleCreator = ');
+    arr.push(prettyJSON(simpleCreator));
+    arr.push(';');
+    arr.push('\n');
+    arr.push('// 病名');
+    arr.push('\n');
+    arr.push('var simpleDiagnosis = ');
+    arr.push(prettyJSON(diagnosis));
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
@@ -414,10 +556,10 @@ var showLabTest = function () {
     });
 };
 
-// 病名情報をセットする
-var showDiagnosis = function () {
+// バイタルサイン情報をセットする
+var showVitalSign = function () {
     // staffs
-    var diagnosis = simpleDiagnosis();          // 病名
+    var vitalSign = simpleVitalSign();          // バイタルサイン
     var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
     var uid = uuid.v4();                        // MML文書の UUID
     var simpleComposition = {                   // POST = simpleComposition
@@ -427,7 +569,7 @@ var showDiagnosis = function () {
             patient: simplePatient,             // 患者
             creator: simpleCreator              // 医師
         },
-        content: [diagnosis]                    // 中身をこのdiagnosisにする
+        content: [vitalSign]                    // 中身をこのvitalSignにする
     };
     // 表示
     var arr = [];
@@ -444,94 +586,10 @@ var showDiagnosis = function () {
     arr.push(prettyJSON(simpleCreator));
     arr.push(';');
     arr.push('\n');
-    arr.push('// 病名');
+    arr.push('// バイタルサイン');
     arr.push('\n');
-    arr.push('var simpleDiagnosis = ');
-    arr.push(prettyJSON(diagnosis));
-    arr.push(';');
-    arr.push('</pre>');
-    var text = arr.join('');
-    simpleBox().innerHTML = text;
-    // POST する
-    post(simpleComposition);
-};
-
-// 処方情報をセットする
-var showInjection = function () {
-    // staffs
-    var injection = simpleInjection();          // 注射記録
-    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
-    var uid = uuid.v4();                        // MML文書の UUID
-    var simpleComposition = {                   // send = simpleComposition
-        context: {
-            uuid: uid,                          // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 患者
-            creator: simpleCreator              // 医師
-        },
-        content: [injection]                    // content: [injection]
-    };
-    // 表示
-    var arr = [];
-    arr.push('<pre>');
-    arr.push('// 患者');
-    arr.push('\n');
-    arr.push('var simplePatient = ');
-    arr.push(prettyJSON(simplePatient));
-    arr.push(';');
-    arr.push('\n');
-    arr.push('// 医師');
-    arr.push('\n');
-    arr.push('var simpleCreator = ');
-    arr.push(prettyJSON(simpleCreator));
-    arr.push(';');
-    arr.push('\n');
-    arr.push('// 注射記録');
-    arr.push('\n');
-    arr.push('var simpleInjection = ');
-    arr.push(prettyJSON(injection));
-    arr.push(';');
-    arr.push('</pre>');
-    var text = arr.join('');
-    simpleBox().innerHTML = text;
-    // send する
-    post(simpleComposition);
-};
-
-// 処方情報をセットする
-var showPrescription = function () {
-    // staffs
-    var prescription = simplePrescription();    // 処方せん
-    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
-    var uid = uuid.v4();                        // MML文書の UUID
-    var simpleComposition = {                   // POST = simpleComposition
-        context: {
-            uuid: uid,                          // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 患者
-            creator: simpleCreator              // 医師
-        },
-        content: [prescription]                 // 中身をこのprescriptionにする
-    };
-    // 表示
-    var arr = [];
-    arr.push('<pre>');
-    arr.push('// 患者');
-    arr.push('\n');
-    arr.push('var simplePatient = ');
-    arr.push(prettyJSON(simplePatient));
-    arr.push(';');
-    arr.push('\n');
-    arr.push('// 医師');
-    arr.push('\n');
-    arr.push('var simpleCreator = ');
-    arr.push(prettyJSON(simpleCreator));
-    arr.push(';');
-    arr.push('\n');
-    arr.push('// 処方せん');
-    arr.push('\n');
-    arr.push('var simplePrescription = ');
-    arr.push(prettyJSON(prescription));
+    arr.push('var simpleVitalSign = ');
+    arr.push(prettyJSON(vitalSign));
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
@@ -543,40 +601,4 @@ var showPrescription = function () {
 // selectionが変更された
 var changeModule = function (selection) {
     window[selection.value]();
-};
-
-// Client Credentials Grant flow of the OAuth 2 specification
-// https://tools.ietf.org/html/rfc6749#section-4.4
-// Must use HTTPS endpoints in production
-// consumer key and secret below are invalid in production stage
-var login = function () {
-    var consumer = 'xvz1evFS4wEEPTGEFPHBog';
-    var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
-    var base64 = btoa(consumer+':'+secret);
-    var params = encodeURI('grant_type=client_credentials');
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', appCtx.oauth2, true);
-    xhr.setRequestHeader('Authorization', 'Basic ' + base64);
-    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status < 200 || xhr.status > 299) {
-                var err = JSON.parse(xhr.responseText);
-                alert(new Error(err.error + ' ' + xhr.status));
-            } else {
-                var data = JSON.parse(xhr.responseText);
-                if (data.hasOwnProperty('token_type') &&
-                        data.token_type === 'bearer' &&
-                        data.hasOwnProperty('access_token')) {
-                    appCtx.token_type = data.token_type;
-                    appCtx.access_token = data.access_token;
-                    appCtx.expires_in = data.expires_in;
-                    showPrescription();
-                } else {
-                    alert(new Error('Unexpected server response'));
-                }
-            }
-        }
-    }
-    xhr.send(params);
 };
