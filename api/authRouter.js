@@ -6,7 +6,7 @@ const jwt = require('jwt-simple');
 const logger = require('../log/logger');
 const db = require('../db/db');
 
-var router = express.Router();
+const router = express.Router();
 
 function sendError (status, err, req, res) {
 	var message = {
@@ -38,14 +38,18 @@ function checkCredential (req, res, next) {
 	    var decoded = new Buffer(auth.substring(index+1), 'base64').toString();
 	    logger.debug(decoded);
 	    var arr = decoded.split(':');
-	    db.authenticate(arr[0], arr[1], (err, user) => {
-	        if (err) {
-				return sendError(401, 'invalid_client', req, res);
-	        } else {
-	            req.user = user;
-	            next();
-	        }
-	    });
+		if (arr.length!==2) {
+			sendError(400, 'invalid_request', req, res);
+		} else {
+			db.authenticate(arr[0], arr[1], (err, user) => {
+		        if (err) {
+					return sendError(401, 'invalid_client', req, res);
+		        } else {
+		            req.user = user;
+		            next();
+		        }
+		    });
+		}
 	}
 }
 

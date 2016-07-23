@@ -6,7 +6,7 @@ const jwt = require('jwt-simple');
 const logger = require('../log/logger');
 const simpleBuilder = require('../api/simpleBuilder');
 
-var router = express.Router();
+const router = express.Router();
 
 function sendError (status, err, req, res) {
 	var message = {
