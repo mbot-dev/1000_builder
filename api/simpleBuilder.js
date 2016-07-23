@@ -1001,7 +1001,7 @@ module.exports = {
       * @param {simpleComposition} - simpleComposition
       * @returns {MML}
      */
-    build: function (simpleComposition) {
+    build: function (simpleComposition, callback) {
         /***************************************************
         var simpleComposition = {
             context: {
@@ -1103,7 +1103,6 @@ module.exports = {
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
                 content = this.buildInjectionModule(entry);
-                //console.log(content);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
         });
@@ -1115,6 +1114,8 @@ module.exports = {
             docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
             result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
         }
-        return mmlBuilder.build(result);
+        process.nextTick(() => {
+            callback(mmlBuilder.build(result));
+        });
     }
 };

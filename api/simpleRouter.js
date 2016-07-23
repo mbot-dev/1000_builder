@@ -40,12 +40,13 @@ function authenticate (req, res, next) {
 router.post(config.path.simple, authenticate, (req, res) => {
     var parsed = req.body;
     logger.debug(parsed);
-    var mml = simpleBuilder.build(parsed);
-    logger.debug(mml);
-    res.status(200).json({
-        result: 'success',
-        mml: mml
-    });
+    var mml = simpleBuilder.build(parsed, (mml) => {
+		logger.debug(mml);
+	    res.status(200).json({
+	        result: 'success',
+	        mml: mml
+	    });
+	});
 });
 
 module.exports = router;
