@@ -8,11 +8,10 @@ const db = require('../db/db');
 
 var router = express.Router();
 
-function sendError (err, req, res) {
+function sendError (status, err, req, res) {
 	var message = {
 		error: err
     };
-	var status = (err.message === 'invalid_client' || err.message ==='invalid_grant') ? 401 : 400;
 	res.status(status);
 	res.header('Content-Type', 'application/json;charset=UTF-8');
 	res.header('Cache-Control', 'no-store');
@@ -22,32 +21,32 @@ function sendError (err, req, res) {
 
 function checkBody (req, res, next) {
 	logger.debug(req.body);
-	if (req.body.hasOwnProperty('grant_type') &&
-			req.body.grant_type === 'client_credentials') {
-		next();
+	if (req.body.grant_type !== 'client_credentials') {
+		sendError(400, 'invalid_request', req, res);
 	} else {
-		sendError('invalid_request', req, res);
+		next();
 	}
 }
 
 function checkCredential (req, res, next) {
     var auth = req.get('Authorization');
     logger.debug(auth);
-    if (auth === 'Undefined' || !auth.startsWith('Basic ')) {
-		return sendError('invalid_request', req, res);
-    }
-    var index = auth.indexOf(' ');
-    var decoded = new Buffer(auth.substring(index+1), 'base64').toString();
-    logger.debug(decoded);
-    var arr = decoded.split(':');
-    db.authenticate(arr[0], arr[1], (err, user) => {
-        if (err) {
-			return sendError('invalid_client', req, res);
-        } else {
-            req.user = user;
-            next();
-        }
-    });
+	if (!auth || !auth.startsWith('Basic ')) {
+		sendError(400, 'invalid_request', req, res);
+	} else {
+		var index = auth.indexOf(' ');
+	    var decoded = new Buffer(auth.substring(index+1), 'base64').toString();
+	    logger.debug(decoded);
+	    var arr = decoded.split(':');
+	    db.authenticate(arr[0], arr[1], (err, user) => {
+	        if (err) {
+				return sendError(401, 'invalid_client', req, res);
+	        } else {
+	            req.user = user;
+	            next();
+	        }
+	    });
+	}
 }
 
 function generateToken (req, res, next) {
@@ -68,7 +67,7 @@ function respond (req, res) {
 		expires_in: config.jwt.expires			// in seconds
     };
 	res.status(200);
-	res.header('Content-Type', 'application/json;charset=UTF-8');
+	res.header('Content-Type', 'application/json;charset=utf-8');
 	res.header('Cache-Control', 'no-store');
 	res.header('Pragma', 'no-cache');
 	res.end(JSON.stringify(result));

@@ -8,33 +8,33 @@ const simpleBuilder = require('../api/simpleBuilder');
 
 var router = express.Router();
 
-function sendError (err, req, res) {
+function sendError (status, err, req, res) {
 	var message = {
 		error: err
     };
-	var status = (err.message === 'invalid_client' || err.message ==='invalid_grant') ? 401 : 400;
 	res.status(status);
 	res.header('Content-Type', 'application/json;charset=UTF-8');
 	res.header('Cache-Control', 'no-store');
 	res.header('Pragma', 'no-cache');
 	res.end(JSON.stringify(message));
-};
+}
 
 function authenticate (req, res, next) {
     var auth = req.get('Authorization');
     logger.debug(auth);
-    if (auth === 'Undefined' || !auth.startsWith('Bearer ')) {
-		return sendError('invalid_request', req, res);
-    }
-    var index = auth.indexOf(' ');
-    var token = auth.substring(index+1);
-    try {
-        var decoded = jwt.decode(token, config.jwt.secret);
-        logger.debug(decoded);
-        next();
-    } catch (err) {
-		sendError('invalid_grant', req, res);
-    }
+    if (!auth || !auth.startsWith('Bearer ')) {
+		sendError(400, 'invalid_request', req, res);
+    } else {
+		var index = auth.indexOf(' ');
+	    var token = auth.substring(index+1);
+	    try {
+	        var decoded = jwt.decode(token, config.jwt.secret);
+	        logger.debug(decoded);
+	        next();
+	    } catch (err) {
+			sendError('invalid_grant', req, res);
+	    }
+	}
 }
 
 router.post(config.path.simple, authenticate, (req, res) => {
