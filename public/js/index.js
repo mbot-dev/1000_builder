@@ -4,7 +4,8 @@
 var appCtx = {
     access_token: '',           // アクセストークン
     expires_in: 0,              // トークンの有効期間（秒）このデモでは使用しない
-    test_results: []            // デモ固有で検査結果を格納する配列
+    test_results: [],           // デモ固有で検査結果を格納する配列
+    queue: []                   // 送信できなかったSimpleCompositonを保存するQueue
 };
 
 //------------------------------------------------------------------
@@ -24,40 +25,50 @@ var mmlBox = function () {
 // Must use HTTPS endpoints in production
 // consumer key and secret below are invalid in production stage
 //------------------------------------------------------------------
-var getAccessToken = function (callback) {
+var getAccessToken = function () {
     var xhr = new XMLHttpRequest();
+
     // プロジェクトから支給された consumer key
     var consumerKey = 'xvz1evFS4wEEPTGEFPHBog';
+
     // プロジェクトから支給された secret
     var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
+
     // 上記二つをコロンで連結し base64 でエンコードする
     var base64 = btoa(consumerKey + ':'　+　secret);
+
     // ポストするデータは grant_type=client_credentials で URL エンコードする
     var data = encodeURI('grant_type=client_credentials');
+
     // ポスト先は /oauth2/token
     xhr.open('POST', '/oauth2/token', true);
+
     // Basic 認証用の HTTP Header をセットする
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
+
     // Content type は application/x-www-form-urlencoded
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=utf-8');
+
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status < 200 || xhr.status > 299) {
-                // HTTP Status が200番台でない時
+                // HTTP Status が200番台でない時アラートする
                 var err = JSON.parse(xhr.responseText);
                 alert(new Error(err.error + ' ' + xhr.status));
-                callback(err);
             } else {
-                // レスポンスをパースしてJSONを得る {token_type: 'bearer', access_token: ''トークン'', expires_in: ''有効期間秒''}
+                // レスポンスをパースしてTokenを得る {token_type: 'bearer', access_token: ''トークン'', expires_in: ''有効期間秒''}
                 var token = JSON.parse(xhr.responseText);
                 if (token.token_type === 'bearer' && token.hasOwnProperty('access_token')) {
                     // tokenをappCtxに保存
                     appCtx.access_token = token.access_token;
                     appCtx.expires_in = token.expires_in;
-                    callback(null);
+                    // Queueに溜まっているものがあれば取り出して post する
+                    while (appCtx.queue.length > 0) {
+                        var simple = appCtx.queue.shift();
+                        post(simple);
+                    }
                 } else {
                     alert(new Error('Unexpected server response'));
-                    callback(err);
                 }
             }
         }
@@ -70,12 +81,16 @@ var getAccessToken = function (callback) {
 //------------------------------------------------------------------
 var post = function (simpleComposition) {
     var xhr = new XMLHttpRequest();
+
     // ポスト先 /1000/simple/v1
     xhr.open('POST', '/1000/simple/v1', true);
+
     // Authorizationヘッダーを Bearer access_token にセットする
     xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
+
     // contentType = json
     xhr.setRequestHeader('Content-type', 'application/json');
+
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status > 199 && xhr.status < 300) {
@@ -83,14 +98,14 @@ var post = function (simpleComposition) {
                 var data = JSON.parse(xhr.responseText);
                 // 結果はMML(XML) なので 'pretty print する
                 mmlBox().innerHTML = prettyXml(data.mml);
+                
             } else if (xhr.status > 399 && xhr.status < 500) {
-                // 400, 401, 403 access tokenが失効しているかemptyなので再取得
-                getAccessToken(function(err) {
-                    if (!err) {
-                        // 取得できたら再帰してpostする
-                        post(simpleComposition);
-                    }
-                });
+                // 400, 401, 403 access tokenが失効しているかempty
+                // 一旦 Queue に保存する
+                appCtx.queue.push(simpleComposition);
+                // Tokenを再取得する
+                // 成功した時点でQueueに保存したSimpleCompositionが再度postされる
+                getAccessToken();
             } else {
                 alert(new Error(xhr.status));
             }
