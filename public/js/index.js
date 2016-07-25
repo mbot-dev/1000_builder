@@ -43,7 +43,7 @@ var getAccessToken = function () {
     // ポスト先は /oauth2/token
     xhr.open('POST', '/oauth2/token', true);
 
-    // Basic 認証用の HTTP Header をセットする
+    // 認証用の HTTP Header をセットする
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
 
     // Content type は application/x-www-form-urlencoded
@@ -98,7 +98,7 @@ var post = function (simpleComposition) {
                 var data = JSON.parse(xhr.responseText);
                 // 結果はMML(XML) なので 'pretty print する
                 mmlBox().innerHTML = prettyXml(data.mml);
-                
+
             } else if (xhr.status > 399 && xhr.status < 500) {
                 // 400, 401, 403 access tokenが失効しているかempty
                 // 一旦 Queue に保存する
