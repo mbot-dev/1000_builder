@@ -7,6 +7,6 @@
       "token_type": "bearer",
       "iss": "1000-builder",
       "secret": "2c16b34375ff386d97a01d9a5df554c3053ebfd5b8eb323bd19870fa9f2671df",
-      "expires": 3600
+      "expires": 7200
   }
 }

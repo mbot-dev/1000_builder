@@ -42,7 +42,7 @@ var getAccessToken = function (callback) {
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=utf-8');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            if (xhr.status / 100 !== 2) {
+            if (xhr.status < 200 || xhr.status > 299) {
                 // HTTP Status が200番台でない時
                 var err = JSON.parse(xhr.responseText);
                 alert(new Error(err.error + ' ' + xhr.status));
@@ -78,19 +78,19 @@ var post = function (simpleComposition) {
     xhr.setRequestHeader('Content-type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            if (xhr.status / 100 === 4) {
-                // access tokenが失効しているかemptyなので再取得
+            if (xhr.status > 199 && xhr.status < 300) {
+                // response = 200, responseからJSONを生成する
+                var data = JSON.parse(xhr.responseText);
+                // 結果はMML(XML) なので 'pretty print する
+                mmlBox().innerHTML = prettyXml(data.mml);
+            } else if (xhr.status > 399 && xhr.status < 500) {
+                // 400, 401, 403 access tokenが失効しているかemptyなので再取得
                 getAccessToken(function(err) {
                     if (!err) {
                         // 取得できたら再帰してpostする
                         post(simpleComposition);
                     }
                 });
-            } else if (xhr.status / 100 === 2) {
-                // response = 200, responseからJSONを生成する
-                var data = JSON.parse(xhr.responseText);
-                // 結果はMML(XML) なので 'pretty print する
-                mmlBox().innerHTML = prettyXml(data.mml);
             } else {
                 alert(new Error(xhr.status));
             }

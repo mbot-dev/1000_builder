@@ -32,7 +32,7 @@ function authenticate (req, res, next) {
 	        logger.debug(decoded);
 	        next();
 	    } catch (err) {
-			sendError('invalid_grant', req, res);
+			sendError(401, 'invalid_grant', req, res);
 	    }
 	}
 }
