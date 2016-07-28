@@ -3,6 +3,7 @@
 const express = require('express');
 const config = require('config');
 const jwt = require('jwt-simple');
+const uuid = require('node-uuid');
 const logger = require('../log/logger');
 const db = require('../db/db');
 
@@ -54,12 +55,14 @@ function checkCredential (req, res, next) {
 }
 
 function generateToken (req, res, next) {
-    var expires = Math.floor(Date.now() / 1000) + config.jwt.expires;
-    var payload = {
-        iss: config.jwt.iss,
+	var now = Date.now();
+    var expires = Math.floor(now / 1000) + config.jwt.expires;
+	var claim = {
+		jti: uuid.v4(),
+        iat: now,
         exp: expires
     };
-    req.token = jwt.encode(payload, config.jwt.secret);
+    req.token = jwt.encode(claim, config.jwt.secret);
     logger.debug(req.token);
     next();
 }
