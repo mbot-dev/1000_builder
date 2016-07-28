@@ -8,6 +8,17 @@ var appCtx = {
     queue: []                   // 送信できなかったSimpleCompositonを保存するQueue
 };
 
+var saveToken = function (token) {
+    // tokenをappCtxに保存
+    appCtx.access_token = token.access_token;
+    appCtx.expires_in = token.expires_in;
+    // Queueに溜まっているものがあれば取り出して post する
+    while (appCtx.queue.length > 0) {
+        var simple = appCtx.queue.shift();
+        post(simple);
+    }
+};
+
 //------------------------------------------------------------------
 // Simpleデータ及びMMLを表示するDOM
 //------------------------------------------------------------------
@@ -25,7 +36,7 @@ var mmlBox = function () {
 // Must use HTTPS endpoints in production
 // consumer key and secret below are invalid in production stage
 //------------------------------------------------------------------
-var getAccessToken = function () {
+var getAccessToken = function (callback) {
     var xhr = new XMLHttpRequest();
 
     // プロジェクトから支給された consumer key
@@ -55,20 +66,16 @@ var getAccessToken = function () {
                 // HTTP Status が200番台でない時アラートする
                 var err = JSON.parse(xhr.responseText);
                 alert(new Error(err.error + ' ' + xhr.status));
+                callback(err, null);
             } else {
                 // レスポンスをパースしてTokenを得る {token_type: 'bearer', access_token: ''トークン'', expires_in: ''有効期間秒''}
                 var token = JSON.parse(xhr.responseText);
                 if (token.token_type === 'bearer' && token.hasOwnProperty('access_token')) {
-                    // tokenをappCtxに保存
-                    appCtx.access_token = token.access_token;
-                    appCtx.expires_in = token.expires_in;
-                    // Queueに溜まっているものがあれば取り出して post する
-                    while (appCtx.queue.length > 0) {
-                        var simple = appCtx.queue.shift();
-                        post(simple);
-                    }
+                    callback(null, token);
                 } else {
-                    alert(new Error('Unexpected server response'));
+                    var e = new Error('Unexpected server response');
+                    alert(e);
+                    callback(e, null);
                 }
             }
         }
@@ -86,7 +93,9 @@ var post = function (simpleComposition) {
     xhr.open('POST', '/1000/simple/v1', true);
 
     // Authorizationヘッダーを Bearer access_token にセットする
-    xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
+    // Safari
+    var tk = appCtx.access_token === '' ? 'dummy' : appCtx.access_token;
+    xhr.setRequestHeader('Authorization', 'Bearer ' + tk);
 
     // contentType = json
     xhr.setRequestHeader('Content-type', 'application/json');
@@ -105,7 +114,11 @@ var post = function (simpleComposition) {
                 appCtx.queue.push(simpleComposition);
                 // Tokenを再取得する
                 // 成功した時点でQueueに保存したSimpleCompositionが再度postされる
-                getAccessToken();
+                getAccessToken(function(err, token) {
+                    if (!err) {
+                        saveToken(token);
+                    }
+                });
             } else {
                 alert(new Error(xhr.status));
             }
@@ -617,3 +630,12 @@ var showVitalSign = function () {
 var changeModule = function (selection) {
     window[selection.value]();
 };
+
+var startApp = function () {
+    getAccessToken(function(err, token) {
+        if (!err) {
+            saveToken(token);
+            showPrescription();
+        }
+    });
+}
