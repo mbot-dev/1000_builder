@@ -28,7 +28,8 @@ function authenticate (req, res, next) {
 		var index = auth.indexOf(' ');
 	    var token = auth.substring(index+1);
 	    try {
-	        var decoded = jwt.decode(token, config.jwt.secret);
+			// secret == demo
+	        var decoded = jwt.decode(token, config.jwt.secret_demo);
 	        logger.debug(decoded);
 	        next();
 	    } catch (err) {

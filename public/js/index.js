@@ -51,8 +51,8 @@ var getAccessToken = function (callback) {
     // ポストするデータは grant_type=client_credentials で URL エンコードする
     var data = encodeURI('grant_type=client_credentials');
 
-    // ポスト先は /oauth2/token
-    xhr.open('POST', '/oauth2/token', true);
+    // ポスト先は token server の /oauth2/token
+    xhr.open('POST', 'https://ehr-token.au-syd.mybluemix.net/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
