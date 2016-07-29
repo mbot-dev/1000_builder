@@ -52,7 +52,7 @@ var getAccessToken = function (callback) {
     var data = encodeURI('grant_type=client_credentials');
 
     // ポスト先は token server の /oauth2/token
-    xhr.open('POST', 'https://ehr-token.au-syd.mybluemix.net/oauth2/token', true);
+    xhr.open('POST', '/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
@@ -93,9 +93,7 @@ var post = function (simpleComposition) {
     xhr.open('POST', '/1000/simple/v1', true);
 
     // Authorizationヘッダーを Bearer access_token にセットする
-    // Safari
-    var tk = appCtx.access_token === '' ? 'dummy' : appCtx.access_token;
-    xhr.setRequestHeader('Authorization', 'Bearer ' + tk);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
 
     // contentType = json
     xhr.setRequestHeader('Content-type', 'application/json');

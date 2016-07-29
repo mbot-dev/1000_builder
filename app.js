@@ -7,6 +7,7 @@ const cfenv = require('cfenv');
 const helmet = require('helmet');
 const logger = require('./log/logger');
 const indexRouter = require('./api/indexRouter');
+const authRouter = require('./api/authRouter');
 const simpleRouter = require('./api/simpleRouter');
 
 const app = express();
@@ -14,26 +15,21 @@ const app = express();
 	if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
 		param.enable('trust proxy');
 		param.use ((req, res, next) => {
-			if (req.secure) {
+	        if (req.secure) {
 				next();
-			} else {
+	        } else {
 				res.redirect('https://' + req.headers.host + req.url);
-			}
+	        }
 		});
 	}
 })(app);
-app.use((req, res, next) => {
-	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Access-Control-Allow-Methods", "GET,POST");
-	res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  next();
-});
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(':remote-addr - :remote-user [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));
 app.use(express.static(__dirname + '/public'));
 app.use(indexRouter);
+app.use(authRouter);
 app.use(simpleRouter);
 
 // Start Server
