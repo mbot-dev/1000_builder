@@ -14,7 +14,7 @@ const app = express();
 (function (param) {
 	if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
 		param.enable('trust proxy');
-		param.use ((req, res, next) => {
+		param.use (function (req, res, next) {
 	        if (req.secure) {
 				next();
 	        } else {
@@ -33,8 +33,8 @@ app.use(authRouter);
 app.use(simpleRouter);
 
 // Start Server
-const appEnv = cfenv.getAppEnv();
-const server = app.listen(appEnv.port, appEnv.bind, () => {
+var appEnv = cfenv.getAppEnv();
+var server = app.listen(appEnv.port, appEnv.bind, function () {
     var info = ['Listening on ', server.address().address, ':', server.address().port].join('');
     logger.info(info);
 });

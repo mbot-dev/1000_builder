@@ -13,7 +13,7 @@ function formatXml (xml) {
         if (node.match( /.+<\/\w[^>]*>$/ )) {
             indent = 0;
         } else if (node.match( /^<\/\w/ )) {
-            if (pad != 0) {
+            if (pad !== 0) {
                 pad -= 1;
             }
         } else if (node.match( /^<\w[^>]*[^\/]>.*$/ )) {
