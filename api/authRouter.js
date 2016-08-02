@@ -13,7 +13,7 @@ function sendError (status, err, req, res) {
 		error: err
     };
 	res.status(status);
-	res.header('Content-Type', 'application/json;charset=UTF-8');
+	res.header('Content-Type', 'application/json;charset=utf-8');
 	res.header('Cache-Control', 'no-store');
 	res.header('Pragma', 'no-cache');
 	res.end(JSON.stringify(message));
@@ -41,8 +41,9 @@ function checkCredential (req, res, next) {
 		if (arr.length!==2) {
 			sendError(400, 'invalid_request', req, res);
 
-		} else if (arr[0] === 'xvz1evFS4wEEPTGEFPHBog' && arr[1] === 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg') {
-			logger.info('1000-builder demo');
+		} else if (arr[0] === '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e' &&
+				   arr[1] === '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141') {
+			// logger.info('1000-builder demo');
 			req.user = {
 			    demo: true
 			};

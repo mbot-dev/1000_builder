@@ -512,6 +512,7 @@ module.exports = {
             registeredDiagnosisModule.categories = [{
                 value: simpleDiagnosis.category,
                 attr: {
+                    // ToDo MML0012 ~ MML0015
                     tableId: 'MML0012'
                 }
             }];
@@ -562,6 +563,7 @@ module.exports = {
 
         var external = {issuedTo: 'external', medication: []};   // 院外処方Prescription
         var internal = {issuedTo: 'internal', medication: []};   // 院内処方Prescription
+        var inOrExt = {medication: []};                          // 院内、院外が指定されていない場合
 
         simplePrescription.medication.forEach((entry) => {
 
@@ -578,13 +580,17 @@ module.exports = {
                 dose: entry.dose,                       // 1回の量
                 doseUnit: entry.doseUnit                // 単位
             };
-            if (entry.issuedTo === 'external') {
-                external.medication.push(medication);
-            } else if (entry.issuedTo === 'internal') {
-                internal.medication.push(medication);
-            }
             // 以下オプションなのでテストしながら設定
-
+            // 院内、院外
+            if (entry.hasOwnProperty('issuedTo')) {
+                if (entry.issuedTo === 'external') {
+                    external.medication.push(medication);
+                } else if (entry.issuedTo === 'internal') {
+                    internal.medication.push(medication);
+                }
+            } else {
+                inOrExt.medication.push(medication);
+            }
             // 1日の内服回数
             if (entry.hasOwnProperty('frequencyPerDay')) {
                 medication.frequencyPerDay = entry.frequencyPerDay;
@@ -605,12 +611,12 @@ module.exports = {
                 medication.instruction = entry.instruction;
             }
 
-            // 頓用=false
+            // 頓用
             if (entry.hasOwnProperty('PRN')) {
                 medication.PRN = entry.PRN;
             }
 
-            // ジェネリック
+            // ジェネリック デフォルトは true
             if (entry.hasOwnProperty('brandSubstitutionPermitted')) {
                 medication.brandSubstitutionPermitted = entry.brandSubstitutionPermitted;
             } else {
@@ -623,7 +629,7 @@ module.exports = {
             }
         });
 
-        return [external, internal];
+        return [external, internal, inOrExt];
     },
 
     buildInjectionModule: function (simpleInjection) {

@@ -8,11 +8,14 @@ var appCtx = {
     queue: []                   // 送信できなかったSimpleCompositonを保存するQueue
 };
 
+//------------------------------------------------------------------
+// Access Token 取得後にコールされる関数
+//------------------------------------------------------------------
 var saveToken = function (token) {
     // tokenをappCtxに保存
     appCtx.access_token = token.access_token;
     appCtx.expires_in = token.expires_in;
-    // Queueに溜まっているものがあれば取り出して post する
+    // Queueに保存されているsimpleCompositonをpostする
     while (appCtx.queue.length > 0) {
         var simple = appCtx.queue.shift();
         post(simple);
@@ -20,38 +23,23 @@ var saveToken = function (token) {
 };
 
 //------------------------------------------------------------------
-// Simpleデータ及びMMLを表示するDOM
-//------------------------------------------------------------------
-var simpleBox = function () {
-    return document.getElementById('simple_box');
-};
-
-var mmlBox = function () {
-    return document.getElementById('mml_box');
-};
-
-//------------------------------------------------------------------
+// Access Token 取得する
 // Client Credentials Grant flow of the OAuth 2 specification
 // https://tools.ietf.org/html/rfc6749#section-4.4
-// Must use HTTPS endpoints in production
-// consumer key and secret below are invalid in production stage
 //------------------------------------------------------------------
 var getAccessToken = function (callback) {
     var xhr = new XMLHttpRequest();
 
-    // プロジェクトから支給された consumer key
-    var consumerKey = 'xvz1evFS4wEEPTGEFPHBog';
+    // プロジェクトから支給された consumer key（デモ用）
+    var consumerKey = '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e';
 
-    // プロジェクトから支給された secret
-    var secret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg';
+    // プロジェクトから支給された secret（デモ用）
+    var secret = '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141';
 
     // 上記二つをコロンで連結し base64 でエンコードする
     var base64 = btoa(consumerKey + ':'　+　secret);
 
-    // ポストするデータは grant_type=client_credentials で URL エンコードする
-    var data = encodeURI('grant_type=client_credentials');
-
-    // ポスト先は token server の /oauth2/token
+    // ポスト先は /oauth2/token
     xhr.open('POST', '/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする
@@ -60,27 +48,41 @@ var getAccessToken = function (callback) {
     // Content type は application/x-www-form-urlencoded
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded;charset=utf-8');
 
+    // ポストするデータは grant_type=client_credentials で URL エンコードする
+    var postString = encodeURI('grant_type=client_credentials');
+
+    // Event listener XMLHttpRequest固有
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            if (xhr.status < 200 || xhr.status > 299) {
-                // HTTP Status が200番台でない時アラートする
-                var err = JSON.parse(xhr.responseText);
-                alert(new Error(err.error + ' ' + xhr.status));
-                callback(err, null);
-            } else {
-                // レスポンスをパースしてTokenを得る {token_type: 'bearer', access_token: ''トークン'', expires_in: ''有効期間秒''}
-                var token = JSON.parse(xhr.responseText);
-                if (token.token_type === 'bearer' && token.hasOwnProperty('access_token')) {
-                    callback(null, token);
+
+            // レスポンスを調べる
+            if (xhr.status === 200 ) {
+                // HTTP Status が 200 で正常取得できた場合
+                // レスポンステキストをパースしてJSONに変換する
+                // 結果は {token_type: 'bearer', access_token: 'token', expires_in: ''有効期間秒''}
+                var parsed = JSON.parse(xhr.responseText);
+                if (parsed.token_type === 'bearer' && parsed.hasOwnProperty('access_token')) {
+                    // token_type が 'bearer' であることを確認しコールバック
+                    callback(null, parsed);
                 } else {
                     var e = new Error('Unexpected server response');
                     alert(e);
                     callback(e, null);
                 }
+            } else {
+                // status !== 200 原因
+                // consumerKey または secretの誤り
+                // Authorization ヘッダーの誤り
+                // Content-typeの誤り
+                // grant_type=client_credentials がセットされていない
+                // 戻り値 {error: invalid_request(400) | invalid_client(401)}
+                var err = JSON.parse(xhr.responseText);
+                alert(new Error(err.error + ' ' + xhr.status));
+                callback(err, null);
             }
         }
     }
-    xhr.send(data);
+    xhr.send(postString);
 };
 
 //------------------------------------------------------------------
@@ -98,26 +100,32 @@ var post = function (simpleComposition) {
     // contentType = json
     xhr.setRequestHeader('Content-type', 'application/json');
 
+    // Event listener XMLHttpRequest固有
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
+
+            // レスポンスを調べる
             if (xhr.status > 199 && xhr.status < 300) {
                 // response = 200, responseからJSONを生成する
-                var data = JSON.parse(xhr.responseText);
+                var parsed = JSON.parse(xhr.responseText);
                 // 結果はMML(XML) なので 'pretty print する
-                mmlBox().innerHTML = prettyXml(data.mml);
+                document.getElementById('mml_box').innerHTML = prettyXml(parsed.mml);
 
             } else if (xhr.status > 399 && xhr.status < 500) {
-                // 400, 401, 403 access tokenが失効しているかempty
-                // 一旦 Queue に保存する
+                // status = 400 | 401 | 403
+                // access tokenが失効しているか不正な場合
+                // Authorization に Bearer token がセットされていない
+                // ポストするsimpleCompositionを一旦 Queue に保存する
                 appCtx.queue.push(simpleComposition);
                 // Tokenを再取得する
-                // 成功した時点でQueueに保存したSimpleCompositionが再度postされる
                 getAccessToken(function(err, token) {
                     if (!err) {
+                        // 成功した時点でQueueに保存したSimpleCompositionが再度postされる
                         saveToken(token);
                     }
                 });
             } else {
+                // simpleCompositionに誤りがある
                 alert(new Error(xhr.status));
             }
         }
@@ -127,163 +135,166 @@ var post = function (simpleComposition) {
 
 // 患者
 var simplePatient = {
-    id: '0516',                                        // 施設(病院)内で発番されている患者Id
-    idType: 'facility',                                // 施設固有のIdであることを示す
-    facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
-    kanjiName: '宮田 奈々',                             // 漢字の氏名
-    kanaName: 'ミヤタ ナナ',                             // カナ
-    romanName: 'Nana Miyata',                          // ローマ字
-    gender: 'femail',                                  // MML0010(女:femail 男:male その他:other 不明:unknown)
-    dateOfBirth: '1994-11-26',                         // 生年月日
-    maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
-    nationality: 'JPN',                                // 国籍 オプション
-    postalCode: '000-0000',                            // 郵便番号
-    address: '横浜市中区日本大通り 1-23-4-567',            // 住所
-    telephone: '054-078-7934',                         // 電話番号
-    mobile: '090-2710-1564',                           // モバイル
-    email: 'miyata_nana@example.com'                   // 電子メール オプション
+    id: '0516',                                        // 患者ID
+    idType: 'facility',                                // IDのタイプ MML0024 を使用する
+    facilityId: 'JPN012345678901',                     // 医療連携用の施設IDでプロジェクトから指定される
+    kanjiName: '宮田 奈々',                             // 漢字の氏名（氏名は漢字、カナ、ローマ字のどれか一つ必須）
+    kanaName: 'ミヤタ ナナ',                             // カナの氏名（同上）
+    romanName: 'Nana Miyata',                          // ローマ字の氏名（同上）
+    gender: 'femail',                                  // 性別 MML0010を使用 (女:female 男:male その他:other 不明:unknown)
+    dateOfBirth: '1994-11-26',                         // 生年月日 YYYY-MM-DD 形式
+    maritalStatus: 'single',                           // 婚姻状況 MML0011を使用（オプション）
+    nationality: 'JPN',                                // 国籍（オプション）
+    postalCode: '000-0000',                            // 郵便番号（オプション）
+    address: '横浜市中区日本大通り 1-23-4-567',           // 住所（オプション）
+    telephone: '054-078-7934',                         // 電話番号（オプション）
+    mobile: '090-2710-1564',                           // モバイル（オプション）
+    email: 'miyata_nana@example.com'                   // 電子メール（オプション）
 };
 
 // 医師等
 var simpleCreator = {
-    id: '201605',                                      // 施設で付番されている医師のId
-    idType: 'facility',                                // 施設固有のIdであることを示す
-    kanjiName: '青山 慶二',                             // 医師名
-    prefix: 'Professor',                               // 肩書き等 オプション
-    degree: 'MD/PhD',                                  // 学位 オプション
-    facilityId: 'JPN012345678901',                     // 医療連携等のために施設に振られているId
-    facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027(ca|insurance|monbusho|JMARI|OID)から選ぶ
+    id: '201605',                                      // 医師のID
+    idType: 'facility',                                // IDのタイプ MML0024 を使用する
+    kanjiName: '青山 慶二',                             // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
+    prefix: 'Professor',                               // 肩書き等（オプション）
+    degree: 'MD/PhD',                                  // 学位（オプション）
+    facilityId: 'JPN012345678901',                     // 医療連携用の施設ID プロジェクトから指定される
+    facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027を使用（ca|insurance|monbusho|JMARI|OID)
     facilityName: 'シルク内科',                          // 施設名
     facilityZipCode: '231-0023',                       // 施設郵便番号
     facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
     facilityPhone: '045-571-6572',                     // 施設電話番号
-    departmentId: '01',                                // 医科用:MML0028 歯科用:MML0030 から選ぶ
-    departmentIdType: 'medical',                       // 医科用の診療科コード:medical 歯科用の診療科コード:dental を指定 MML0029(medical|dental|facility)から選ぶ
-    departmentName: '第一内科',                         // 診療科名
-    license: 'doctor'                                  // 医療資格 MML0026から選ぶ
+    departmentId: '01',                                // 医科用の場合は MML0028、歯科用の場合は MML0030 から選ぶ（オプション）
+    departmentIdType: 'medical',                       // 医科用の診療科コードの場合はmedicalを、歯科用の診療科コードの場合はdentalを指定する MML0029(medical|dental|facility)から選ぶ（オプション）
+    departmentName: '第一内科',                         // 診療科名（オプション）
+    license: 'doctor'                                  // 医療資格 MML0026を使用（オプション）
 };
 
-// 処方せん
+// 処方せんサンプル
 var simplePrescription = function () {
-    // 服薬開始日
-    var startDate = nowAsDate();                        // YYYY-MM-DD
-    // リターンする simplePrescription
+    // 服薬開始日（デモなので現在時刻）
+    var startDate = nowAsDate();                        // YYYY-MM-DD形式
+    // 生成する simplePrescription
     var simple = {
-        contentType: 'Medication',                      // Medication
+        contentType: 'Medication',                      // contentTypeをMedicationにする
         medication: []                                  // 処方の配列
     };
 
+    // 処方
     var med = {
-        issuedTo: 'external',                           // 院外処方: external 院内処方: internal
-        medicine: 'マーズレン S 顆粒',                    // 処方薬
+        issuedTo: 'external',                           // 院外処方の場合はexternal、院内処方の場合はinternalを指定する（オプション）
+        medicine: 'マーズレン S 顆粒',                    // 処方薬名称
         medicineCode: '612320261',                      // 処方薬のコード
         medicineCodeSystem: 'YJ',                       // コード体系
-        dose: 1,                                        // 1回の量
+        dose: 1,                                        // 数量
         doseUnit: 'g',                                  // 単位
-        frequencyPerDay: 2,                             // 1日の内服回数
-        startDate: startDate,                           // 服薬開始日 YYYY-MM-DD
-        duration: 'P30D',                               // 30日分
-        instruction: '内服2回 朝夜食後に',                 // 用法
-        PRN: false,                                     // 頓用=false
-        brandSubstitutionPermitted: true,               // ジェネリック可
-        longTerm: false                                 // 臨時処方
+        frequencyPerDay: 2,                             // 1日の内服回 数総量のみが記載される外用剤などの場合には省略可（オプション）
+        startDate: startDate,                           // 服薬開始日 YYYY-MM-DD（オプション）
+        duration: 'P30D',                               // 30日分 P数値D で記述する（オプション）
+        instruction: '内服2回 朝夜食後に',                 // 用法（オプション）
+        PRN: false,                                     // 頓用の時 true（オプション）
+        brandSubstitutionPermitted: true,               // ジェネリック医薬品への代替可 可の時true、省略時は可とみなす（オプション）
+        longTerm: false                                 // 長期処方の時true、短期であればfalse（オプション）
     };
-    simple.medication.push(med);                        // 配列へ格納
+    simple.medication.push(med);                        // 配列へ追加
 
     med = {
-        issuedTo: 'external',                           // 院外処方: external 院内処方: internal
-        medicine: 'メトリジン錠 2 mg',                    // 処方薬
+        issuedTo: 'external',                           // 院外処方の場合はexternal、院内処方の場合はinternalを指定する（オプション）
+        medicine: 'メトリジン錠 2 mg',                    // 処方薬名称
         medicineCode: '612160027',                      // 処方薬のコード
         medicineCodeSystem: 'YJ',                       // コード体系
-        dose: 2,                                        // 1回の量
+        dose: 2,                                        // 数量
         doseUnit: '錠',                                 // 単位
-        frequencyPerDay: 2,                             // 1日の内服回数
-        startDate: startDate,                           // 服薬開始日
-        duration: 'P30D',                               // 30日分
-        instruction: '内服2回 朝夜食後に',                 // 用法
-        PRN: false,                                     // 頓用=false
-        brandSubstitutionPermitted: false,              // ジェネリック不可
-        longTerm: true                                  // 長期処方
+        frequencyPerDay: 2,                             // 1日の内服回数 数総量のみが記載される外用剤などの場合には省略可（オプション）
+        startDate: startDate,                           // 服薬開始日 YYYY-MM-DD（オプション）
+        duration: 'P30D',                               // 30日分 P数値D で記述する（オプション）
+        instruction: '内服2回 朝夜食後に',                 // 用法（オプション）
+        PRN: false,                                     // 頓用の時 true（オプション）
+        brandSubstitutionPermitted: false,              // ジェネリック医薬品への代替可 可の時true、省略時は可とみなす（オプション）
+        longTerm: true                                  // 長期処方の時true、短期であればfalse（オプション）
     };
-    simple.medication.push(med);                        // 配列へ格納
+    simple.medication.push(med);                        // 配列へ追加
 
     return simple;
 };
 
-// 注射
+// 注射サンプル
 var simpleInjection = function () {
     // 生成する simpleInjection
     var simple = {
-        contentType: 'Injection',                       // Injection
-        medication: []                                  // 処方の配列
+        contentType: 'Injection',                       // contentTypeをInjectionにする
+        medication: []                                  // 注射の配列
     };
-    // 投与開始日時
+    // 投与開始日時（デモなので現在時刻）
     var start = new Date();                             // 投与開始日時
     var end = new Date();
-    end.setHours(start.getHours() + 2);                 // 投与終了日時
+    end.setHours(start.getHours() + 2);                 // 2H後 投与終了日時
     var med = {
         medicine: 'ラクテック 500ml',                     // 薬剤名称
         medicineCode: '12304155',                       // 薬剤コード
         medicineCodeystem: 'YJ',                        // コード体系
         dose: '500',                                    // 用量
         doseUnit: 'ml',                                 // 単位
-        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss
-        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss
-        instruction: '2時間で投与する',                    // 用法指示
-        route: '右前腕静脈ルート',                         // 投与経路
-        site: '右前腕',                                  // 投与部位
-        deliveryMethod: '点滴静注',                       // 注射方法
-        batchNo: '1'                                    // 処方番号
+        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        instruction: '2時間で投与する',                    // 用法指示（オプション）
+        route: '右前腕静脈ルート',                         // 投与経路 投与する注射ルートを記載する。例：右前腕留置ルート，右鎖骨下中心静脈ルート（オプション）
+        site: '右前腕',                                  // 投与部位 注射した部位を記載する。例：右上腕三角，腹部（オプション）
+        deliveryMethod: '点滴静注',                       // 注射方法 例：筋注，皮下注，静注，点滴静注，中心静脈注射（オプション）
+        batchNo: '1'                                    // 処方番号 これにより用法が共通する薬剤をまとめて一つの処方単位とすることができる。（オプション）
     };
     simple.medication.push(med);
     med = {
         medicine: 'ビタメジン静注用',                      // 薬剤名称
         medicineCode: '553300555',                      // 薬剤コード
         medicineCodeystem: 'YJ',                        // コード体系
-        dose: '1',
-        doseUnit: 'V',
-        batchNo: '1'
+        dose: '1',                                      // 用量
+        doseUnit: 'V',                                  // 単位
+        batchNo: '1'                                    // 処方番号（オプション）
     };
     simple.medication.push(med);
+
     // 投与開始、終了日時
     start = new Date();                                 // 投与開始日時
     end = new Date();
-    end.setHours(start.getHours() + 1);                 // 投与終了日時
+    end.setHours(start.getHours() + 1);                 // 1H後 投与終了日時
     med = {
         medicine: 'セファメジンα 2g キット',               // 薬剤名称
         medicineCode: '14433344',                       // 薬剤コード
         medicineCodeystem: 'YJ',                        // コード体系
         dose: '1',                                      // 用量
         doseUnit: 'V',                                  // 単位
-        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss
-        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss
-        instruction: '1時間で投与する',                    // 用法指示
-        route: '右前腕静脈ルート',                         // 投与経路
-        site: '右前腕',                                   // 投与部位
-        deliveryMethod: '点滴静注',                       // 注射方法
-        batchNo: '1'                                    // 処方番号
+        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        instruction: '1時間で投与する',                    // 用法指示（オプション）
+        route: '右前腕静脈ルート',                         // 投与経路 投与する注射ルートを記載する。例：右前腕留置ルート，右鎖骨下中心静脈ルート（オプション）
+        site: '右前腕',                                  // 投与部位 注射した部位を記載する。例：右上腕三角，腹部（オプション）
+        deliveryMethod: '点滴静注',                       // 注射方法 例：筋注，皮下注，静注，点滴静注，中心静脈注射（オプション）
+        batchNo: '1'                                    // 処方番号 これにより用法が共通する薬剤をまとめて一つの処方単位とすることができる。（オプション）
     };
     simple.medication.push(med);
     return simple;
 };
 
-// 病名
+// 病名サンプル
 // 1病名毎に1モジュール
 var simpleDiagnosis = function () {
+    // デモ用の日時
     var now = new Date();
-    var dateOfRemission = toDateString(now);                // 終了日 = 今
-    now.setDate(now.getDate() - 30);                        // 30日前が
-    var dateOfOnset = toDateString(now);                    // 開始日
+    var dateOfRemission = toDateString(now);                // 疾患終了日
+    now.setDate(now.getDate() - 30);                        // 30日前を
+    var dateOfOnset = toDateString(now);                    // 疾患開始日
 
     return {
-        contentType: 'Medical Diagnosis',                   // Medical Diagnosis
-        diagnosis: 'colon carcinoid',
-        code: 'C189-.006',
-        system: 'ICD10',
-        category: 'mainDiagnosis',
-        dateOfOnset: dateOfOnset,
-        dateOfRemission: dateOfRemission,
-        outcome: 'fullyRecovered'
+        contentType: 'Medical Diagnosis',                   // contentTypeをMedical Diagnosisにする
+        diagnosis: 'colon carcinoid',                       // 疾患名
+        code: 'C189-.006',                                  // 疾患コード
+        system: 'ICD10',                                    // 疾患コード体系名
+        category: 'mainDiagnosis',                          // 診断の分類　MML0012からMML0015を使用（オプション）
+        dateOfOnset: dateOfOnset,                           // 疾患開始日 YYYY-MM-DD 形式（オプション）
+        dateOfRemission: dateOfRemission,                   // 疾患終了日 YYYY-MM-DD 形式（オプション）
+        outcome: 'fullyRecovered'                           // 転帰 MML0016を使用（オプション）
     };
 };
 
@@ -305,9 +316,9 @@ var createTestItems = function (content) {
         // この行のテスト項目
         simpleItem = {
             spcCode: lineArray[0],                      // 検体コード
-            spcName: lineArray[1],                      // 検体名
-            code: lineArray[2],                         // コード
-            name: lineArray[3],                         // テスト項目名
+            spcName: lineArray[1],                      // 検体名称
+            code: lineArray[2],                         // 検査項目コード
+            name: lineArray[3],                         // 検査項目名称
             value: lineArray[4]                         // 結果値
         };
         if (lineArray[5] !== '') {
@@ -332,31 +343,31 @@ var createTestItems = function (content) {
     return items;
 };
 
-// 検査
+// 検査サンプル
 var simpleLabTest = function (callback) {
     var laboratoryTest = {
-        contentType: 'Laboratory Report',
+        contentType: 'Laboratory Report',                   // contentTypeをLaboratory Reportにする
         context: {
-            issuedId: uuid.v4(),                            // 検査Id 　運用で決める
-            issuedTime: nowAsDateTime(),                    // 受付日時
-            resultIssued: nowAsDateTime(),                  // 報告日時
-            resultStatus: '最終報告',                        // 報告状態
+            issuedId: uuid.v4(),                            // 検査依頼ID
+            issuedTime: nowAsDateTime(),                    // 受付日時 YYYY-MM-DDTHH:mm:ss 形式
+            resultIssued: nowAsDateTime(),                  // 報告日時 YYYY-MM-DDTHH:mm:ss 形式
+            resultStatus: '最終報告',                        // 報告状態 最終報告または検査中
             resultStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
             codeSystem: 'YBS_2016',                         // 検査コード体系名
-            facilityName: simpleCreator.facilityName,       // 検査依頼施設
-            facilityId: simpleCreator.facilityId,           // 検査依頼施設
-            facilityIdType: 'JMARI',                        // 検査依頼施設
-            laboratory: {
-                id: '303030',                                // 検査実施会社内での Id
-                idType: 'facility',                          // 施設で付番されているIdであることを示す
-                kanjiName: '石山 由美子',                      // 検査実施施設の代表 代表とは?
-                facilityId: '1.2.3.4.5.6.7890.1.2',          // OID
-                facilityIdType: 'OID',                       // MML0027 OID 方式
-                facilityName: 'ベイサイド・ラボ',               // 検査実施会社の名称
-                facilityZipCode: '231-0000',                 // 検査実施会社の郵便番号
-                facilityAddress: '横浜市中区スタジアム付近 1-5', // 検査実施会社の住所
-                facilityPhone: '045-000-0072',               // 検査実施会社の電話
-                license: 'lab'                               // MML0026 他に?
+            facilityName: simpleCreator.facilityName,       // 検査依頼施設名称
+            facilityId: simpleCreator.facilityId,           // 検査依頼施設ID
+            facilityIdType: 'JMARI',                        // 検査依頼施設IDタイプ
+            laboratory: {                                    // 検査実施施設の情報
+                id: '303030',                                // 施設で発番している代表のID
+                idType: 'facility',                          // 施設で付番されているIDであることを示す
+                kanjiName: '石山 由美子',                      // 施設の代表（kanjiName、kanaName、romanNameのどれか一つは必須）代表とは?
+                facilityId: '1.2.3.4.5.6.7890.1.2',          // 施設のID プロジェクトから指定
+                facilityIdType: 'OID',                       // MML0027を使用 プロジェクトから指定
+                facilityName: 'ベイサイド・ラボ',               // 施設の名称
+                facilityZipCode: '231-0000',                 // 施設の郵便番号
+                facilityAddress: '横浜市中区スタジアム付近 1-5', // 施設の住所
+                facilityPhone: '045-000-0072',               // 施設の電話
+                license: 'lab'                               // MML0026を使用（オプション）
             }
         }
     };
@@ -382,50 +393,50 @@ var simpleLabTest = function (callback) {
     }
 };
 
-// Vital Sign
+// Vital Sign サンプル
 var simpleVitalSign = function () {
     var vitalSign = {
-        contentType: 'Vital Sign',
-        context: {
-            observer: '花田 綾子',
+        contentType: 'Vital Sign',                              // contentTypeをVital Signにする
+        context: {                                              // バイタルサインが計測された時のコンテキスト（オプション）
+            observer: '花田 綾子',                               // バイタルサインを計測した人（オプション）
         },
-        item: [],
-        observedTime: nowAsDateTime(),
-        protocol: {
-            position: 'sitting',         // mmlVs03
-            device: 'Apple Watch',
-            bodyLocation: '右腕'
+        item: [],                                               // 計測項目の配列
+        observedTime: nowAsDateTime(),                          // バイタルサインを観察した時間 YYYY-MM-DDTHH:mm:ss 形式
+        protocol: {                                             // バイタルサインの測定方法を記載する親エレメント（オプション）
+            position: 'sitting',                                // バイタルサインを測定した時の体位 mmlVs03を使用（オプション）
+            device: 'Apple Watch',                              // バイタルサインの測定に使用した機材、デバイス。聴診器、水銀柱血圧計、機械式血圧計、動脈内プローベなど。（オプション）
+            bodyLocation: '右腕'                                 // バイタルサインを測定した身体の部位。右上腕、左下腿など（オプション）
         }
     };
     // 収縮期血圧
     vitalSign.item.push({
-        itemName: 'Systolic blood pressure',    // mmlVs01
-        numValue: 135,
-        unit: 'mmHg'                            // mmlVs02
+        itemName: 'Systolic blood pressure',                    // バイタルサイン項目 mmlVs01を使用
+        numValue: 135,                                          // 値
+        unit: 'mmHg'                                            // 単位 mmlVs02を使用
     });
     // 拡張期血圧
     vitalSign.item.push({
-        itemName: 'Diastolic blood pressure',   // mmlVs01
-        numValue: 80,
-        unit: 'mmHg'                            // mmlVs02
+        itemName: 'Diastolic blood pressure',                   // バイタルサイン項目 mmlVs01を使用
+        numValue: 80,                                           // 値
+        unit: 'mmHg'                                            // 単位 mmlVs02を使用
     });
     return vitalSign;
 };
 
-// 処方情報をセットする
+// 処方せんサンプルをPOSTする
 var showPrescription = function () {
     // staffs
     var prescription = simplePrescription();    // 処方せん
-    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
+    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
     var uid = uuid.v4();                        // MML文書の UUID
-    var simpleComposition = {                   // POST = simpleComposition
-        context: {                              // 文脈
+    var simpleComposition = {                   // POStする simpleComposition
+        context: {                              // context: 処方された時の文脈
             uuid: uid,                          // UUID
             confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 患者
-            creator: simpleCreator              // 医師
+            patient: simplePatient,             // 対象患者
+            creator: simpleCreator              // 担当医師
         },
-        content: [prescription]                 // 臨床データ
+        content: [prescription]                 // content: 臨床データの処方せん
     };
     // 表示
     var arr = [];
@@ -449,25 +460,25 @@ var showPrescription = function () {
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
-    simpleBox().innerHTML = text;
+    document.getElementById('simple_box').innerHTML = text;
     // POST する
     post(simpleComposition);
 };
 
-// 処方情報をセットする
+// 注射サンプルをPOSTする
 var showInjection = function () {
     // staffs
     var injection = simpleInjection();          // 注射記録
-    var confirmDate = nowAsDateTime();          // このMMLの確定日はこの時点 YYYY-MM-DDTHH:mm:ss
+    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
     var uid = uuid.v4();                        // MML文書の UUID
-    var simpleComposition = {                   // send = simpleComposition
-        context: {
+    var simpleComposition = {                   // POSTする simpleComposition
+        context: {                              // context: 注射された時の文脈
             uuid: uid,                          // UUID
             confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 患者
-            creator: simpleCreator              // 医師
+            patient: simplePatient,             // 対象患者
+            creator: simpleCreator              // 担当医師
         },
-        content: [injection]                    // content: [injection]
+        content: [injection]                    // content: 臨床データの注射記録
     };
     // 表示
     var arr = [];
@@ -491,25 +502,25 @@ var showInjection = function () {
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
-    simpleBox().innerHTML = text;
+    document.getElementById('simple_box').innerHTML = text;
     // send する
     post(simpleComposition);
 };
 
-// 病名情報をセットする
+// 病名サンプルをPOSTする
 var showDiagnosis = function () {
     // staffs
     var diagnosis = simpleDiagnosis();          // 病名
-    var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+    var confirmDate = nowAsDateTime();          // 確定日時　YYYY-MM-DDTHH:mm:ss
     var uid = uuid.v4();                        // MML文書の UUID
-    var simpleComposition = {                   // POST = simpleComposition
-        context: {
+    var simpleComposition = {                   // POSTする simpleComposition
+        context: {                              // context: 病名確定時の文脈
             uuid: uid,                          // UUID
             confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 患者
-            creator: simpleCreator              // 医師
+            patient: simplePatient,             // 対象患者
+            creator: simpleCreator              // 担当医師
         },
-        content: [diagnosis]                    // 中身をこのdiagnosisにする
+        content: [diagnosis]                    // content: 臨床データの病名
     };
     // 表示
     var arr = [];
@@ -533,26 +544,26 @@ var showDiagnosis = function () {
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
-    simpleBox().innerHTML = text;
+    document.getElementById('simple_box').innerHTML = text;
     // POST する
     post(simpleComposition);
 };
 
-// 検査情報をセットする
+// 検査サンプルをPOSTする
 var showLabTest = function () {
 
     simpleLabTest (function (simpleTest) {
         // staffs
-        var confirmDate = simpleTest.resultIssued;  // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss
+        var confirmDate = simpleTest.resultIssued;  // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss に一致させる
         var uid = uuid.v4();                        // MML文書の UUID
-        var simpleComposition = {                   // POST = simpleComposition
-            context: {
+        var simpleComposition = {                   // POSTする simpleComposition
+            context: {                              // context: 検査結果確定時の文脈
                 uuid: uid,                          // UUID
                 confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-                patient: simplePatient,             // 患者
-                creator: simpleCreator              // 医師
+                patient: simplePatient,             // 対象患者
+                creator: simpleCreator              // 責任医師
             },
-            content: [simpleTest]                   // 中身をこのsimpleTestにする
+            content: [simpleTest]                   // content: 臨床データの検査結果
         };
         // 表示
         var arr = [];
@@ -576,26 +587,26 @@ var showLabTest = function () {
         arr.push(';');
         arr.push('</pre>');
         var text = arr.join('');
-        simpleBox().innerHTML = text;
+        document.getElementById('simple_box').innerHTML = text;
         // POST する
         post(simpleComposition);
     });
 };
 
-// バイタルサイン情報をセットする
+// バイタルサイン サンプルをPOSTする
 var showVitalSign = function () {
     // staffs
     var vitalSign = simpleVitalSign();          // バイタルサイン
-    var confirmDate = nowAsDateTime();          // 確定日はこの時点　YYYY-MM-DDTHH:mm:ss
+    var confirmDate = nowAsDateTime();          // 確定日時　YYYY-MM-DDTHH:mm:ss
     var uid = uuid.v4();                        // MML文書の UUID
-    var simpleComposition = {                   // POST = simpleComposition
-        context: {
+    var simpleComposition = {                   // POSTする simpleComposition
+        context: {                              // context: バイタルサイン確定時の文脈
             uuid: uid,                          // UUID
             confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 患者
-            creator: simpleCreator              // 医師
+            patient: simplePatient,             // 対象患者
+            creator: simpleCreator              // 責任医師
         },
-        content: [vitalSign]                    // 中身をこのvitalSignにする
+        content: [vitalSign]                    // content: 臨床データのバイタルサイン
     };
     // 表示
     var arr = [];
@@ -619,7 +630,7 @@ var showVitalSign = function () {
     arr.push(';');
     arr.push('</pre>');
     var text = arr.join('');
-    simpleBox().innerHTML = text;
+    document.getElementById('simple_box').innerHTML = text;
     // POST する
     post(simpleComposition);
 };
@@ -629,7 +640,9 @@ var changeModule = function (selection) {
     window[selection.value]();
 };
 
+// ページロード後にコールされる関数
 var startApp = function () {
+    // Access Tokenを取得し処方せんサンプルをpostする
     getAccessToken(function(err, token) {
         if (!err) {
             saveToken(token);

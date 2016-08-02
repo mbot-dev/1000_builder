@@ -8,7 +8,7 @@ const logger = new (winston.Logger)({
         new (winston.transports.Console)({ json: false, timestamp: true })
     ],
     exceptionHandlers: [
-        new (winston.transports.Console)({ json: false, timestamp: true }),
+        new (winston.transports.Console)({ json: false, timestamp: true })
     ],
     exitOnError: false
 });
