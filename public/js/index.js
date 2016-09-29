@@ -81,7 +81,7 @@ var getAccessToken = function (callback) {
                 callback(err, null);
             }
         }
-    }
+    };
     xhr.send(postString);
 };
 
@@ -129,7 +129,7 @@ var post = function (simpleComposition) {
                 alert(new Error(xhr.status));
             }
         }
-    }
+    };
     xhr.send(JSON.stringify(simpleComposition));
 };
 
@@ -388,7 +388,7 @@ var simpleLabTest = function (callback) {
                 laboratoryTest.testResult = appCtx.test_results;
                 callback(laboratoryTest);
             }
-        }
+        };
         xhr.send();
     }
 };
@@ -398,7 +398,7 @@ var simpleVitalSign = function () {
     var vitalSign = {
         contentType: 'Vital Sign',                              // contentTypeをVital Signにする
         context: {                                              // バイタルサインが計測された時のコンテキスト（オプション）
-            observer: '花田 綾子',                               // バイタルサインを計測した人（オプション）
+            observer: '花田 綾子'                                // バイタルサインを計測した人（オプション）
         },
         item: [],                                               // 計測項目の配列
         observedTime: nowAsDateTime(),                          // バイタルサインを観察した時間 YYYY-MM-DDTHH:mm:ss 形式
@@ -554,7 +554,7 @@ var showLabTest = function () {
 
     simpleLabTest (function (simpleTest) {
         // staffs
-        var confirmDate = simpleTest.resultIssued;  // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss に一致させる
+        var confirmDate = simpleTest.context.resultIssued;  // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss に一致させる
         var uid = uuid.v4();                        // MML文書の UUID
         var simpleComposition = {                   // POSTする simpleComposition
             context: {                              // context: 検査結果確定時の文脈
@@ -649,4 +649,4 @@ var startApp = function () {
             showPrescription();
         }
     });
-}
+};

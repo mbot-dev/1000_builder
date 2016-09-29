@@ -297,6 +297,55 @@ module.exports = {
         return [accessRightForCreatorFacility, accessRightForPatientAnExperienceFacility];
     },
 
+    buildAccessRight: function (patientId, patientName, simpleAccessRight) {
+        // 記載者施設
+        var accessRightForCreator = {
+            attr: {
+                permit: simpleAccessRight.creator
+            },
+            facility: [{
+                attr: {
+                    facilityCode: 'creator',
+                    tableId: 'MML0035'
+                },
+                value: '記載者施設'
+            }]
+        };
+
+        // 診療歴のある施設
+        var accessRightForExperience = {
+            attr: {
+                permit: simpleAccessRight.experience
+            },
+            facility: [{
+                attr: {
+                    facilityCode: 'experience',
+                    tableId: 'MML0035'
+                },
+                value: '診療歴のある施設'
+            }]
+        };
+
+        // 患者
+        var accessRightForPatient = {
+            attr: {
+                permit: simpleAccessRight.patient
+            },
+            person: [{
+                attr: {
+                    personCode: 'patient',
+                    tableId: 'MML0036',
+                    personId: patientId,                            // 患者ID
+                    personIdType: 'dolphinUserId_2001-10-03'        // ToDo
+                },
+                value: patientName
+            }]
+        };
+
+        // 配列で返す
+        return [accessRightForCreator, accessRightForExperience, accessRightForPatient];
+    },
+
     /**
      * docInfo を生成する
      * @param {baseDocInfo} baseDocInfo
@@ -304,7 +353,8 @@ module.exports = {
      * @params {[]} defaultAccessRight - このプロジェクトのデフォルトアクセス権
      * @returns {docInfo}
      */
-    buildDocInfo: function (baseDocInfo, creatorInfo, defaultAccessRight) {
+    buildDocInfo: function (baseDocInfo, creatorInfo, accessRight) {
+        // buildDocInfo: function (baseDocInfo, creatorInfo, defaultAccessRight) {
         /***************************************
         var simpleDocInfo = {
             contentModuleType: '',
@@ -324,7 +374,7 @@ module.exports = {
                 contentModuleType: baseDocInfo.contentModuleType  // 文書の種類コード MML0005を使用
                 //moduleVersion: ''                                // 使用モジュールのDTDのURIを記載
             },
-            securityLevel: defaultAccessRight,                    // accessRight の配列
+            securityLevel: accessRight,                            // accessRight の配列
             title: {
                 value: title,                                      // 文書タイトル
                 attr: {
@@ -381,9 +431,7 @@ module.exports = {
     },
 
     /**
-     * PatientModuleを生成する
-     * @param {simplePatient}
-     * @returns {PatientModule}
+     * 1. PatientModule
      */
     buildPatientModule: function (simplePatient) {
         /********************************************************************
@@ -477,9 +525,14 @@ module.exports = {
     },
 
     /**
-     * RegisteredDiagnosisModuleを生成する
-     * @param {simpleDiagnosis} simpleDiagnosis
-     * @returns {RegisteredDiagnosisModule}
+     * 2. HealthInsuranceModule
+     */
+    buildHealthInsuranceModule: function (simpleHealthInsurance) {
+
+    },
+
+    /**
+     * 3. RegisteredDiagnosisModule
      */
     buildRegisteredDiagnosisModule: function (simpleDiagnosis) {
         /****************************************************
@@ -537,185 +590,49 @@ module.exports = {
     },
 
     /**
-     * PrescriptionModule を生成する
-     * @param {simplePrescription} simplePrescription
-     * @returns {[external, internal]}
+     * 4. LifestyleModule
      */
-    buildPrescriptionModule: function (simplePrescription) {
-        /**********************************************************
-        var simplePrescription = {
-            medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
-            medicine: '',                             // 処方薬
-            medicineCode: '',                         // 処方薬のコード
-            medicineCodeystem: '',                    // コード体系
-            dose: 1,                                  // 1回の量
-            doseUnit: 'g',                            // 単位
-            frequencyPerDay: 2,                       // 1日の内服回数
-            startDate: startDate,                     // 服薬開始日
-            duration: 7,                              // 14日分
-            instruction: '内服2回 朝夜食後に',           // 用法
-            PRN: false,                               // 頓用=false
-            brandSubstitutionPermitted: true,         // ジェネリック
-            longTerm: false,                          // 長期処方
-        },,,, ]
-        };
-        ************************************************************/
+    buildLifestyleModule: function (simpleLifestyle) {
 
-        var external = {issuedTo: 'external', medication: []};   // 院外処方Prescription
-        var internal = {issuedTo: 'internal', medication: []};   // 院内処方Prescription
-        var inOrExt = {medication: []};                          // 院内、院外が指定されていない場合
-
-        simplePrescription.medication.forEach((entry) => {
-
-            var medication = {
-                medicine: {
-                    name: entry.medicine,
-                    code: [{
-                        value: entry.medicineCode,
-                        attr: {
-                            system: entry.medicineCodeSystem
-                        }
-                    }]
-                },
-                dose: entry.dose,                       // 1回の量
-                doseUnit: entry.doseUnit                // 単位
-            };
-            // 以下オプションなのでテストしながら設定
-            // 院内、院外
-            if (entry.hasOwnProperty('issuedTo')) {
-                if (entry.issuedTo === 'external') {
-                    external.medication.push(medication);
-                } else if (entry.issuedTo === 'internal') {
-                    internal.medication.push(medication);
-                }
-            } else {
-                inOrExt.medication.push(medication);
-            }
-            // 1日の内服回数
-            if (entry.hasOwnProperty('frequencyPerDay')) {
-                medication.frequencyPerDay = entry.frequencyPerDay;
-            }
-
-            // 服薬開始日
-            if (entry.hasOwnProperty('startDate')) {
-                medication.startDate = entry.startDate;
-            }
-
-            // 服薬期間
-            if (entry.hasOwnProperty('duration')) {
-                medication.duration = entry.duration;
-            }
-
-            // 用法
-            if (entry.hasOwnProperty('instruction')) {
-                medication.instruction = entry.instruction;
-            }
-
-            // 頓用
-            if (entry.hasOwnProperty('PRN')) {
-                medication.PRN = entry.PRN;
-            }
-
-            // ジェネリック デフォルトは true
-            if (entry.hasOwnProperty('brandSubstitutionPermitted')) {
-                medication.brandSubstitutionPermitted = entry.brandSubstitutionPermitted;
-            } else {
-                medication.brandSubstitutionPermitted = true;
-            }
-
-            // 長期処方
-            if (entry.hasOwnProperty('longTerm')) {
-                medication.longTerm = entry.longTerm;
-            }
-        });
-
-        return [external, internal, inOrExt];
-    },
-
-    buildInjectionModule: function (simpleInjection) {
-        /**********************************************************
-        var simpleInjection = {
-            medication: [],
-            narcoticPrescriptionLicenseNumber: '',
-            comment: ''
-        };
-        var medicationObj = {
-            medicine: '',                             // 薬剤名称
-            medicineCode: '',                         // 薬剤コード
-            medicineCodeystem: '',                    // コード体系
-            dose: '',
-            doseUnit: '',
-            startDateTime: '',
-            endDateTime: '',
-            instruction: '',
-            route: '',
-            site: '',
-            deliveryMethod: '',
-            batchNo: '',
-            additionalInstruction: ''
-        };
-        ************************************************************/
-        var injection = {
-            medication: []
-        };
-
-        simpleInjection.medication.forEach((entry) => {
-            var medication = {
-                medicine: {
-                    name: entry.medicine,
-                    code: [{
-                        value: entry.medicineCode,
-                        attr: {
-                            system: entry.medicineCodeSystem
-                        }
-                    }]
-                },
-                dose: entry.dose,                       // 1回の量
-                doseUnit: entry.doseUnit                // 単位
-            };
-            // 投与開始日時
-            if (entry.hasOwnProperty('startDateTime')) {
-                medication.startDateTime = entry.startDateTime;
-            }
-            // 投与修了日時
-            if (entry.hasOwnProperty('endDateTime')) {
-                medication.endDateTime = entry.endDateTime;
-            }
-            // 用法指示
-            if (entry.hasOwnProperty('instruction')) {
-                medication.instruction = entry.instruction;
-            }
-            // 投与経路
-            if (entry.hasOwnProperty('route')) {
-                medication.route = entry.route;
-            }
-            // 投与部位
-            if (entry.hasOwnProperty('site')) {
-                medication.site = entry.site;
-            }
-            // 注射方法
-            if (entry.hasOwnProperty('deliveryMethod')) {
-                medication.deliveryMethod = entry.deliveryMethod;
-            }
-            // 処方番号
-            if (entry.hasOwnProperty('batchNo')) {
-                medication.batchNo = entry.batchNo;
-            }
-            // 追加指示，コメント
-            if (entry.hasOwnProperty('additionalInstruction')) {
-                medication.additionalInstruction = entry.additionalInstruction;
-            }
-            injection.medication.push(medication);
-        });
-        // 麻薬施用者番号
-        // コメント
-        return injection;
     },
 
     /**
-     * TestModule を生成する
-     * @param {simpleTest} simpleTest
-     * @returns {TestModule}
+     * 5. BaseClinicModule
+     */
+    buildBaseClinicModule: function (simpleBaseClinic) {
+
+    },
+
+    /**
+     * 6. FirstClinicModule
+     */
+    buildFirstClinicModule: function (simpleFirstClinic) {
+
+    },
+
+    /**
+     * 7. ProgressCourceModule
+     */
+    buildProgressCourceModule: function (simpleProgressCource) {
+
+    },
+
+    /**
+     * 8. SurgeryModule
+     */
+    buildSurgeryModule: function (simpleSurgery) {
+
+    },
+
+    /**
+     * 9. SummaryModule
+     */
+    buildSummaryModule: function (simpleSummary) {
+
+    },
+
+    /**
+     * 10. TestModule
      */
     buildTestModule: function (simpleTest) {
         /***********************************
@@ -881,6 +798,23 @@ module.exports = {
         return testModule;
     },
 
+    /**
+     * 11. ReportModule
+     */
+    buildReportModule: function (simpleReport) {
+
+    },
+
+    /**
+     * 12. ReferralModule
+     */
+    buildReferralModule: function (simpleReferral) {
+
+    },
+
+    /**
+     * 13. VitalSignModule
+     */
     buildVitalSignModule: function (simpleVitalSign) {
         // 必須属性
         var vitalSign = {
@@ -1003,6 +937,197 @@ module.exports = {
     },
 
     /**
+     * 14. FlowSheetModule
+     */
+    buildFlowSheetModule: function (simpleFlowSheet) {
+
+    },
+
+    /**
+     * 15. PrescriptionModule
+     */
+    buildPrescriptionModule: function (simplePrescription) {
+        /**********************************************************
+        var simplePrescription = {
+            medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
+            medicine: '',                             // 処方薬
+            medicineCode: '',                         // 処方薬のコード
+            medicineCodeystem: '',                    // コード体系
+            dose: 1,                                  // 1回の量
+            doseUnit: 'g',                            // 単位
+            frequencyPerDay: 2,                       // 1日の内服回数
+            startDate: startDate,                     // 服薬開始日
+            duration: 7,                              // 14日分
+            instruction: '内服2回 朝夜食後に',           // 用法
+            PRN: false,                               // 頓用=false
+            brandSubstitutionPermitted: true,         // ジェネリック
+            longTerm: false,                          // 長期処方
+        },,,, ]
+        };
+        ************************************************************/
+
+        var external = {issuedTo: 'external', medication: []};   // 院外処方Prescription
+        var internal = {issuedTo: 'internal', medication: []};   // 院内処方Prescription
+        var inOrExt = {medication: []};                          // 院内、院外が指定されていない場合
+
+        simplePrescription.medication.forEach((entry) => {
+
+            var medication = {
+                medicine: {
+                    name: entry.medicine,
+                    code: [{
+                        value: entry.medicineCode,
+                        attr: {
+                            system: entry.medicineCodeSystem
+                        }
+                    }]
+                },
+                dose: entry.dose,                       // 1回の量
+                doseUnit: entry.doseUnit                // 単位
+            };
+            // 以下オプションなのでテストしながら設定
+            // 院内、院外
+            if (entry.hasOwnProperty('issuedTo')) {
+                if (entry.issuedTo === 'external') {
+                    external.medication.push(medication);
+                } else if (entry.issuedTo === 'internal') {
+                    internal.medication.push(medication);
+                }
+            } else {
+                inOrExt.medication.push(medication);
+            }
+            // 1日の内服回数
+            if (entry.hasOwnProperty('frequencyPerDay')) {
+                medication.frequencyPerDay = entry.frequencyPerDay;
+            }
+
+            // 服薬開始日
+            if (entry.hasOwnProperty('startDate')) {
+                medication.startDate = entry.startDate;
+            }
+
+            // 服薬期間
+            if (entry.hasOwnProperty('duration')) {
+                medication.duration = entry.duration;
+            }
+
+            // 用法
+            if (entry.hasOwnProperty('instruction')) {
+                medication.instruction = entry.instruction;
+            }
+
+            // 頓用
+            if (entry.hasOwnProperty('PRN')) {
+                medication.PRN = entry.PRN;
+            }
+
+            // ジェネリック デフォルトは true
+            if (entry.hasOwnProperty('brandSubstitutionPermitted')) {
+                medication.brandSubstitutionPermitted = entry.brandSubstitutionPermitted;
+            } else {
+                medication.brandSubstitutionPermitted = true;
+            }
+
+            // 長期処方
+            if (entry.hasOwnProperty('longTerm')) {
+                medication.longTerm = entry.longTerm;
+            }
+        });
+
+        return [external, internal, inOrExt];
+    },
+
+    /**
+     * 16. InjectionModule
+     */
+    buildInjectionModule: function (simpleInjection) {
+        /**********************************************************
+        var simpleInjection = {
+            medication: [],
+            narcoticPrescriptionLicenseNumber: '',
+            comment: ''
+        };
+        var medicationObj = {
+            medicine: '',                             // 薬剤名称
+            medicineCode: '',                         // 薬剤コード
+            medicineCodeystem: '',                    // コード体系
+            dose: '',
+            doseUnit: '',
+            startDateTime: '',
+            endDateTime: '',
+            instruction: '',
+            route: '',
+            site: '',
+            deliveryMethod: '',
+            batchNo: '',
+            additionalInstruction: ''
+        };
+        ************************************************************/
+        var injection = {
+            medication: []
+        };
+
+        simpleInjection.medication.forEach((entry) => {
+            var medication = {
+                medicine: {
+                    name: entry.medicine,
+                    code: [{
+                        value: entry.medicineCode,
+                        attr: {
+                            system: entry.medicineCodeSystem
+                        }
+                    }]
+                },
+                dose: entry.dose,                       // 1回の量
+                doseUnit: entry.doseUnit                // 単位
+            };
+            // 投与開始日時
+            if (entry.hasOwnProperty('startDateTime')) {
+                medication.startDateTime = entry.startDateTime;
+            }
+            // 投与修了日時
+            if (entry.hasOwnProperty('endDateTime')) {
+                medication.endDateTime = entry.endDateTime;
+            }
+            // 用法指示
+            if (entry.hasOwnProperty('instruction')) {
+                medication.instruction = entry.instruction;
+            }
+            // 投与経路
+            if (entry.hasOwnProperty('route')) {
+                medication.route = entry.route;
+            }
+            // 投与部位
+            if (entry.hasOwnProperty('site')) {
+                medication.site = entry.site;
+            }
+            // 注射方法
+            if (entry.hasOwnProperty('deliveryMethod')) {
+                medication.deliveryMethod = entry.deliveryMethod;
+            }
+            // 処方番号
+            if (entry.hasOwnProperty('batchNo')) {
+                medication.batchNo = entry.batchNo;
+            }
+            // 追加指示，コメント
+            if (entry.hasOwnProperty('additionalInstruction')) {
+                medication.additionalInstruction = entry.additionalInstruction;
+            }
+            injection.medication.push(medication);
+        });
+        // 麻薬施用者番号
+        // コメント
+        return injection;
+    },
+
+    /**
+     * 17. HemoDialysysModule
+     */
+    buildHemoDialysysModule: function (simpleHemoDialysys) {
+
+    },
+
+    /**
       * MML を生成する
       * @param {simpleComposition} - simpleComposition
       * @returns {MML}
@@ -1014,9 +1139,10 @@ module.exports = {
                 uuid: uuid,
                 confirmDate: confirmDate,
                 patient: simplePatient,
-                creator: simpleCreator
+                creator: simpleCreator,
+                accessRight: simpleaccessRight
             },
-            content: [{simplePrescription} | {simpleDiagnosis} | {simpleTest}]
+            content: [{simplePrescription} | {simpleInjection} | {simpleDiagnosis} | {simpleTest} | {simpleVitalSign}]
         };
         ***************************************************/
         // このMMLの生成日
@@ -1025,8 +1151,20 @@ module.exports = {
         var context = simpleComposition.context;
         // 患者情報モジュールを生成する
         var patientModule = this.buildPatientModule(context.patient);
-        // デフォルトのアクセス権を生成する
-        var defaultAccessRight = this.buildDefaultAccessRight(context.patient.id, context.patient.kanjiName);
+        // アクセス権
+        var simpleAccessRight = {};
+        if (context.hasOwnProperty('accessRight')) {
+            simpleAccessRight = context.accessRight;
+        } else {
+            // デフォルトを設定
+            simpleAccessRight = {
+                patient: 'read',
+                creator: 'all',
+                experience: 'read'
+            };
+        }
+        var accessRight = this.buildAccessRight(context.patient.id, context.patient.kanjiName, simpleAccessRight);
+
         // このMMLのcreatorInfoを生成する
         var creatorInfo = this.buildCreatorInfo(context.creator);
         // Header
@@ -1072,14 +1210,14 @@ module.exports = {
                         // MML 規格によりModule単位にuuidを付番する
                         baseDocInfo.uuid = uuid.v4();
                         // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
-                        docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                        docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
                         result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
                     }
                 });
             } else if (entry.contentType === 'Medical Diagnosis') {
                 baseDocInfo.contentModuleType = 'registeredDiagnosis';
                 baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
                 content = this.buildRegisteredDiagnosisModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             } else if (entry.contentType === 'Laboratory Report') {
@@ -1088,26 +1226,26 @@ module.exports = {
                 // それがdocInfoにセットされる
                 baseDocInfo.contentModuleType = 'test';
                 baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creator, defaultAccessRight);
+                docInfo = this.buildDocInfo(baseDocInfo, creator, accessRight);
                 content = this.buildTestModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             } else if (entry.contentType === 'Patient Information') {
                 baseDocInfo.contentModuleType = 'patientInfo';
                 baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
                 content = this.buildPatientModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
                 hasPatientModule = true;
             } else if (entry.contentType === 'Vital Sign') {
                 baseDocInfo.contentModuleType = 'vitalsign';
                 baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
                 content = this.buildVitalSignModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             } else if (entry.contentType === 'Injection') {
                 baseDocInfo.contentModuleType = 'injection';
                 baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
                 content = this.buildInjectionModule(entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
@@ -1117,7 +1255,7 @@ module.exports = {
             baseDocInfo.contentModuleType = 'patientInfo';
             baseDocInfo.uuid = uuid.v4();
             baseDocInfo.confirmDate = createDate;
-            docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, defaultAccessRight);
+            docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
             result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
         }
         process.nextTick(() => {
