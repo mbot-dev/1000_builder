@@ -2,9 +2,9 @@
 
 const express = require('express');
 const config = require('config');
-const jwt = require('jwt-simple');
 const uuid = require('node-uuid');
 const logger = require('../log/logger');
+const jweSimple = require('../api/jweSimple');
 
 const router = express.Router();
 
@@ -66,15 +66,17 @@ function generateToken(req, res, next) {
         iat: now,
         exp: expires
     };
-    req.token = jwt.encode(claim, config.jwt.secret_demo);
-    logger.debug(req.token);
+    var key = new Buffer(config.jwt.secret_demo, 'hex');
+    // logger.info(Buffer.byteLength(key)); = 32 ok
+    req.token = jweSimple.compact(claim, key);
+    logger.info(req.token);
     next();
 }
 
 function respond(req, res) {
     var result = {
-        token_type: config.jwt.token_type,              // beare
-        access_token: req.token,                        // jwt
+        token_type: config.jwt.token_type,      // beare
+        access_token: req.token,                // jwt
         expires_in: config.jwt.expires			// in seconds
     };
     res.status(200);

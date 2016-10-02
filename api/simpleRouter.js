@@ -2,14 +2,11 @@
 
 const express = require('express');
 const config = require('config');
-const jwt = require('jwt-simple');
 const logger = require('../log/logger');
 const simpleBuilder = require('../api/simpleBuilder');
-const http = require('http');
-const url = require('url');
+const jweSimple = require('../api/jweSimple');
 
 const router = express.Router();
-
 
 function sendError(status, err, req, res) {
     var message = {
@@ -31,8 +28,9 @@ function authenticate(req, res, next) {
         }
         var len = bearer.length;
         var token = auth.substring(len);
-        var decoded = jwt.decode(token, config.jwt.secret_demo);
-        logger.debug(decoded);
+        var key = new Buffer(config.jwt.secret_demo, 'hex');
+        var decoded = jweSimple.verify(token, key);
+        logger.info(JSON.stringify(decoded));
         next();
     } catch (error) {
         sendError(401, 'invalid_grant', req, res);
