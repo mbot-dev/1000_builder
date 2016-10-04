@@ -40,7 +40,7 @@ var getAccessToken = function (callback) {
     var base64 = btoa(consumerKey + ':'　+　secret);
 
     // ポスト先は /oauth2/token
-    xhr.open('POST', '/oauth2/token', true);
+    xhr.open('POST', '/simple/api/v1/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
@@ -92,7 +92,7 @@ var post = function (simpleComposition) {
     var xhr = new XMLHttpRequest();
 
     // ポスト先 /1000/simple/v1
-    xhr.open('POST', '/1000/simple/v1', true);
+    xhr.open('POST', '/simple/api/v1/mml', true);
 
     // Authorizationヘッダーを Bearer access_token にセットする
     xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
@@ -422,6 +422,109 @@ var simpleVitalSign = function () {
     });
     return vitalSign;
 };
+
+// 生活習慣
+var simpleLifestyle = {
+    occupation: '会社員',
+    tobacco: '吸わない',
+    alcohol: 'Beer 350ml/日',
+    other: 'ウォーキング'
+};
+
+// 基礎的診療情報
+var simpleBaseClinic = {                                    // 基礎的診療情報
+    allergy: [],                                            // アレルギー情報 ? [allergyItem]
+    bloodtype: {
+        abo: 'a',                                           // ABO 式血液型 MML0018
+        rh: 'rhD+'                                          // Rho(D) 式血液型 ? MML0019
+    }
+    // infection: []                                        // 感染性情報 ? [infectionItem]
+};
+var allergyItem = {
+    factor: 'crab',                                         // アレルギー原因
+    severity: 'mild',                                       // アレルギー反応程度 ? MML0017
+    identifiedDate: 'since almost 20 years ago',            // アレルギー同定日 ?
+    memo: 'no reaction to shrimp'                           // アレルギーメモ ?
+};
+simpleBaseClinic.allergy.push(allergyItem);
+
+// 初診時特有情報
+var simpleFirstClinic = {                                   // 初診時特有情報
+    contentType: 'firstClinic',
+    familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
+    childhood: {},                                          // 小児期情報 ?
+    pastHistory: {},                                        // 既往歴情報 ?
+    chiefComplaints: '頭痛',                                    // 主訴 ?
+    presentIllnessNotes: '2週間前より一日に数回側頭部から頭頂部にかけてのずきずきする痛みがあり。' // 現病歴自由記載 ?
+};
+
+var familyHistoryItem = {
+    relation: 'motherInLaw',                                // 続柄コード MML0020
+    simpleDiagnosis: {
+        contentType: 'Medical Diagnosis',                   // contentTypeをMedical Diagnosisにする
+        diagnosis: 'gastric cancer',                        // 疾患名
+        code: 'C169-.007',                                  // 疾患コード
+        system: 'ICD10',                                    // 疾患コード体系名
+        dateOfRemission: '1989-08-25',                      // 疾患終了日 YYYY-MM-DD 形式（オプション）
+        outcome: 'died'                                     // 転帰 MML0016を使用（オプション）
+    },
+    age: 'P40Y'                                            // 家族の疾患時年齢 ?
+};
+simpleFirstClinic.familyHistory.push(familyHistoryItem);
+
+var childhood = {                                           // 出生時情報
+    birthInfo: {
+        deliveryWeeks: 'P40W',                              // 分娩時週数 ? PnW
+        deliveryMethod: 'cesarean section',                 // 分娩方法 ?
+        bodyWeight: '3270',                                 // 出生時体重 ? g
+        bodyHeight: '50'                                    // 出生時身長 ? cm
+    },
+    vaccination: []                                         // 予防接種情報 ? [vaccinationItem]
+};
+
+var vaccinationItem1 = {
+    vaccine: 'polio',                                       // 接種ワクチン名
+    injected: 'true',                                       // 実施状態．true：ワクチン接種，false：接種せず
+    age: 'P6M',                                             // 接種時年齢 ? PnYnM 1歳6ヶ月=P1Y6M
+    memo: 'first administration'                            // 実施時メモ ?
+};
+var vaccinationItem2 = {
+    vaccine: 'polio',                                       // 接種ワクチン名
+    injected: 'true',                                       // 実施状態．true：ワクチン接種，false：接種せず
+    age: 'P1Y6M',                                           // 接種時年齢 ? PnYnM 1歳6ヶ月=P1Y6M
+    memo: 'second administration'                           // 実施時メモ ?
+};
+childhood.vaccination.push(vaccinationItem1);
+childhood.vaccination.push(vaccinationItem2);
+simpleFirstClinic.childhood = childhood;
+
+var pastHistory = {                                         // 既往歴情報 choice
+    pastHistoryItem: []                                     // 時間表現併用 choice Not support
+};
+
+var pastHistoryItem1 = {
+    timeExpression: '6 years old',                          // 時間表現
+    eventExpression: appendectomy                           // 時間表現に対応するイベント表現 ? [string]
+};
+var pastHistoryItem2 = {
+    timeExpression: '5 years ago (1994)',                   // 時間表現
+    eventExpression: hypertension                           // 時間表現に対応するイベント表現 ? [string]
+};
+pastHistory.pastHistoryItem.push(pastHistoryItem1);
+pastHistory.pastHistoryItem.push(pastHistoryItem2);
+simpleFirstClinic.pastHistory = pastHistory;
+
+// 手術記録
+
+
+
+
+
+
+
+
+
+
 
 // 処方せんサンプルをPOSTする
 var showPrescription = function () {

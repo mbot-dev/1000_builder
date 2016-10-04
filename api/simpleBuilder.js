@@ -528,7 +528,213 @@ module.exports = {
      * 2. HealthInsuranceModule
      */
     buildHealthInsuranceModule: function (simpleHealthInsurance) {
+        /*******************************************************************************
+        // 保険種別
+        insuranceClass;
 
+        // 保険種別コード
+        insuranceClassCode;
+
+        // 保険者番号
+        insuranceNumber;
+
+        // 被保険者記号
+        clientGroup;
+
+        // 被保険者番号
+        clientNumber;
+
+        // 本人家族区分
+        familyClass;
+
+        // 開始日(交付年月日）
+        startDate;
+
+        // 有効期限
+        expiredDate;
+
+        // 継続疾患名 no use
+        continuedDisease;
+
+        // 入院時負担率
+        payInRatio;
+
+        // 外来時負担率
+        payOutRatio;
+
+        // 公費負担リスト
+        publicItems;
+
+        // 複数公費の優先順位
+        priority;
+
+        // 公費負担名称
+        providerName;
+
+        // 負担者番号
+        provider;
+
+        // 受給者番号
+        recipient;
+
+        // 開始日
+        startDate;
+
+        // 開始日
+        expiredDate;
+
+        // 負担率または負担金
+        paymentRatio;
+
+        // 負担率または負担金
+        paymentRatioType;
+
+        // 複数公費の優先順位
+        priority;
+
+        // 公費負担名称
+        providerName;
+
+        // 負担者番号
+        provider;
+
+        // 受給者番号
+        recipient;
+
+        // 開始日
+        startDate;
+
+        // 開始日
+        expiredDate;
+
+        // 負担率または負担金
+        paymentRatio;
+
+        // 負担率または負担金
+        paymentRatioType;
+
+        var HealthInsuranceModule = {
+            attr: {
+                countryType: ''
+            },
+            insuranceClass: {
+                value: '',                                  // 健康保険種別
+                attr: {
+                    ClassCode: '',
+                    tableId: ''                             // MML0031
+                }
+            },
+            insuranceNumber: '',                            // 健康保険者番号
+            clientId: {                                     // 被保険者情報
+                group: '',                                  // 被保険者記号
+                number: ''                                  // 被保険者番号
+            },
+            familyClass: '',                                // 本人家族区分．true：本人，false：家族
+            clientInfo: {                                   // 被保険者情報
+                personName: [],                             // mmlNm:Nameの配列
+                addresses: [],                              // mmlAd:Addressの配列
+                phones: []                                  // mmlPh:Phoneの配列
+            },
+            continuedDiseases: [],                          // 継続疾患情報 stringの配列
+            startDate: '',                                  // 開始日 (交付年月日) CCYY-MM-DD
+            expiredDate: '',                                // 有効期限
+            paymentInRatio: '',                             // 入院時の負担率
+            paymentOutRatio: '',                            // 外来時の負担率
+            insuredInfo: {                                  // 保険者情報
+                facility: {},                               // mmlFc:Facility
+                addresses: [],                              // mmlAd:Addressの配列
+                phones: []                                  // mmlPh:Phoneの配列
+            },
+            workInfo: {                                     // 被保険者の所属する事業所情報
+                facility: {},                               // mmlFc:Facility
+                addresses: [],                              // mmlAd:Addressの配列
+                phones: []                                  // mmlPh:Phoneの配列
+            },
+            publicInsurance: []                             // publicInsuranceItemの配列 公費負担医療情報
+        };
+
+        var publicInsuranceItem = {
+            attr: {
+                priority: ''                                // 優先順位
+            },
+            providerName: '',                               // 公費負担名称
+            provider: '',                                   // 負担者番号
+            recipient: '',                                  // 受給者番号
+            startDate: '',                                  // 開始日
+            expiredDate: '',                                // 有効期限
+            paymentRatio: {
+                value: '',                                  // 負担率または負担金
+                attr: {
+                    ratioType: ''                           // MML0032
+                }
+            }
+        };
+        ********************************************************************************/
+        var result = {};
+
+        // countryType
+        var countryType = (simpleHealthInsurance.hasOwnProperty('countryType'))
+            ? simpleHealthInsurance.countryType
+            : 'JPN';
+        result.attr = {
+            countryType: countryType
+        };
+
+        // insuranceClass
+        result.insuranceClass = {
+            value: simpleHealthInsurance.insuranceClass,    // 健康保険種別
+            attr: {
+                ClassCode: simpleHealthInsurance.insuranceClassCode,
+                tableId: 'MML0031'                             // MML0031
+            }
+        };
+
+        // insuranceNumber
+        result.insuranceNumber = simpleHealthInsurance.insuranceNumber;
+
+        // clientId
+        result.clientId = {                                     // 被保険者情報
+            group: simpleHealthInsurance.clientGroup,           // 被保険者記号
+            number: simpleHealthInsuranceclientNumber           // 被保険者番号
+        };
+
+        // familyClass
+        result.familyClass = simpleHealthInsurance.familyClass;
+
+        // startDate
+        result.startDate = simpleHealthInsurance.startDate;
+
+        // expiredDate
+        result.expiredDate = simpleHealthInsurance.expiredDate;
+
+        // paymentRatio
+        result.paymentRatio = simpleHealthInsurance.paymentRatio;
+
+        // publicInsurance
+        if (simpleHealthInsurance.hasOwnProperty('publicInsurance')) {
+            result.publicInsurance = [];
+            simpleHealthInsurance.publicInsurance.forEach((entry) => {
+                var it = {
+                    attr: {
+                        priority: entry.priority
+                    },
+                    providerName: entry.providerName,
+                    provider: entry.provider,
+                    recipient: entry.recipient,
+                    startDate: entry.startDate,
+                    expiredDate: entry.expiredDate,
+                    paymentRatio: {
+                        value: entry.paymentRatio,                  // 負担率または負担金
+                        attr: {
+                            ratioType: entry.paymentRatioType       // MML0032
+                        }
+                    }
+                };
+                result.publicInsurance.push(it);
+            });
+        }
+
+        return result;
     },
 
     /**
@@ -593,42 +799,830 @@ module.exports = {
      * 4. LifestyleModule
      */
     buildLifestyleModule: function (simpleLifestyle) {
-
+        /******************************************
+        var simpleLifestyle = {
+            occupation: '',
+            tobacco: '',
+            alcohol: '',
+            other: ''
+        };
+        ******************************************/
+        return JSON.parse(JSON.stringify(simpleLifestyle));
     },
 
     /**
      * 5. BaseClinicModule
      */
     buildBaseClinicModule: function (simpleBaseClinic) {
+        /*******************************************************************************
+        var simpleBaseClinic = {                    // 基礎的診療情報
+            allergy: [],                            // アレルギー情報 ? [allergyItem]
+            bloodtype: {},                          // 血液型情報 ?
+            infection: []                           // 感染性情報 ? [infectionItem]
+        };
 
+        var allergyItem = {
+            factor: '',                             // アレルギー原因
+            severity: '',                           // アレルギー反応程度 ? MML0017
+            identifiedDate: '',                     // アレルギー同定日 ?
+            memo: ''                                // アレルギーメモ ?
+        };
+
+        var bloodtype = {
+            abo: '',                                // ABO 式血液型 MML0018
+            rh: '',                                 // Rho(D) 式血液型 ? MML0019
+            others: [],                             // その他の血液型 ? [other]
+            memo: ''                                // メモ ?
+        };
+
+        var other = {
+            typeName: '',                           // 血液型名称
+            typeJudgement: '',                      // 血液型判定
+            description: ''                         // 血液型注釈 ?
+        };
+
+        var infectionItem = {
+            factor: '',                             // 感染性要因名
+            examValue: '',                          // 感染性要因検査値
+            identifiedDate: '',                     // 感染性要因同定日 ?
+            memo: ''                                // 感染性要因メモ ?
+        };
+        ********************************************************************************/
+        return JSON.parse(JSON.stringify(simpleBaseClinic));
     },
 
     /**
      * 6. FirstClinicModule
      */
     buildFirstClinicModule: function (simpleFirstClinic) {
+        /******************************************************************************
+        var simpleFirstClinic = {                                   // 初診時特有情報
+            familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
+            childhood: {},                                          // 小児期情報 ?
+            pastHistory: {},                                        // 既往歴情報 ?
+            chiefComplaints: '',                                    // 主訴 ?
+            presentIllnessNotes: ''                                 // 現病歴自由記載 ?
+        };
 
+        var familyHistoryItem = {
+            relation: '',                                           // 続柄コード MML0020
+            simpleDiagnosis: {},                                    // 疾患名情報
+            age: '',                                                // 家族の疾患時年齢 ?
+            memo: ''                                                // メモ ?
+        };
+
+        var childhood = {                                           // 出生時情報
+            birthInfo: {
+                facilityId: '',                                     // Facility へ変換 oid
+                facilityName: ''
+                deliveryWeeks: '',                                  // 分娩時週数 ? PnW
+                deliveryMethod: '',                                 // 分娩方法 ?
+                bodyWeight: '',                                     // 出生時体重 ?
+                bodyHeight: '',                                     // 出生時身長 ?
+                chestCircumference: '',                             // 出生時胸囲 ?
+                headCircumference: '',                              // 出生時頭囲 ?
+                memo: ''                                            // 出生時メモ ?
+            },
+            vaccination: []                                         // 予防接種情報 ? [vaccinationItem]
+        };
+
+        var vaccinationItem = {
+            vaccine: '',                                            // 接種ワクチン名
+            injected: '',                                           // 実施状態．true：ワクチン接種，false：接種せず
+            age: '',                                                // 接種時年齢 ? PnYnM 1歳6ヶ月=P1Y6M
+            memo: ''                                                // 実施時メモ ?
+        };
+
+        var pastHistory = {                                         // 既往歴情報 choice
+            freeNotes: '',                                          // 自由文章表現 choice
+            pastHistoryItem: []                                     // 時間表現併用 choice Not support
+        };
+
+        var pastHistoryItem = {
+            timeExpression: '',                                     // 時間表現
+            eventExpression: []                                     // 時間表現に対応するイベント表現 ? [string]
+        };
+        ******************************************************************************/
+
+        var result = {};
+
+        // familyHistory
+        if (simpleFirstClinic.hasOwnProperty('familyHistory')) {
+            result.familyHistory = [];
+            simpleFirstClinic.familyHistory.forEach((entry) => {
+                var fhItem = {
+                    relation: entry.relation
+                };
+                fhItem.RegisteredDiagnosisModule = this.buildRegisteredDiagnosisModule(entry.simpleDiagnosis);
+                if (entry.hasOwnProperty('age')) {
+                    fhItem.age = entry.age;
+                }
+                if (entry.hasOwnProperty('memo')) {
+                    fhItem.memo = entry.memo;
+                }
+                result.familyHistory.push(fhItem);
+            });
+        }
+
+        //childhood
+        if (simpleFirstClinic.hasOwnProperty('childhood')) {
+            var src = simpleFirstClinic.childhood;
+            var dest = {};
+            result.childhood = dest;
+            if (src.hasOwnProperty('birthInfo')) {
+                dest.birthInfo = {};
+                if (src.birthInfo.hasOwnProperty('facilityId') && src.birthInfo.hasOwnProperty('facilityName')) {
+                    // 共通形式の Facility
+                    dest.birthInfo.Facility = this.buildFacility(src.birthInfo.facilityId, 'OID', src.birthInfo.facilityName);
+                }
+                if (src.birthInfo.hasOwnProperty('deliveryWeeks')) {
+                    dest.birthInfo.deliveryWeeks = src.birthInfo.deliveryWeeks;
+                }
+                if (src.birthInfo.hasOwnProperty('deliveryMethod')) {
+                    dest.birthInfo.deliveryWeeks = src.birthInfo.deliveryMethod;
+                }
+                if (src.birthInfo.hasOwnProperty('bodyWeight')) {
+                    dest.birthInfo.bodyWeight = {
+                        value: src.birthInfo.bodyWeight,
+                        attr: {
+                            unit: 'g'
+                        }
+                    };
+                }
+                if (src.birthInfo.hasOwnProperty('bodyHeight')) {
+                    dest.birthInfo.bodyHeight = {
+                        value: src.birthInfo.bodyHeight,
+                        attr: {
+                            unit: 'cm'
+                        }
+                    };
+                }
+                if (src.birthInfo.hasOwnProperty('chestCircumference')) {
+                    dest.birthInfo.chestCircumference = {
+                        value: src.birthInfo.chestCircumference,
+                        attr: {
+                            unit: 'cm'
+                        }
+                    };
+                }
+                if (src.birthInfo.hasOwnProperty('headCircumference')) {
+                    dest.birthInfo.headCircumference = {
+                        value: src.birthInfo.headCircumference,
+                        attr: {
+                            unit: 'cm'
+                        }
+                    };
+                }
+                if (src.birthInfo.hasOwnProperty('memo')) {
+                    dest.birthInfo.memo = src.birthInfo.deliveryMethod;
+                }
+            }
+            if (src.hasOwnProperty('vaccination')) {
+                dest.vaccination = [];
+                src.vaccination.forEach((entry) => {
+                    var it = {
+                        vaccine: entry.vaccine,
+                        injected: entry.injected
+                    };
+                    if (entry.hasOwnProperty('age')) {
+                        it.age = entry.age;
+                    }
+                    if (entry.hasOwnProperty('memo')) {
+                        it.memo = entry.memo;
+                    }
+                    dest.vaccination.push(it);
+                });
+            }
+        }
+
+        // 既往歴 freeNotes のみ
+        if (simpleFirstClinic.hasOwnProperty('pastHistory') &&
+                simpleFirstClinic.pastHistory.hasOwnProperty('freeNotes')) {
+            result.pastHistory = {
+                freeNotes: simpleFirstClinic.pastHistory.freeNotes
+            };
+        } else if (simpleFirstClinic.hasOwnProperty('pastHistory') &&
+                simpleFirstClinic.pastHistory.hasOwnProperty('pastHistoryItem')) {
+            result.pastHistory = {
+                pastHistoryItem: []
+            };
+            simpleFirstClinic.pastHistory.pastHistoryItem.forEach((entry) => {
+                // timeExpression, eventExpression pair
+                var it = {
+                    timeExpression: entry.timeExpression,           // pair
+                    eventExpression: [entry.eventExpression]        // pair
+                };
+                result.pastHistory.pastHistoryItem.push(it);
+            });
+        }
+
+        // chiefComplaints
+        if (simpleFirstClinic.hasOwnProperty('chiefComplaints')) {
+            result.chiefComplaints = simpleFirstClinic.chiefComplaints;
+        }
+
+        // presentIllnessNotes
+        if (simpleFirstClinic.hasOwnProperty('presentIllnessNotes')) {
+            result.presentIllnessNotes = simpleFirstClinic.presentIllnessNotes;
+        }
+
+        return result;
     },
 
     /**
      * 7. ProgressCourceModule
      */
     buildProgressCourceModule: function (simpleProgressCource) {
-
+        /*******************************************************
+        var simpleProgressCource = {
+            content: '',
+            extRef: []
+        };
+        *******************************************************/
+        var result = {
+            value: simpleProgressCource.content
+        };
+        if (simpleProgressCource.hasOwnProperty('extRef')) {
+            result.extRef = [];
+            simpleProgressCource.extRef.forEach((entry) => {
+                result.extRef.push(this.buildExtRef(entry));
+            });
+        }
+        return result;
     },
 
     /**
      * 8. SurgeryModule
      */
-    buildSurgeryModule: function (simpleSurgery) {
+    buildSurgeryItem: function (simpleSurgery) {
+        /*******************************************************************************
+        var simpleSurgery = {                                   // 手術記録情報
+            surgeryItem: []                                     // [surgeryItem]
+        };
 
+        var surgeryItem = {
+            context: {                                          // 手術ヘッダー情報 -> surgicalInfo
+                type: '',                                       // MML0021
+                date: '',                                       // 手術施行日 CCYY-MM-DD
+                startTime: '',                                  // 手術開始時刻 ? hh:mm
+                duration: '',                                   // 手術時間 ? PTnHnM 5時間25分=PT5H25M
+                surgicalDepartmentId: '',                       // 手術実施診療科情報 ? [mmlDp:Department]
+                surgicalDepartmentName: '',                     // 手術実施診療科情報 ? [mmlDp:Department]
+                patientDepartmentId: '',
+                patientDepartmentName: ''                       // 手術時に患者の所属していた診療科 ? [mmlDp:Department]
+            },
+            surgicalDiagnosis: [],                              // 外科診断情報 simpleDiagnosis -> [mmlRd:RegisteredDiagnosisModule]
+            surgicalProcedure: [],                              // 手術法情報 [procedureItem]
+            surgicalStaffs: [],                                 // 麻酔を除く手術スタッフの情報 ? [staff]
+            anesthesiaProcedure: [],                            // 麻酔法名情報 ? [titleItem]
+            anesthesiologists: [],                              // 麻酔医情報 ? [staff]
+            anesthesiaDuration: '',                             // 麻酔時間 ? PTnHnM
+            operativeNotes: '',                                 // 手術記録の自由文章表現 ?
+            referenceInfo: {},                                  // 手術記録に用いる図や写真を外部参照 ? mmlCm:extRef
+            memo: ''                                            // 手術に関する追加事項 ?
+        };
+
+        var procedureItem = {
+            operation: ''                                        // 手術法 choice
+            code: '',                                            // 手術法コード
+            system: ''                                           // 手術法コード体系名
+            // operationElement: [],                               // 手術法の要素分割表記 choice [operationElementItem] Not supported
+            procedureMemo: ''                                   // 手術法に関する追加事項 ?
+        };
+
+        var operationElementItem = {
+            values: []                                          // 分割された手術要素名 [title]
+        };
+
+        var titleItem = {                                       // 分割された手術要素名
+            title: '',
+            code: '',                                           // 手術法コード 麻酔法名コード
+            system: ''                                          // 手術法コード体系名 麻酔法名コード体系名
+        };
+
+        var staff = {
+            superiority: '',                                    // 序列
+            staffClass: ''                                      // 手術スタッフ区分 MML0022
+            staffInfo: {}                                       // スタッフ 情報 simpleCreator -> [mmlPsi:PersonalizedInfo]
+        };
+        *******************************************************************************/
+
+        var result = {
+            surgicalInfo: {
+                date: simpleSurgery.context.date
+            }
+        };
+
+        // surgicalInfo
+        if (simpleSurgery.context.hasOwnProperty('type')) {
+            result.surgicalInfo.attr = {
+                type: simpleSurgery.context.type
+            };
+        }
+        if (simpleSurgery.context.hasOwnProperty('startTime')) {
+            result.surgicalInfo.startTime = simpleSurgery.context.startTime;
+        }
+        if (simpleSurgery.context.hasOwnProperty('duration')) {
+            result.surgicalInfo.duration = simpleSurgery.context.duration;
+        }
+        if (simpleSurgery.context.hasOwnProperty('surgicalDepartmentId') && simpleSurgery.context.hasOwnProperty('surgicalDepartmentName') ) {
+            var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, 'facility', simpleSurgery.context.surgicalDepartmentName);
+            result.surgicalInfo.surgicalDepartment = [sdp];
+        }
+        if (simpleSurgery.context.hasOwnProperty('patientDepartmentId') && simpleSurgery.context.hasOwnProperty('patientDepartmentName') ) {
+            var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, 'facility', simpleSurgery.context.patientDepartmentName);
+            result.surgicalInfo.patientDepartment = [pdp];
+        }
+
+        // surgicalDiagnosis
+        result.surgicalDiagnosis = [];
+        simpleSurgery.surgicalDiagnosis.forEach((entry) => {
+            result.surgicalDiagnosis.push(this.buildRegisteredDiagnosisModule(entry));
+        });
+
+        // surgicalProcedure
+        result.surgicalProcedure = [];
+        simpleSurgery.surgicalProcedure.forEach((entry) => {
+            var procedureItem = {
+                value: entry.operation
+            };
+            result.surgicalProcedure.push(procedureItem);
+            if (entry.hasOwnProperty('code') || entry.hasOwnProperty('system')) {
+                procedureItem.operation.attr = {};
+                if (entry.hasOwnProperty('code')) {
+                    procedureItem.operation.attr.code = entry.code;
+                }
+                if (entry.hasOwnProperty('system')) {
+                    procedureItem.operation.attr.system = entry.system;
+                }
+            }
+            if (entry.hasOwnProperty('procedureMemo')) {
+                procedureItem.procedureMemo = entry.procedureMemo;
+            }
+        });
+
+        // surgicalStaffs
+        if (simpleSurgery.hasOwnProperty('surgicalStaffs')) {
+            result.surgicalStaffs = [];
+            simpleSurgery.surgicalStaffs.forEach((entry) => {
+                // entry = simpleCreator + attributes
+                var staff = {
+                    staffInfo: []
+                };
+                result.surgicalStaffs.push(staff);
+                if (entry.hasOwnProperty('superiority') || entry.hasOwnProperty('staffClass')) {
+                    staff.attr = {};
+                    if (entry.hasOwnProperty('superiority')) {
+                        staff.attr.superiority = entry.superiority;
+                    }
+                    if (entry.hasOwnProperty('staffClass')) {
+                        staff.attr.superiority = entry.staffClass;
+                    }
+                }
+                staff.staffInfo.push(this.buildPersonalizedInfo(entry));
+            });
+        }
+
+        // anesthesiaProcedure
+        if (simpleSurgery.hasOwnProperty('anesthesiaProcedure')) {
+            result.anesthesiaProcedure = [];
+            simpleSurgery.anesthesiaProcedure.forEach((entry) => {
+                var title = {
+                    value: entry.title
+                };
+                result.anesthesiaProcedure.push(title);
+                if (entry.hasOwnProperty('code') || entry.hasOwnProperty('system')) {
+                    title.attr = {};
+                    if (entry.hasOwnProperty('code')) {
+                        title.attr.code = entry.code;
+                    }
+                    if (entry.hasOwnProperty('system')) {
+                        title.attr.system = entry.system;
+                    }
+                }
+            });
+        }
+
+        // anesthesiologists
+        if (simpleSurgery.hasOwnProperty('anesthesiologists')) {
+            result.anesthesiologists = [];
+            simpleSurgery.anesthesiologists.forEach((entry) => {
+                // entry = simpleCreator + attributes
+                var staff = {
+                    staffInfo: []
+                };
+                result.anesthesiologists.push(staff);
+                if (entry.hasOwnProperty('superiority') || entry.hasOwnProperty('staffClass')) {
+                    staff.attr = {};
+                    if (entry.hasOwnProperty('superiority')) {
+                        staff.attr.superiority = entry.superiority;
+                    }
+                    if (entry.hasOwnProperty('staffClass')) {
+                        staff.attr.superiority = entry.staffClass;
+                    }
+                }
+                staff.staffInfo.push(this.buildPersonalizedInfo(entry));
+            });
+        }
+
+        // anesthesiaDuration
+        if (simpleSurgery.hasOwnProperty('anesthesiaDuration')) {
+            result.anesthesiaDuration = simpleSurgery.anesthesiaDuration;
+        }
+
+        // operativeNotes
+        if (simpleSurgery.hasOwnProperty('operativeNotes')) {
+            result.operativeNotes = simpleSurgery.operativeNotes;
+        }
+
+        // referenceInfo
+        if (simpleSurgery.hasOwnProperty('referenceInfo')) {
+            result.referenceInfo = {
+                href: simpleSurgery.referenceInfo.href
+            };
+            if (simpleSurgery.referenceInfo.hasOwnProperty('contentType')) {
+                result.referenceInfo.contentType = simpleSurgery.referenceInfo.contentType;
+            }
+            if (simpleSurgery.referenceInfo.hasOwnProperty('medicalRole')) {
+                result.referenceInfo.medicalRole = simpleSurgery.referenceInfo.medicalRole;
+            }
+            if (simpleSurgery.referenceInfo.hasOwnProperty('title')) {
+                result.referenceInfo.title = simpleSurgery.referenceInfo.title;
+            }
+        }
+
+        // memo
+        if (simpleSurgery.hasOwnProperty('memo')) {
+            result.memo = simpleSurgery.memo;
+        }
+
+        return result;
+    },
+
+    buildSurgeryModule: function (simpleSurgery) {
+        var result = {
+            surgeryItem: []
+        };
+        simpleSurgery.surgeryItem.forEach((entry) => {
+            result.surgeryItem.push(this.buildSurgeryItem(entry));
+        });
+        return result;
     },
 
     /**
      * 9. SummaryModule
      */
     buildSummaryModule: function (simpleSummary) {
+        /***********************************************************************
+        var SummaryModule = {                                       // 臨床経過サマリー情報
+            context: {                                              // 期間情報
+                start: '',                                          // サマリー対象期間の開始日
+                end: ''                                             // サマリー対象期間の終了日
+                outPatient: [],                                         // 外来受診歴情報 ? [outPatientItem]
+                inPatient: []                                           // 入院暦情報 ? [inPatientItem]
+            },
+            simpleDiagnosis: {},                                      // サマリーにおける診断履歴情報 ? 解説は* []
+            deathInfo: {                                            // 死亡関連情報 ?
+                info: '',
+                date: '',                                           // 死亡日時
+                autopsy: ''                                         // 剖検の有無．true：剖検あり，false：なし
+            },
+            simpleSurgery: [],                                      // サマリーにおける手術記録情報 ?
+            chiefComplaints: '',                                    // 主訴 ?
+            patientProfile: '',                                     // 患者プロフィール ?
+            history: '',                                            // 入院までの経過 ?
+            physicalExam: {                                         // 入院時理学所見 ?
+                value: ''                                           // extRef *
+            },
+            clinicalCourse: [],                                     // 経過および治療 ? mmlSm:clinicalRecord
+            dischargeFindings: {                                    // 退院時所見 ?
+                value: ''                                           // mixed=true extRef *
+            },
+            medication: {                                           // 退院時処方 ? medication
+                value: '',                                          // mixed=true
+                PrescriptionModule: {},                             // PrescriptionModule ?
+                extRef: []                                          // extRef *
+            },
+            testResults: [],                                        // 退院時検査結果 ? mmlSm:testResult
+            plan: {                                                 // 退院後治療方針 ? plan
+                value: '',                                          // extRef *
+            },
+            remarks: ''                                             // 患者に関する留意事項 ?
+        };
 
+        var outPatientItem = {
+            date: '',                                               // 外来受診日 date　書式：CCYY-MM-DD
+            outPatientCondition: '',                                // 外来受診状態 ?
+            first: '',                                              // 初診．true：初診，false：再診
+            emergency: '',                                          // 救急受診．true：救急，false：通常
+            staffs: []                                              // 患者担当スタッフ情報 ? [staffInfo]
+        };
+
+        var inPatientItem = {                                       // 個々の入院暦
+            admission: {},                                          // 入院
+            discharge: {},                                          // 退院
+            staffs: [],                                             // ? [staffInfo]
+        };
+
+        var staffInfo = {                                           // 外来担当スタッフ
+            PersonalizedInfo: {},                                   // mmlPsi:PersonalizedInfo  ToDo PersonalizedInfo
+            creatorLicense: []                                      // mmlCi:creatorLicense
+        };
+
+        var admission = {                                           // 入院
+            date: '',                                               // 入院 (転入) 日 CCYY-MM-DD
+            admissionCondition: '',                                 // 入院時状態 ?
+            emergency: '',                                          // 緊急入院．true：緊急入院，false：通常
+            referFrom: {}                                           // 紹介元情報 ? mmlPsi:PersonalizedInfo
+        };
+
+        var discharge = {                                           // 退院
+            date: '',                                               // 退院 (転出) 日 CCYY-MM-DD
+            dischargeCondition: '',                                 // 退院時状態 ?
+            outcome: '',                                            // 退院時転帰 MML0016
+            referTo: {}                                             // 紹介先情報 ? mmlPsi:PersonalizedInfo
+        };
+
+        // contains both text and other elements
+        var clinicalRecord = {
+            date: '',                                               // イベント発生日時
+            recode: '',
+            relatedDoc: [],
+            extRef: []
+        };
+
+        // contains both text and other elements
+        var testResult = {                                          // 個々の検査結果
+            date: '',
+            testResult: '',
+            extRef: [],
+            relatedDoc: []
+        };
+
+        var relatedDoc = {
+            uuid: '',                                              // MmlModuleItemのuid
+            relation: ''                                           // MML0008
+        };
+    ***********************************************************************/
+
+        var result = {
+            serviceHistory: {                                       // 期間情報
+                attr: {
+                    start: simpleSummary.context.start,             // サマリー対象期間の開始日
+                    end: simpleSummary.context.end                  // サマリー対象期間の終了日
+                }
+            }
+        };
+
+        // outPatient
+        if (simpleSummary.context.hasOwnProperty('outPatient')) {
+            result.serviceHistory.outPatient = [];
+            simpleSummary.outPatient.forEach((entry) => {
+                // date
+                var outPatientItem = {
+                    date: entry.date
+                };
+                result.serviceHistory.outPatient.push(outPatientItem);
+                // outPatientCondition
+                if (entry.hasOwnProperty('outPatientCondition')) {
+                    outPatientItem.outPatientCondition = {
+                        value: entry.outPatientCondition,
+                        attr: {
+                            first: entry.first,
+                            emergency: entry.emergency
+                        }
+                    };
+                }
+                // staffs
+                if (entry.hasOwnProperty('staffs')) {
+                    outPatientItem.staffs = [];
+                    entry.staffs.forEach((e) => {
+                        // e = simpleCreator
+                        var staffInfo = this.buildCreatorInfo(e);   // staffInfo と同じ構造
+                        outPatientItem.staffs.push(staffInfo);
+                    });
+                }
+            });
+        }
+
+        // inPatient
+        if (simpleSummary.hasOwnProperty('inPatient')) {
+            result.serviceHistory.inPatient = [];
+            simpleSummary.inPatient.forEach((entry) => {
+
+                var inPatientItem = {};
+                result.serviceHistory.inPatient.push(inPatientItem);
+
+                // admission 入院情報
+                if (entry.hasOwnProperty('admission')) {
+                    inPatientItem.admission = {};
+                    // date
+                    inPatientItem.admission.date = entry.admission.date;
+                    // admissionCondition
+                    if (entry.admission.hasOwnProperty('admissionCondition')) {
+                        inPatientItem.admission.admissionCondition = {
+                            value: entry.admission.admissionCondition
+                        };
+                    }
+                    // emergency
+                    if (entry.admission.hasOwnProperty('emergency')) {
+                        inPatientItem.admission.admissionCondition.attr = {
+                            emergency: entry.admission.emergency
+                        };
+                    }
+                    // referFrom
+                    if (entry.admission.hasOwnProperty('referFrom')) {
+                        inPatientItem.admission.referFrom = this.buildPersonalizedInfo(entry.admission.referFrom);
+                    }
+                }
+
+                // discharge 退院情報
+                if (entry.hasOwnProperty('discharge')) {
+                    inPatientItem.discharge = {};
+                    // date
+                    inPatientItem.discharge.date = entry.discharge.date;
+                    // dischargeCondition
+                    if (entry.discharge.hasOwnProperty('dischargeCondition')) {
+                        inPatientItem.discharge.dischargeCondition = {
+                            value: entry.discharge.dischargeCondition
+                        };
+                    }
+                    // outcome
+                    if (entry.discharge.hasOwnProperty('outcome')) {
+                        inPatientItem.discharge.dischargeCondition.attr = {
+                            outcome: entry.discharge.outcome
+                        };
+                    }
+                    // referFrom
+                    if (entry.discharge.hasOwnProperty('referTo')) {
+                        inPatientItem.discharge.referTo = this.buildPersonalizedInfo(entry.discharge.referTo);
+                    }
+                }
+
+                // staffs
+                if (entry.hasOwnProperty('staffs')) {
+                    inPatientItem.staffs = [];
+                    entry.staffs.forEach((e) => {
+                        // e = simpleCreator
+                        var staffInfo = this.buildCreatorInfo(e);   // staffInfo と同じ構造
+                        inPatientItem.staffs.push(staffInfo);
+                    });
+                }
+            });
+        }
+
+        // RegisteredDiagnosisModule ?  != *
+        if (simpleSummary.hasOwnProperty('simpleDiagnosis')) {
+            result.RegisteredDiagnosisModule = this.buildRegisteredDiagnosisModule(simpleSummary.simpleDiagnosis);
+        }
+
+        // deathInfo
+        if (simpleSummary.hasOwnProperty('deathInfo')) {
+            result.deathInfo = {};
+            result.deathInfo.value = simpleSummary.deathInfo.info;  // info
+            if (simpleSummary.deathInfo.hasOwnProperty('date') || simpleSummary.deathInfo.hasOwnProperty('autopsy')) {
+                result.deathInfo.attr = {};
+                if (simpleSummary.deathInfo.hasOwnProperty('date')) {
+                    result.deathInfo.attr.date = simpleSummary.deathInfo.date;
+                }
+                if (simpleSummary.deathInfo.hasOwnProperty('autopsy')) {
+                    result.deathInfo.attr.autopsy = simpleSummary.deathInfo.autopsy;
+                }
+            }
+        }
+
+        // SurgeryModule
+        if (simpleSummary.hasOwnProperty('simpleSurgery')) {
+            result.SurgeryModule = [];
+            simpleSummary.simpleSurgery.forEach((entry) => {
+                result.SurgeryModule.push(this.buildSummaryModule(entry));
+            });
+        }
+
+        // chiefComplaints
+        if (simpleSummary.hasOwnProperty('chiefComplaints')) {
+            result.chiefComplaints = simpleSummary.chiefComplaints;
+        }
+
+        // patientProfile
+        if (simpleSummary.hasOwnProperty('patientProfile')) {
+            result.patientProfile = simpleSummary.patientProfile;
+        }
+
+        // history
+        if (simpleSummary.hasOwnProperty('history')) {
+            result.history = simpleSummary.history;
+        }
+
+        // physicalExam  extRef *
+        if (simpleSummary.hasOwnProperty('physicalExam')) {
+            result.physicalExam = {
+                value: simpleSummary.physicalExam
+            };
+        }
+
+        // clinicalCourse
+        if (simpleSummary.hasOwnProperty('clinicalCourse')) {
+            result.clinicalCourse = [];
+            simpleSummary.clinicalCourse.forEach((entry) => {
+                var clinicalRecord = {
+                    attr: {
+                        date: entry.date
+                    },
+                    value: entry.record
+                };
+                if (entry.hasOwnProperty('relatedDoc')) {
+                    clinicalRecord.relatedDoc = [];
+                    entry.relatedDoc.forEach((e) => {
+                        var relatedDoc = {
+                            value: entry.relatedDoc.uuid,
+                            attr: {
+                                relation: entry.relatedDoc.relation
+                            }
+                        }
+                        clinicalRecord.relatedDoc.push(relatedDoc);
+                    });
+                }
+                if (entry.hasOwnProperty('extRef')) {
+                    clinicalRecord.extRef = [];
+                    entry.extRef.forEach((e) => {
+                        clinicalRecord.extRef.push(this.buildExtRef(e));
+                    });
+                }
+                result.clinicalCourse.push(clinicalRecord);
+            });
+        }
+
+        // dischargeFindings
+        if (simpleSummary.hasOwnProperty('dischargeFindings')) {
+            result.dischargeFindings = {
+                value: simpleSummary.dischargeFindings
+            };
+        }
+
+        // medication: {                                           // 退院時処方 ? medication
+        if (simpleSummary.hasOwnProperty('medication')) {
+            result.medication = {
+                value: simpleSummary.medication
+            };
+            if (simpleSummary.medication.hasOwnProperty('simplePrescription')) {
+                result.medication.PrescriptionModule = this.buildPrescriptionModule(simpleSummary.medication.simplePrescription);
+            }
+            if (simpleSummary.medication.hasOwnProperty('extRef')) {
+                result.medication.extRef = [];
+                simpleSummary.medication.forEach((e) => {
+                    result.medication.extRef.push(this.buildExtRef(e));
+                });
+            }
+        }
+
+        // testResults
+        if (simpleSummary.hasOwnProperty('testResults')) {
+            result.testResults = [];
+            simpleSummary.testResults.forEach((entry) => {
+                var tr = {                                          // 個々の検査結果
+                    attr: {
+                        date: entry.date
+                    },
+                    value: entry.testResult,
+                };
+                result.testResults.push(tr);
+
+                if (entry.hasOwnProperty('relatedDoc')) {
+                    tr.relatedDoc = [];
+                    entry.relatedDoc.forEach((e) => {
+                        var relatedDoc = {
+                            value: entry.relatedDoc.uuid,
+                            attr: {
+                                relation: entry.relatedDoc.relation
+                            }
+                        }
+                        tr.relatedDoc.push(relatedDoc);
+                    });
+                }
+                if (entry.hasOwnProperty('extRef')) {
+                    tr.extRef = [];
+                    entry.extRef.forEach((e) => {
+                        tr.extRef.push(this.buildExtRef(e));
+                    });
+                }
+
+            });
+        }
+
+        // plan
+        if (simpleSummary.hasOwnProperty('plan')) {
+            result.plan = {
+                value: simpleSummary.plan
+            };
+        }
+
+        // remarks
+        if (simpleSummary.hasOwnProperty('remarks')) {
+            result.remarks = simpleSummary.remarks;
+        }
+
+        return result;
     },
 
     /**
@@ -802,14 +1796,422 @@ module.exports = {
      * 11. ReportModule
      */
     buildReportModule: function (simpleReport) {
+        /********************************************************************************
+        var simpleReport = {
+            context: {},                                      // 報告書ヘッダー情報
+            body: {}                                          // 報告書本文情報
+        };
 
+        var context = {
+            performTime: '',                                    // 検査実施日時 required
+            reportTime: ''                                      // 報告日時 required
+            reportStatus: '',                                   // 報告状態
+            statusCode: '',                                     // mid 検査中 final 最終報告 required
+            statusCodeId: '',                                   // mmlLb0001と入力 required
+            testClass: '',                                      // 報告書種別
+            testClassCode: '',                                  // MML0033 required
+            testClassCodeId: ''                                 // MML0033 required
+            testSubclass: '',                                   // 報告書詳細種別 ?
+            testSubclassCode: '',
+            testSubclassCodeId: '',
+            organ: '',                                          // 臓器 ?
+            consultFrom: {
+                facility: '',                                   // 依頼者情報 ?
+                facilityCode: '',
+                facilityCodeId: '',                             // MML0027
+                department: '',                                 // 依頼診療科 ?
+                departmentCode: '',
+                departmentCodeId: '',
+                ward: '',                                       // 依頼病棟 ?
+                wardCode: '',
+                wardCodeId: '',
+                client: '',                                     // 依頼者 ?
+                lientCode: '',
+                clientCodeId: ''
+            },
+            perform: {                                          // 実施者情報
+                facility: '',                                   // 実施施設
+                facilityCode: '',                               // required
+                facilityCodeId: '',                             // required
+                department: '',                                 // 実施診療科 ?
+                departmentCode: '',
+                departmentCodeId: '',
+                ward: '',                                       // 実施病棟 ?
+                wardCode: '',
+                wardCodeId: '',
+                performer: '',                                  // 実施者
+                performerCode: '',                              // required
+                performerCodeId: ''                             // required
+                supervisor: '',                                 // 監督者 ?
+                supervisorCode: '',
+                supervisorCodeId: ''
+            }
+        };
+
+        var body = {                                            // 報告書本文情報
+            chiefComplaints: '',                                    // 主訴 ?
+            testPurpose: '',                                        // 検査目的 ?
+            testDx: '',                                             // 検査診断 ?
+            testNotes: {                                            // 検査所見記載 ?
+                value: ''                                           // mixed=true extRef * 外部参照図
+            },
+            testMemo: [],                                           // 検査コメント ? [testMemo]
+            testMemoF: ''                                           // 検査フリーコメント ?
+        };
+
+        var testMemo = {
+            memo: '',
+            memoCodeName: '',
+            memoCode: '',
+            memoCodeId: ''
+        };
+        ********************************************************************************/
+
+        var information = {};
+        var reportBody = {};
+        var result = {
+            information: information,                               // 報告書ヘッダー情報
+            reportBody: reportBody                                  // 報告書本文情報
+        };
+
+        var context = simpleReport.context;
+        var body = simpleReport.body;
+
+        // attr
+        information.attr = {
+            performTime: context.performTime,                       // 検査実施日時 required
+            reportTime: context.reportTime                          // 報告日時 required
+        };
+
+        // reportStatus
+        information.reportStatus = {                                // 報告状態
+            value: context.reportStatus,
+            attr: {
+                statusCode: context.statusCode,                     // mid 検査中 final 最終報告 required
+                statusCodeId: 'mmlLb0001と入力'                      // mmlLb0001と入力 required
+            }
+        };
+
+        // testClass
+        information.testClass = {                                   // 報告書種別
+            value: context.testClass,
+            attr: {
+                testClassCode: context.testClassCode,               // MML0033 required
+                testClassCodeId: context.testClassCodeId            // MML0033 required
+            }
+        };
+
+        // testSubclass
+        if (context.hasOwnProperty('testSubclass')) {
+            information.testSubclass = {                                         // 報告書詳細種別 ?
+                value: context.testSubclass.testSubclass,
+                attr: {
+                    testSubclassCode: context.testSubclass.testSubclassCode,
+                    testSubclassCodeId: context.testSubclass.testSubclassCodeId
+                }
+            };
+        }
+
+        // organ
+        if (context.hasOwnProperty('organ')) {
+            information.organ = context.organ
+        }
+
+        // consultFrom
+        if (context.hasOwnProperty('consultFrom')) {
+            var cFrom = context.consultFrom;
+            information.consultFrom = {};
+
+            if (cFrom.hasOwnProperty('facility')) {
+                information.consultFrom.conFacility = {                 // 依頼施設 ?
+                    value: cFrom.facility,
+                    attr: {
+                        facilityCode: cFrom.facilityCode,
+                        facilityCodeId: 'MML0027'                          // MML0027
+                    }
+                };
+            }
+            if (cFrom.hasOwnProperty('department')) {
+                information.consultFrom.conDepartment = {                 // 依頼施設 ?
+                    value: cFrom.department,
+                    attr: {
+                        departmentCode: cFrom.departmentCode,
+                        departmentCodeId: cFrom.departmentCodeId
+                    }
+                };
+            }
+            if (cFrom.hasOwnProperty('ward')) {
+                information.consultFrom.conWard = {                 // 依頼施設 ?
+                    value: cFrom.department,
+                    attr: {
+                        wardCode: cFrom.wardCode,
+                        wardCodeId: cFrom.wardCodeId
+                    }
+                };
+            }
+            if (cFrom.hasOwnProperty('client')) {
+                information.consultFrom.client = {                 // 依頼施設 ?
+                    value: cFrom.department,
+                    attr: {
+                        clientCode: cFrom.clientCode,
+                        clientCodeId: cFrom.clientCodeId
+                    }
+                };
+            }
+        }
+
+        // perform
+        if (context.hasOwnProperty('perform')) {
+            var perform = context.perform;
+            information.perform = {};
+
+            if (perform.hasOwnProperty('facility')) {
+                information.perform.pFacility = {                 // 依頼施設 ?
+                    value: perform.facility,
+                    attr: {
+                        facilityCode: perform.facilityCode,
+                        facilityCodeId: 'MML0027'                          // MML0027
+                    }
+                };
+            }
+            if (perform.hasOwnProperty('department')) {
+                information.perform.pDepartment = {                 // 依頼施設 ?
+                    value: perform.department,
+                    attr: {
+                        departmentCode: perform.departmentCode,
+                        departmentCodeId: perform.departmentCodeId
+                    }
+                };
+            }
+            if (perform.hasOwnProperty('ward')) {
+                information.perform.pWard = {                 // 依頼施設 ?
+                    value: perform.ward,
+                    attr: {
+                        wardCode: perform.wardCode,
+                        wardCodeId: perform.wardCodeId
+                    }
+                };
+            }
+            if (perform.hasOwnProperty('performer')) {
+                information.perform.performer = {                 // 依頼施設 ?
+                    value: perform.performer,
+                    attr: {
+                        performerCode: perform.performerCode,
+                        performerCodeId: perform.performerCodeId
+                    }
+                };
+            }
+            if (perform.hasOwnProperty('supervisor')) {
+                information.perform.supervisor = {                 // 依頼施設 ?
+                    value: perform.supervisor,
+                    attr: {
+                        supervisorCode: perform.supervisorCode,
+                        supervisorCodeId: perform.supervisorCodeId
+                    }
+                };
+            }
+        }
+
+        // chiefComplaints
+        if (body.hasOwnProperty('chiefComplaints')) {
+            reportBody.chiefComplaints = body.chiefComplaints;
+        }
+
+        // testPurpose
+        if (body.hasOwnProperty('testPurpose')) {
+            reportBody.testPurpose = body.testPurpose;
+        }
+
+        // testDx
+        if (body.hasOwnProperty('testDx')) {
+            reportBody.testDx = body.testDx;
+        }
+
+        // testNotes
+        if (body.hasOwnProperty('testNotes')) {
+            reportBody.testNotes = body.testNotes;
+            // extRef[]
+        }
+
+        // testMemo
+        if (body.hasOwnProperty('testMemo')) {
+            reportBody.testMemo = [];
+            body.testMemo.forEach((entry) => {
+                var memo = {
+                    value: entry.memo
+                };
+                reportBody.testMemo.push(memo);
+                if (entry.hasOwnProperty('memoCode') || entry.hasOwnProperty('memoCodeId') ) {
+                    memo.attr = {};
+                    if (entry.hasOwnProperty('memoCodeName')) {
+                        memo.attr.tmCodeName = entry.memoCodeName;
+                    }
+                    if (entry.hasOwnProperty('memoCode')) {
+                        memo.attr.tmCode = entry.memoCode;
+                    }
+                    if (entry.hasOwnProperty('memoCodeId')) {
+                        memo.attr.tmCodeId = entry.memoCodeId
+                    }
+                }
+            });
+        }
+
+        // testMemoF
+        if (body.hasOwnProperty('testMemoF')) {
+            reportBody.testMemoF = body.testMemoF;
+        }
+
+        return result;
     },
 
     /**
      * 12. ReferralModule
      */
     buildReferralModule: function (simpleReferral) {
+        /*******************************************************************************
+        var simpleReferral = {
+            patient: {},                                            // 患者情報
+            occupation: '',                                         // 職業 ?
+            referFrom: {},                                          // 紹介者情報を入れる親エレメント mmlPsi:PersonalizedInfo
+            title: '',                                              // タイトル
+            greeting: '',                                           // 挨拶文 ?
+            chiefComplaints: '',                                    // 主訴
+            clinicalDiagnosis: '',                                  // 病名 ?
+            pastHistory: '',
+            familyHistory: '',
+            presentIllness: '',
+            testResults: '',
+            clinicalCourse: '',                                     // 治療経過 ?
+            medication: {},                                         // 現在の処方 ?
+            referPurpose: '',                                       // 紹介目的
+            remarks: '',
+            referToFacility: {                                      // 紹介先医療機関名
+                Facility: {},
+                Department: {}
+            },
+            referToPerson: {},                                      // 紹介先医師 ? mmlPsi:PersonalizedInfo
+            referToUnknownName: ''                                  // 医師名を指定しない相手 ?
+        };
 
+        var medication = {
+            value: '',                                              // テキストとmmlCm:extRefの混在可
+            PrescriptionModule: {},                                 // mmlPs:PrescriptionModule
+            InjectionModule: {},                                    // mmlInj:InjectionModule
+            extRef: []
+        };
+        *******************************************************************************/
+
+        var result = {};
+
+        // PatientModule
+        result.PatientModule = this.buildPatientModule(simpleReferral.patient);
+
+        // occupation
+        if (simpleReferral.hasOwnProperty('occupation')) {
+            result.occupation = simpleReferral.occupation;
+        }
+
+        // referFrom
+        result.referFrom = this.buildPersonalizedInfo(simpleReferral.referFrom);
+
+        // title
+        result.title = simpleReferral.title;
+
+        // greeting
+        if (simpleReferral.hasOwnProperty('greeting')) {
+            result.greeting = simpleReferral.greeting;
+        }
+
+        // chiefComplaints
+        result.title = simpleReferral.chiefComplaints;
+
+        // clinicalDiagnosis
+        if (simpleReferral.hasOwnProperty('clinicalDiagnosis')) {
+            result.clinicalDiagnosis = simpleReferral.clinicalDiagnosis;
+        }
+
+        // pastHistory extRef
+        if (simpleReferral.hasOwnProperty('pastHistory')) {
+            result.pastHistory = {
+                value: simpleReferral.pastHistory
+            };
+        }
+
+        // familyHistory
+        if (simpleReferral.hasOwnProperty('familyHistory')) {
+            result.familyHistory = {
+                value: simpleReferral.familyHistory
+            };
+        }
+
+        // presentIllness
+        if (simpleReferral.hasOwnProperty('presentIllness')) {
+            result.presentIllness = {
+                value: simpleReferral.presentIllness
+            };
+        }
+
+        // testResults
+        if (simpleReferral.hasOwnProperty('testResults')) {
+            result.testResults = {
+                value: simpleReferral.testResults
+            };
+        }
+
+        // clinicalCourse
+        if (simpleReferral.hasOwnProperty('clinicalCourse')) {
+            result.clinicalCourse = simpleReferral.clinicalCourse;
+        }
+
+        // medication
+        if (simpleReferral.hasOwnProperty('medication')) {
+            result.medication = {
+                value: simpleReferral.medication.medication,    // medication
+                PrescriptionModule: this.buildPrescriptionModule(simpleReferral.medication.simplePrescription),
+                InjectionModule: this.buildInjectionModule(simpleReferral.medication.simpleInjection)
+            };
+            if (simpleReferral.medication.hasOwnProperty('extRef')) {
+                result.medication.extRef = [];
+                simpleReferral.medication.extRef.forEach((entry) => {
+                    result.medication.extRef(this.buildExtRef(entry));
+                });
+            }
+        }
+
+        // referPurpose
+        if (simpleReferral.hasOwnProperty('referPurpose')) {
+            result.referPurpose = simpleReferral.referPurpose;
+        }
+
+        // remarks
+        if (simpleReferral.hasOwnProperty('remarks')) {
+            result.remarks = {
+                value: simpleReferral.remarks
+            };
+        }
+
+        // referToFacility
+        if (simpleReferral.hasOwnProperty('referToFacility')) {
+            result.referToFacility = {};
+            if (simpleReferral.referToFacility.hasOwnProperty('facility')) {
+                result.referToFacility.Facility = this.buildFacility(simpleReferral.referToFacility.facility);
+            }
+            if (simpleReferral.referToFacility.hasOwnProperty('department')) {
+                result.referToFacility.Department = this.buildDepartment(simpleReferral.referToFacility.department);
+            }
+        }
+
+        // referToPerson
+        if (simpleReferral.hasOwnProperty('referToPerson')) {
+            result.referToPerson = this.buildPersonalizedInfo(simpleReferral.referToPerson);
+        }
+
+        // referToUnknownName
+        if (simpleReferral.hasOwnProperty('referToUnknownName')) {
+            result.referToUnknownName = simpleReferral.referToUnknownName;
+        }
+
+        return result;
     },
 
     /**
@@ -940,7 +2342,140 @@ module.exports = {
      * 14. FlowSheetModule
      */
     buildFlowSheetModule: function (simpleFlowSheet) {
+        /*******************************************************************************
+        var simpleFlowSheet = {
+            context: {},
+            VitalSignModule: [],                                        // *
+            intake: [],                                                 // *
+            bodilyOutput: [],                                           // *
+            fsMemo: ''                                                  // ?
+        };
 
+        var context = {
+            facility: '',
+            facilityCode: '',
+            facilityCodeId: ''                                          // ca | insurance | monbusho | JMARI
+            department: '',                                              // ?
+            depCode: '',
+            depCodeId: '',
+            ward: '',                                                     // ?
+            wardCode: '',
+            wardCodeId: ''
+            observer: ''                                                // ?
+            obsCode: '',
+            obsCodeId: ''
+        };
+
+        var intake = {
+            intakeType: '',
+            intakeVolume: '',                                           // xs:decimal
+            intakeUnit: '',
+            intakePathway: '',
+            intakeStartTime: '',                                        // xs:dateTime
+            intakeEndTime: '',                                          // xs:dateTime
+            intakeMemo: ''
+        };
+
+        var bodilyOutput = {
+            boType: '',
+            boVolume: '',                                               // xs:decimal
+            boUnit: '',
+            boStatus: '',
+            boColor: '',
+            boPathway: '',
+            boStartTime: '',                                            // xs:dateTime
+            boEndTime: '',                                              // xs:dateTime
+            boFrequency: [],
+            boMemo: ''
+        };
+
+        var boFrequency = {
+            bofTimes: '',
+            bofPeriodStartTime: '',                                     // xs:dateTim
+            bofPeriodEndTime: '',                                       // xs:dateTim
+            bofMemo: ''
+        };
+        *******************************************************************************/
+        var context = {};
+
+        var result = {
+            context: context
+        };
+
+        var target = simpleFlowSheet.context;
+
+        // facility
+        context.facility = {
+            value: target.facility,
+            attr: {
+                facilityCode: target.facilityCode,
+                facilityCodeId: target.facilityCodeId
+            }
+        };
+
+        // department
+        if (target.hasOwnProperty('department')) {
+            context.department = {
+                value: target.department,
+                attr: {
+                    facilityCode: target.depCode,
+                    facilityCodeId: target.depCodeId
+                }
+            };
+        }
+
+        // ward
+        if (target.hasOwnProperty('ward')) {
+            context.ward = {
+                value: target.ward,
+                attr: {
+                    facilityCode: target.wardCode,
+                    facilityCodeId: target.wardCodeId
+                }
+            };
+        }
+
+        // observer
+        if (target.hasOwnProperty('observer')) {
+            context.observer = {
+                value: target.observer,
+                attr: {
+                    facilityCode: target.obsCode,
+                    facilityCodeId: target.obsCodeId
+                }
+            };
+        }
+
+        // vitalSign
+        if (simpleFlowSheet.hasOwnProperty('vitalSign')) {
+            result.VitalSignModule = [];
+            simpleFlowSheet.vitalSign.forEach((entry) => {
+                result.VitalSignModule.push(this.buildVitalSignModule(entry));
+            });
+        }
+
+        // intake
+        if (simpleFlowSheet.hasOwnProperty('intake')) {
+            result.intake = [];
+            simpleFlowSheet.intake.forEach((entry) => {
+                result.intake.push(JSON.parse(JSON.stringify(entry)));
+            });
+        }
+
+        // bodilyOutput
+        if (simpleFlowSheet.hasOwnProperty('bodilyOutput')) {
+            result.bodilyOutput = [];
+            simpleFlowSheet.bodilyOutput.forEach((entry) => {
+                result.bodilyOutput.push(JSON.parse(JSON.stringify(entry)));
+            });
+        }
+
+        // fsMemo
+        if (simpleFlowSheet.hasOwnProperty('fsMemo')) {
+            result.fsMemo = simpleFlowSheet.fsMemo;
+        }
+
+        return result;
     },
 
     /**
