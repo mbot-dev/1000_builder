@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cfenv = require('cfenv');
 const helmet = require('helmet');
+const config = require('config');
 const logger = require('./log/logger');
 const indexRouter = require('./api/indexRouter');
 const authRouter = require('./api/authRouter');
@@ -32,13 +33,19 @@ app.use(helmet.contentSecurityPolicy({
 		imgSrc: ["'self'"]
 	}
 }));
+app.use((req, res, next) => {
+    res.header('Content-Type', 'application/json;charset=UTF-8');
+    res.header('Cache-Control', 'no-store');
+    res.header('Pragma', 'no-cache');
+    next();
+});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(':remote-addr [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));
 app.use(express.static(__dirname + '/public'));
 app.use(indexRouter);
-app.use(authRouter);
-app.use('/simple/api/v1/mml', simpleRouter);
+app.use(config.path.oauth2, authRouter);
+app.use(config.path.simple, simpleRouter);
 
 // Start Server
 const appEnv = cfenv.getAppEnv();

@@ -2625,7 +2625,7 @@ module.exports = {
       * @param {simpleComposition} - simpleComposition
       * @returns {MML}
      */
-    buildActual: function (simpleComposition, contentType) {
+    build: function (simpleComposition, contentType) {
         /***************************************************
         var simpleComposition = {
             context: {
@@ -2715,19 +2715,6 @@ module.exports = {
             }
         });
 
-        return mmlBuilder.build(result);
-    },
-
-    build: function (simpleComposition, contentType, callback) {
-        var self = this;
-        process.nextTick(() => {
-            try {
-                var result = self.buildActual(simpleComposition, contentType);
-                callback(null, result);
-            } catch (err) {
-                logger.warn(err);
-                callback(err, null);
-            }
-        });
+        return result;
     }
 };

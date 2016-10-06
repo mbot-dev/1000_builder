@@ -8,18 +8,14 @@ const jweSimple = require('../api/jweSimple');
 
 const router = express.Router();
 
-function sendError(status, err, req, res) {
+var sendError = function (status, err, req, res) {
     var message = {
         error: err
     };
-    res.status(status);
-    res.header('Content-Type', 'application/json;charset=utf-8');
-    res.header('Cache-Control', 'no-store');
-    res.header('Pragma', 'no-cache');
-    res.end(JSON.stringify(message));
-}
+    res.status(status).json(message);
+};
 
-function checkBody(req, res, next) {
+var checkBody = function (req, res, next) {
     try {
         if (req.body && req.body.grant_type === 'client_credentials') {
             next();
@@ -29,9 +25,9 @@ function checkBody(req, res, next) {
     } catch (error) {
         sendError(400, 'invalid_request', req, res);
     }
-}
+};
 
-function checkCredential(req, res, next) {
+var checkCredential = function (req, res, next) {
     try {
         var basic = 'Basic ';
         var auth = req.get('Authorization');
@@ -56,9 +52,9 @@ function checkCredential(req, res, next) {
     } catch (error) {
         return sendError(400, 'invalid_request', req, res);
     }
-}
+};
 
-function generateToken(req, res, next) {
+var generateToken = function (req, res, next) {
     var now = Date.now();
     var expires = Math.floor(now / 1000) + config.jwt.expires;
     var claim = {
@@ -71,27 +67,17 @@ function generateToken(req, res, next) {
     req.token = jweSimple.compact(claim, key);
     // logger.info(req.token);
     next();
-}
+};
 
-function respond(req, res) {
+var respond = function (req, res) {
     var result = {
         token_type: config.jwt.token_type,      // beare
         access_token: req.token,                // jwt
         expires_in: config.jwt.expires			// in seconds
     };
-    res.status(200);
-    res.header('Content-Type', 'application/json;charset=utf-8');
-    res.header('Cache-Control', 'no-store');
-    res.header('Pragma', 'no-cache');
-    res.end(JSON.stringify(result));
-}
+    res.status(200).json(result);
+};
 
-router.post(
-        config.path.oauth2,
-        checkBody,
-        checkCredential,
-        generateToken,
-        respond
-        );
+router.post('/', [checkBody, checkCredential, generateToken, respond]);
 
 module.exports = router;

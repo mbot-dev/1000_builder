@@ -1,7 +1,7 @@
 {
   "path": {
-      "oauth2": "/simple/api/v1/oauth2/token",
-      "simple": "/simple/api/v1/mml"
+      "oauth2": "/mml/api/v1/oauth2/token",
+      "simple": "/mml/api/v1"
   },
   "jwt": {
       "token_type": "bearer",

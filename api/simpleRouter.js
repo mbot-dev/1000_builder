@@ -3,23 +3,17 @@
 const express = require('express');
 const config = require('config');
 const logger = require('../log/logger');
-const simpleBuilder = require('../api/simpleBuilder');
 const jweSimple = require('../api/jweSimple');
+const simpleBuilder = require('../api/simpleBuilder');
+const mmlBuilder = require('../lib/mmlBuilder');
 
 const router = express.Router();
 
-function sendError(status, err, req, res) {
+var sendError = function (status, err, req, res) {
     res.status(status).json({
         error: err
     });
-}
-
-router.use((req, res, next) => {
-    res.header('Content-Type', 'application/json;charset=UTF-8');
-    res.header('Cache-Control', 'no-store');
-    res.header('Pragma', 'no-cache');
-    next();
-});
+};
 
 // JWE verification
 router.use((req, res, next) => {
@@ -40,22 +34,21 @@ router.use((req, res, next) => {
     }
 });
 
-router.post('/:contentType', (req, res) => {
-    var contentType = req.params.contentType;
-    // logger.info(contentType);
-    var parsed = req.body;
-    // logger.debug(parsed);
-    simpleBuilder.build(parsed, contentType, (error, mml) => {
-        if (error) {
-            res.status(500).json({
-                error: 'MML生成エラー'
-            });
-        } else {
-            res.status(200).json({
-                result: 'success',
-                mml: mml
-            });
-        }
+router.post('/:contentType', (req, res, next) => {
+    try {
+        var contentType = req.params.contentType;
+        var parsed = req.body;
+        var xsdJson = simpleBuilder.build(parsed, contentType);
+        req.xsdJson = xsdJson;
+        next();
+    } catch (err) {
+        sendError(500, 'MML 生成エラー', req, res);
+    }
+}, (req, res) => {
+    var mml = mmlBuilder.build(req.xsdJson);
+    res.status(200).json({
+        result: 'success',
+        mml: mml
     });
 });
 
