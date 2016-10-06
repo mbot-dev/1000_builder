@@ -69,7 +69,7 @@ function generateToken(req, res, next) {
     var key = new Buffer(config.jwt.secret_demo, 'hex');
     // logger.info(Buffer.byteLength(key)); = 32 ok
     req.token = jweSimple.compact(claim, key);
-    logger.info(req.token);
+    // logger.info(req.token);
     next();
 }
 

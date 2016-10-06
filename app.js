@@ -38,7 +38,7 @@ app.use(morgan(':remote-addr [:date[iso]] ":method :url HTTP/:http-version" :sta
 app.use(express.static(__dirname + '/public'));
 app.use(indexRouter);
 app.use(authRouter);
-app.use(simpleRouter);
+app.use('/simple/api/v1/mml', simpleRouter);
 
 // Start Server
 const appEnv = cfenv.getAppEnv();

@@ -3,6 +3,7 @@
 const uuid = require('node-uuid');
 const utils = require('../lib/utils');
 const mmlBuilder = require('../lib/mmlBuilder');
+const logger = require('../log/logger');
 
 module.exports = {
 
@@ -75,7 +76,7 @@ module.exports = {
         return this.buildPhone('PH', phoneNumber);
     },
     buildMobile: function (phoneNumber) {
-        return this.buildPhone('CR', phoneNumber);
+        return this.buildPhone('CP', phoneNumber);
     },
 
     // 施設情報 MMLで病院は施設で表現 漢字のみ
@@ -433,7 +434,7 @@ module.exports = {
     /**
      * 1. PatientModule
      */
-    buildPatientModule: function (simplePatient) {
+    patientInfo: function (simplePatient) {
         /********************************************************************
         var simplePatient = {
             id: '',                                         // Id
@@ -527,7 +528,7 @@ module.exports = {
     /**
      * 2. HealthInsuranceModule
      */
-    buildHealthInsuranceModule: function (simpleHealthInsurance) {
+    healthInsurance: function (simpleHealthInsurance) {
         /*******************************************************************************
         // 保険種別
         insuranceClass;
@@ -589,85 +590,30 @@ module.exports = {
         // 負担率または負担金
         paymentRatioType;
 
-        // 複数公費の優先順位
-        priority;
-
-        // 公費負担名称
-        providerName;
-
-        // 負担者番号
-        provider;
-
-        // 受給者番号
-        recipient;
-
-        // 開始日
-        startDate;
-
-        // 開始日
-        expiredDate;
-
-        // 負担率または負担金
-        paymentRatio;
-
-        // 負担率または負担金
-        paymentRatioType;
-
-        var HealthInsuranceModule = {
-            attr: {
-                countryType: ''
-            },
-            insuranceClass: {
-                value: '',                                  // 健康保険種別
-                attr: {
-                    ClassCode: '',
-                    tableId: ''                             // MML0031
-                }
-            },
+        var simpleHealthInsurance = {
+            countryType: '',                                // 国コード ?
+            insuranceClass: '',                             // 保険種別 ?
+            insuranceClassCode: '',                         // 保険種別コード ?
             insuranceNumber: '',                            // 健康保険者番号
-            clientId: {                                     // 被保険者情報
-                group: '',                                  // 被保険者記号
-                number: ''                                  // 被保険者番号
-            },
+            clientGrouproup: '',                            // 被保険者記号
+            clientGroupNumber: '',                          // 被保険者番号
             familyClass: '',                                // 本人家族区分．true：本人，false：家族
-            clientInfo: {                                   // 被保険者情報
-                personName: [],                             // mmlNm:Nameの配列
-                addresses: [],                              // mmlAd:Addressの配列
-                phones: []                                  // mmlPh:Phoneの配列
-            },
-            continuedDiseases: [],                          // 継続疾患情報 stringの配列
             startDate: '',                                  // 開始日 (交付年月日) CCYY-MM-DD
             expiredDate: '',                                // 有効期限
-            paymentInRatio: '',                             // 入院時の負担率
-            paymentOutRatio: '',                            // 外来時の負担率
-            insuredInfo: {                                  // 保険者情報
-                facility: {},                               // mmlFc:Facility
-                addresses: [],                              // mmlAd:Addressの配列
-                phones: []                                  // mmlPh:Phoneの配列
-            },
-            workInfo: {                                     // 被保険者の所属する事業所情報
-                facility: {},                               // mmlFc:Facility
-                addresses: [],                              // mmlAd:Addressの配列
-                phones: []                                  // mmlPh:Phoneの配列
-            },
-            publicInsurance: []                             // publicInsuranceItemの配列 公費負担医療情報
+            paymentInRatio: '',                             // 入院時の負担率 ?
+            paymentOutRatio: '',                            // 外来時の負担率 ?
+            publicInsurance: []                             // 公費負担医療情報 [publicInsuranceItem]  ?
         };
 
         var publicInsuranceItem = {
-            attr: {
-                priority: ''                                // 優先順位
-            },
-            providerName: '',                               // 公費負担名称
+            priority: ''                                    // 優先順位
+            providerName: '',                               // 公費負担名称 ?
             provider: '',                                   // 負担者番号
             recipient: '',                                  // 受給者番号
             startDate: '',                                  // 開始日
             expiredDate: '',                                // 有効期限
-            paymentRatio: {
-                value: '',                                  // 負担率または負担金
-                attr: {
-                    ratioType: ''                           // MML0032
-                }
-            }
+            paymentRatio: '',                               // ?
+            ratioType: ''                                   // MML0032
         };
         ********************************************************************************/
         var result = {};
@@ -695,7 +641,7 @@ module.exports = {
         // clientId
         result.clientId = {                                     // 被保険者情報
             group: simpleHealthInsurance.clientGroup,           // 被保険者記号
-            number: simpleHealthInsuranceclientNumber           // 被保険者番号
+            number: simpleHealthInsurance.clientNumber           // 被保険者番号
         };
 
         // familyClass
@@ -707,8 +653,15 @@ module.exports = {
         // expiredDate
         result.expiredDate = simpleHealthInsurance.expiredDate;
 
-        // paymentRatio
-        result.paymentRatio = simpleHealthInsurance.paymentRatio;
+        // paymentInRatio
+        if (simpleHealthInsurance.hasOwnProperty('paymentInRatio')) {
+            result.paymentInRatio = simpleHealthInsurance.paymentInRatio;
+        }
+
+        // paymentOutRatio
+        if (simpleHealthInsurance.hasOwnProperty('paymentOutRatio')) {
+            result.paymentOutRatio = simpleHealthInsurance.paymentOutRatio;
+        }
 
         // publicInsurance
         if (simpleHealthInsurance.hasOwnProperty('publicInsurance')) {
@@ -718,18 +671,23 @@ module.exports = {
                     attr: {
                         priority: entry.priority
                     },
-                    providerName: entry.providerName,
                     provider: entry.provider,
                     recipient: entry.recipient,
                     startDate: entry.startDate,
                     expiredDate: entry.expiredDate,
-                    paymentRatio: {
+                };
+
+                if (entry.hasOwnProperty('providerName')) {
+                    it.providerName = entry.providerName;
+                }
+                if (entry.hasOwnProperty('paymentRatio') && entry.hasOwnProperty('paymentRatioType')) {
+                    it.paymentRatio = {
                         value: entry.paymentRatio,                  // 負担率または負担金
                         attr: {
                             ratioType: entry.paymentRatioType       // MML0032
                         }
-                    }
-                };
+                    };
+                }
                 result.publicInsurance.push(it);
             });
         }
@@ -740,7 +698,7 @@ module.exports = {
     /**
      * 3. RegisteredDiagnosisModule
      */
-    buildRegisteredDiagnosisModule: function (simpleDiagnosis) {
+    registeredDiagnosis: function (simpleDiagnosis) {
         /****************************************************
         var simpleDiagnosis = {
             diagnosis: '',
@@ -798,7 +756,7 @@ module.exports = {
     /**
      * 4. LifestyleModule
      */
-    buildLifestyleModule: function (simpleLifestyle) {
+    lifestyle: function (simpleLifestyle) {
         /******************************************
         var simpleLifestyle = {
             occupation: '',
@@ -813,7 +771,7 @@ module.exports = {
     /**
      * 5. BaseClinicModule
      */
-    buildBaseClinicModule: function (simpleBaseClinic) {
+    baseClinic: function (simpleBaseClinic) {
         /*******************************************************************************
         var simpleBaseClinic = {                    // 基礎的診療情報
             allergy: [],                            // アレルギー情報 ? [allergyItem]
@@ -854,7 +812,7 @@ module.exports = {
     /**
      * 6. FirstClinicModule
      */
-    buildFirstClinicModule: function (simpleFirstClinic) {
+    firstClinic: function (simpleFirstClinic) {
         /******************************************************************************
         var simpleFirstClinic = {                                   // 初診時特有情報
             familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
@@ -1032,7 +990,7 @@ module.exports = {
     /**
      * 7. ProgressCourceModule
      */
-    buildProgressCourceModule: function (simpleProgressCource) {
+    progressCourse: function (simpleProgressCource) {
         /*******************************************************
         var simpleProgressCource = {
             content: '',
@@ -1259,7 +1217,7 @@ module.exports = {
         return result;
     },
 
-    buildSurgeryModule: function (simpleSurgery) {
+    surgery: function (simpleSurgery) {
         var result = {
             surgeryItem: []
         };
@@ -1272,7 +1230,7 @@ module.exports = {
     /**
      * 9. SummaryModule
      */
-    buildSummaryModule: function (simpleSummary) {
+    summary: function (simpleSummary) {
         /***********************************************************************
         var SummaryModule = {                                       // 臨床経過サマリー情報
             context: {                                              // 期間情報
@@ -1539,7 +1497,7 @@ module.exports = {
                             attr: {
                                 relation: entry.relatedDoc.relation
                             }
-                        }
+                        };
                         clinicalRecord.relatedDoc.push(relatedDoc);
                     });
                 }
@@ -1596,7 +1554,7 @@ module.exports = {
                             attr: {
                                 relation: entry.relatedDoc.relation
                             }
-                        }
+                        };
                         tr.relatedDoc.push(relatedDoc);
                     });
                 }
@@ -1628,7 +1586,7 @@ module.exports = {
     /**
      * 10. TestModule
      */
-    buildTestModule: function (simpleTest) {
+    test: function (simpleTest) {
         /***********************************
         var simpleTest = {
             context: {
@@ -1795,7 +1753,7 @@ module.exports = {
     /**
      * 11. ReportModule
      */
-    buildReportModule: function (simpleReport) {
+    report: function (simpleReport) {
         /********************************************************************************
         var simpleReport = {
             context: {},                                      // 報告書ヘッダー情報
@@ -1914,7 +1872,7 @@ module.exports = {
 
         // organ
         if (context.hasOwnProperty('organ')) {
-            information.organ = context.organ
+            information.organ = context.organ;
         }
 
         // consultFrom
@@ -2067,7 +2025,7 @@ module.exports = {
     /**
      * 12. ReferralModule
      */
-    buildReferralModule: function (simpleReferral) {
+    referral: function (simpleReferral) {
         /*******************************************************************************
         var simpleReferral = {
             patient: {},                                            // 患者情報
@@ -2104,7 +2062,7 @@ module.exports = {
         var result = {};
 
         // PatientModule
-        result.PatientModule = this.buildPatientModule(simpleReferral.patient);
+        result.PatientModule = this.patientInfo(simpleReferral.patient);
 
         // occupation
         if (simpleReferral.hasOwnProperty('occupation')) {
@@ -2217,7 +2175,7 @@ module.exports = {
     /**
      * 13. VitalSignModule
      */
-    buildVitalSignModule: function (simpleVitalSign) {
+    vitalsign: function (simpleVitalSign) {
         // 必須属性
         var vitalSign = {
             item: [],
@@ -2341,7 +2299,7 @@ module.exports = {
     /**
      * 14. FlowSheetModule
      */
-    buildFlowSheetModule: function (simpleFlowSheet) {
+    flowsheet: function (simpleFlowSheet) {
         /*******************************************************************************
         var simpleFlowSheet = {
             context: {},
@@ -2481,7 +2439,7 @@ module.exports = {
     /**
      * 15. PrescriptionModule
      */
-    buildPrescriptionModule: function (simplePrescription) {
+    prescription: function (simplePrescription) {
         /**********************************************************
         var simplePrescription = {
             medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
@@ -2575,7 +2533,7 @@ module.exports = {
     /**
      * 16. InjectionModule
      */
-    buildInjectionModule: function (simpleInjection) {
+    injection: function (simpleInjection) {
         /**********************************************************
         var simpleInjection = {
             medication: [],
@@ -2658,8 +2616,8 @@ module.exports = {
     /**
      * 17. HemoDialysysModule
      */
-    buildHemoDialysysModule: function (simpleHemoDialysys) {
-
+    hemodialysis: function (simpleHemoDialysys) {
+        return null;
     },
 
     /**
@@ -2667,7 +2625,7 @@ module.exports = {
       * @param {simpleComposition} - simpleComposition
       * @returns {MML}
      */
-    build: function (simpleComposition, callback) {
+    buildActual: function (simpleComposition, contentType) {
         /***************************************************
         var simpleComposition = {
             context: {
@@ -2685,7 +2643,7 @@ module.exports = {
         // context
         var context = simpleComposition.context;
         // 患者情報モジュールを生成する
-        var patientModule = this.buildPatientModule(context.patient);
+        var patientModule = this.patientInfo(context.patient);
         // アクセス権
         var simpleAccessRight = {};
         if (context.hasOwnProperty('accessRight')) {
@@ -2727,17 +2685,13 @@ module.exports = {
         // MML のモジュール単位に付加される
         var docInfo = {};
         var content = {};
-        // 患者情報が含まれているかどうかのフラグ
-        var hasPatientModule = false;
-        var addPatientModule = false;               // 設定が必要
-        // simpleMMLのcontent配列をイテレート
-        // content: [simplePrescription | simpleDiagnosis | simpleTest simpleVitalSign]
+
         simpleComposition.content.forEach((entry) => {
-            if (entry.contentType === 'Medication') {
+            if (contentType === 'prescription') {
                 // contentModuleTypeをセットする
-                baseDocInfo.contentModuleType = 'prescription';
+                baseDocInfo.contentModuleType = contentType;
                 // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
-                var arr = this.buildPrescriptionModule(entry);
+                var arr = this.prescription(entry);
                 // 結果は配列で返る
                 arr.forEach((prescription) => {
                     // それに薬が入っていたらModuleItemへ加える
@@ -2749,52 +2703,31 @@ module.exports = {
                         result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
                     }
                 });
-            } else if (entry.contentType === 'Medical Diagnosis') {
-                baseDocInfo.contentModuleType = 'registeredDiagnosis';
-                baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
-                content = this.buildRegisteredDiagnosisModule(entry);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-            } else if (entry.contentType === 'Laboratory Report') {
+            } else {
                 // 検体検査のcreatorは検査会社の代表
-                var creator = this.buildCreatorInfo(entry.context.laboratory);
-                // それがdocInfoにセットされる
-                baseDocInfo.contentModuleType = 'test';
+                var creator = (contentType === 'test') ? this.buildCreatorInfo(entry.context.laboratory) : creatorInfo;
+
+                baseDocInfo.contentModuleType = contentType;
                 baseDocInfo.uuid = uuid.v4();
                 docInfo = this.buildDocInfo(baseDocInfo, creator, accessRight);
-                content = this.buildTestModule(entry);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-            } else if (entry.contentType === 'Patient Information') {
-                baseDocInfo.contentModuleType = 'patientInfo';
-                baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
-                content = this.buildPatientModule(entry);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-                hasPatientModule = true;
-            } else if (entry.contentType === 'Vital Sign') {
-                baseDocInfo.contentModuleType = 'vitalsign';
-                baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
-                content = this.buildVitalSignModule(entry);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-            } else if (entry.contentType === 'Injection') {
-                baseDocInfo.contentModuleType = 'injection';
-                baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
-                content = this.buildInjectionModule(entry);
+                content = this[contentType].call(this, entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
         });
-        // 患者情報がなかった場合は先頭へ追加する
-        if (addPatientModule && !hasPatientModule) {
-            baseDocInfo.contentModuleType = 'patientInfo';
-            baseDocInfo.uuid = uuid.v4();
-            baseDocInfo.confirmDate = createDate;
-            docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
-            result.MmlBody.MmlModuleItem.unshift({docInfo: docInfo, content: patientModule});
-        }
+
+        return mmlBuilder.build(result);
+    },
+
+    build: function (simpleComposition, contentType, callback) {
+        var self = this;
         process.nextTick(() => {
-            callback(mmlBuilder.build(result));
+            try {
+                var result = self.buildActual(simpleComposition, contentType);
+                callback(null, result);
+            } catch (err) {
+                logger.warn(err);
+                callback(err, null);
+            }
         });
     }
 };
