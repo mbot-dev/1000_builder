@@ -34,22 +34,25 @@ router.use((req, res, next) => {
     }
 });
 
-router.post('/:contentType', (req, res, next) => {
+var generateXSDJson = function (req, res, next) {
     try {
         var contentType = req.params.contentType;
         var parsed = req.body;
-        var xsdJson = simpleBuilder.build(parsed, contentType);
-        req.xsdJson = xsdJson;
+        req.xsdJson = simpleBuilder.build(parsed, contentType);
         next();
     } catch (err) {
-        sendError(500, 'MML 生成エラー', req, res);
+        sendError(500, err, req, res);
     }
-}, (req, res) => {
+};
+
+var generateMml = function (req, res) {
     var mml = mmlBuilder.build(req.xsdJson);
     res.status(200).json({
         result: 'success',
         mml: mml
     });
-});
+};
+
+router.post('/:contentType', [generateXSDJson, generateMml]);
 
 module.exports = router;

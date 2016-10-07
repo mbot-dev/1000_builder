@@ -6,6 +6,24 @@ const mmlBuilder = require('../lib/mmlBuilder');
 const logger = require('../log/logger');
 
 module.exports = {
+    
+    buildExtRef: function (e) {
+        var ref = {
+            attr: {
+                href: e.href
+            }
+        };
+        if (e.hasOwnProperty('contentType')) {
+            ref.attr.contentType = e.contentType;
+        }
+        if (e.hasOwnProperty('medicalRole')) {
+            ref.attr.medicalRole = e.medicalRole;
+        }
+        if (e.hasOwnProperty('title')) {
+            ref.attr.title = e.title;
+        }
+        return ref;
+    },
 
     /**
      * 患者、医師等の個人用Idを生成する
@@ -862,6 +880,8 @@ module.exports = {
         };
         ******************************************************************************/
 
+        // logger.info(JSON.stringify(simpleFirstClinic, null, 4));
+
         var result = {};
 
         // familyHistory
@@ -871,13 +891,15 @@ module.exports = {
                 var fhItem = {
                     relation: entry.relation
                 };
-                fhItem.RegisteredDiagnosisModule = this.buildRegisteredDiagnosisModule(entry.simpleDiagnosis);
+                fhItem.RegisteredDiagnosisModule = this.registeredDiagnosis(entry.simpleDiagnosis);
+                // logger.info(JSON.stringify(fhItem, null, 4));
                 if (entry.hasOwnProperty('age')) {
                     fhItem.age = entry.age;
                 }
                 if (entry.hasOwnProperty('memo')) {
                     fhItem.memo = entry.memo;
                 }
+                // logger.info(JSON.stringify(fhItem, null, 4));
                 result.familyHistory.push(fhItem);
             });
         }
@@ -897,7 +919,7 @@ module.exports = {
                     dest.birthInfo.deliveryWeeks = src.birthInfo.deliveryWeeks;
                 }
                 if (src.birthInfo.hasOwnProperty('deliveryMethod')) {
-                    dest.birthInfo.deliveryWeeks = src.birthInfo.deliveryMethod;
+                    dest.birthInfo.deliveryMethod = src.birthInfo.deliveryMethod;
                 }
                 if (src.birthInfo.hasOwnProperty('bodyWeight')) {
                     dest.birthInfo.bodyWeight = {
@@ -1065,6 +1087,8 @@ module.exports = {
         };
         *******************************************************************************/
 
+        // logger.info(JSON.stringify(simpleSurgery, null,4));
+
         var result = {
             surgicalInfo: {
                 date: simpleSurgery.context.date
@@ -1091,18 +1115,22 @@ module.exports = {
             var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, 'facility', simpleSurgery.context.patientDepartmentName);
             result.surgicalInfo.patientDepartment = [pdp];
         }
+        // logger.info(JSON.stringify(result, null,4));
 
         // surgicalDiagnosis
         result.surgicalDiagnosis = [];
         simpleSurgery.surgicalDiagnosis.forEach((entry) => {
-            result.surgicalDiagnosis.push(this.buildRegisteredDiagnosisModule(entry));
+            result.surgicalDiagnosis.push(this.registeredDiagnosis(entry));
         });
+        // logger.info(JSON.stringify(result, null,4));
 
         // surgicalProcedure
         result.surgicalProcedure = [];
         simpleSurgery.surgicalProcedure.forEach((entry) => {
             var procedureItem = {
-                value: entry.operation
+                operation: {
+                    value: entry.operation
+                }
             };
             result.surgicalProcedure.push(procedureItem);
             if (entry.hasOwnProperty('code') || entry.hasOwnProperty('system')) {
@@ -1124,6 +1152,7 @@ module.exports = {
             result.surgicalStaffs = [];
             simpleSurgery.surgicalStaffs.forEach((entry) => {
                 // entry = simpleCreator + attributes
+                // logger.info(JSON.stringify(entry, null,4));
                 var staff = {
                     staffInfo: []
                 };
@@ -1137,9 +1166,12 @@ module.exports = {
                         staff.attr.superiority = entry.staffClass;
                     }
                 }
-                staff.staffInfo.push(this.buildPersonalizedInfo(entry));
+                var pi = this.buildPersonalizedInfo(entry.staffInfo);
+                // logger.info(JSON.stringify(pi, null,4));
+                staff.staffInfo.push(pi);
             });
         }
+        // logger.info(JSON.stringify(result, null,4));
 
         // anesthesiaProcedure
         if (simpleSurgery.hasOwnProperty('anesthesiaProcedure')) {
@@ -1179,7 +1211,7 @@ module.exports = {
                         staff.attr.superiority = entry.staffClass;
                     }
                 }
-                staff.staffInfo.push(this.buildPersonalizedInfo(entry));
+                staff.staffInfo.push(this.buildPersonalizedInfo(entry.staffInfo));
             });
         }
 
@@ -1196,16 +1228,18 @@ module.exports = {
         // referenceInfo
         if (simpleSurgery.hasOwnProperty('referenceInfo')) {
             result.referenceInfo = {
-                href: simpleSurgery.referenceInfo.href
+                attr: {
+                    href: simpleSurgery.referenceInfo.href
+                }
             };
             if (simpleSurgery.referenceInfo.hasOwnProperty('contentType')) {
-                result.referenceInfo.contentType = simpleSurgery.referenceInfo.contentType;
+                result.referenceInfo.attr.contentType = simpleSurgery.referenceInfo.contentType;
             }
             if (simpleSurgery.referenceInfo.hasOwnProperty('medicalRole')) {
-                result.referenceInfo.medicalRole = simpleSurgery.referenceInfo.medicalRole;
+                result.referenceInfo.attr.medicalRole = simpleSurgery.referenceInfo.medicalRole;
             }
             if (simpleSurgery.referenceInfo.hasOwnProperty('title')) {
-                result.referenceInfo.title = simpleSurgery.referenceInfo.title;
+                result.referenceInfo.attr.title = simpleSurgery.referenceInfo.title;
             }
         }
 
@@ -1214,6 +1248,7 @@ module.exports = {
             result.memo = simpleSurgery.memo;
         }
 
+        // logger.info(JSON.stringify(result, null,4));
         return result;
     },
 
@@ -1323,6 +1358,7 @@ module.exports = {
         };
     ***********************************************************************/
 
+        // logger.info(JSON.stringify(simpleSummary, null, 4));
         var result = {
             serviceHistory: {                                       // 期間情報
                 attr: {
@@ -1331,11 +1367,12 @@ module.exports = {
                 }
             }
         };
+        // logger.info(JSON.stringify(result, null, 4));
 
         // outPatient
         if (simpleSummary.context.hasOwnProperty('outPatient')) {
             result.serviceHistory.outPatient = [];
-            simpleSummary.outPatient.forEach((entry) => {
+            simpleSummary.context.outPatient.forEach((entry) => {
                 // date
                 var outPatientItem = {
                     date: entry.date
@@ -1364,15 +1401,17 @@ module.exports = {
         }
 
         // inPatient
-        if (simpleSummary.hasOwnProperty('inPatient')) {
+        if (simpleSummary.context.hasOwnProperty('inPatient')) {
             result.serviceHistory.inPatient = [];
-            simpleSummary.inPatient.forEach((entry) => {
+            simpleSummary.context.inPatient.forEach((entry) => {
+                //logger.info(JSON.stringify(entry, null, 4));
 
                 var inPatientItem = {};
                 result.serviceHistory.inPatient.push(inPatientItem);
 
                 // admission 入院情報
                 if (entry.hasOwnProperty('admission')) {
+                    // logger.info(JSON.stringify(entry.admission, null, 4));
                     inPatientItem.admission = {};
                     // date
                     inPatientItem.admission.date = entry.admission.date;
@@ -1388,10 +1427,12 @@ module.exports = {
                             emergency: entry.admission.emergency
                         };
                     }
+                    // logger.info(JSON.stringify(inPatientItem.admission, null, 4));
                     // referFrom
                     if (entry.admission.hasOwnProperty('referFrom')) {
                         inPatientItem.admission.referFrom = this.buildPersonalizedInfo(entry.admission.referFrom);
                     }
+                    // logger.info(JSON.stringify(inPatientItem.admission, null, 4));
                 }
 
                 // discharge 退院情報
@@ -1415,6 +1456,7 @@ module.exports = {
                     if (entry.discharge.hasOwnProperty('referTo')) {
                         inPatientItem.discharge.referTo = this.buildPersonalizedInfo(entry.discharge.referTo);
                     }
+                    // logger.info(JSON.stringify(inPatientItem.discharge, null, 4));
                 }
 
                 // staffs
@@ -1428,6 +1470,7 @@ module.exports = {
                 }
             });
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
         // RegisteredDiagnosisModule ?  != *
         if (simpleSummary.hasOwnProperty('simpleDiagnosis')) {
@@ -1471,13 +1514,15 @@ module.exports = {
         if (simpleSummary.hasOwnProperty('history')) {
             result.history = simpleSummary.history;
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
         // physicalExam  extRef *
         if (simpleSummary.hasOwnProperty('physicalExam')) {
             result.physicalExam = {
-                value: simpleSummary.physicalExam
+                value: simpleSummary.physicalExam.value
             };
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
         // clinicalCourse
         if (simpleSummary.hasOwnProperty('clinicalCourse')) {
@@ -1493,9 +1538,9 @@ module.exports = {
                     clinicalRecord.relatedDoc = [];
                     entry.relatedDoc.forEach((e) => {
                         var relatedDoc = {
-                            value: entry.relatedDoc.uuid,
+                            value: e.uuid,
                             attr: {
-                                relation: entry.relatedDoc.relation
+                                relation: e.relation
                             }
                         };
                         clinicalRecord.relatedDoc.push(relatedDoc);
@@ -1504,9 +1549,24 @@ module.exports = {
                 if (entry.hasOwnProperty('extRef')) {
                     clinicalRecord.extRef = [];
                     entry.extRef.forEach((e) => {
-                        clinicalRecord.extRef.push(this.buildExtRef(e));
+                        var ref = {
+                            attr: {
+                            }
+                        };
+                        ref.attr.href = e.href;
+                        if (e.hasOwnProperty('contentType')) {
+                            ref.attr.contentType = e.contentType;
+                        }
+                        if (e.hasOwnProperty('medicalRole')) {
+                            ref.attr.medicalRole = e.medicalRole;
+                        }
+                        if (e.hasOwnProperty('title')) {
+                            ref.attr.title = e.title;
+                        }
+                        clinicalRecord.extRef.push(ref);
                     });
                 }
+                // logger.info(JSON.stringify(clinicalRecord, null, 4));
                 result.clinicalCourse.push(clinicalRecord);
             });
         }
@@ -1517,22 +1577,42 @@ module.exports = {
                 value: simpleSummary.dischargeFindings
             };
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
         // medication: {                                           // 退院時処方 ? medication
         if (simpleSummary.hasOwnProperty('medication')) {
+            // logger.info(JSON.stringify(simpleSummary.medication.simplePrescription, null, 4));
             result.medication = {
-                value: simpleSummary.medication
+                value: simpleSummary.medication.value
             };
             if (simpleSummary.medication.hasOwnProperty('simplePrescription')) {
-                result.medication.PrescriptionModule = this.buildPrescriptionModule(simpleSummary.medication.simplePrescription);
+                // xsd 1 個だけ....
+                var preArr = this.prescription(simpleSummary.medication.simplePrescription);
+                result.medication.PrescriptionModule = preArr[0];
             }
             if (simpleSummary.medication.hasOwnProperty('extRef')) {
                 result.medication.extRef = [];
                 simpleSummary.medication.forEach((e) => {
-                    result.medication.extRef.push(this.buildExtRef(e));
+                    var ref = {
+                        attr: {
+                        }
+                    };
+                    ref.attr.href = e.href;
+                    if (e.hasOwnProperty('contentType')) {
+                        ref.attr.contentType = e.contentType;
+                    }
+                    if (e.hasOwnProperty('medicalRole')) {
+                        ref.attr.medicalRole = e.medicalRole;
+                    }
+                    if (e.hasOwnProperty('title')) {
+                        ref.attr.title = e.title;
+                    }
+                    result.medication.extRef.push(ref);
                 });
             }
+            // logger.info(JSON.stringify(result.medication, null, 4));
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
         // testResults
         if (simpleSummary.hasOwnProperty('testResults')) {
@@ -1550,9 +1630,9 @@ module.exports = {
                     tr.relatedDoc = [];
                     entry.relatedDoc.forEach((e) => {
                         var relatedDoc = {
-                            value: entry.relatedDoc.uuid,
+                            value: e.uuid,
                             attr: {
-                                relation: entry.relatedDoc.relation
+                                relation: e.relation
                             }
                         };
                         tr.relatedDoc.push(relatedDoc);
@@ -1561,17 +1641,32 @@ module.exports = {
                 if (entry.hasOwnProperty('extRef')) {
                     tr.extRef = [];
                     entry.extRef.forEach((e) => {
-                        tr.extRef.push(this.buildExtRef(e));
+                        var ref = {
+                            attr: {
+                            }
+                        };
+                        ref.attr.href = e.href;
+                        if (e.hasOwnProperty('contentType')) {
+                            ref.attr.contentType = e.contentType;
+                        }
+                        if (e.hasOwnProperty('medicalRole')) {
+                            ref.attr.medicalRole = e.medicalRole;
+                        }
+                        if (e.hasOwnProperty('title')) {
+                            ref.attr.title = e.title;
+                        }
+                        tr.extRef.push(ref);
                     });
                 }
-
+                // logger.info(JSON.stringify(tr, null, 4));
             });
         }
+        //logger.info(JSON.stringify(result, null, 4));
 
         // plan
         if (simpleSummary.hasOwnProperty('plan')) {
             result.plan = {
-                value: simpleSummary.plan
+                value: simpleSummary.plan.value
             };
         }
 
@@ -1580,6 +1675,7 @@ module.exports = {
             result.remarks = simpleSummary.remarks;
         }
 
+        // logger.info(JSON.stringify(result, null, 4));
         return result;
     },
 
@@ -2527,7 +2623,18 @@ module.exports = {
             }
         });
 
-        return [external, internal, inOrExt];
+        var retArray = [];
+        if (external.medication.length > 0 ) {
+            retArray.push(external);
+        }
+        if (internal.medication.length > 0 ) {
+            retArray.push(internal);
+        }
+        if (inOrExt.medication.length > 0 ) {
+            retArray.push(inOrExt);
+        }
+
+        return retArray;
     },
 
     /**

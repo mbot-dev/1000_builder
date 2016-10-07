@@ -37,9 +37,6 @@ var checkCredential = function (req, res, next) {
         var len = basic.length;
         var decoded = new Buffer(auth.substring(len), 'base64').toString();
         var arr = decoded.split(':');
-        // logger.info(decoded);
-        // '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e'
-        // '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141'
         if (arr[0] === '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e' &&
                 arr[1] === '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141') {
             req.user = {
