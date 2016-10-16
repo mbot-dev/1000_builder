@@ -6,7 +6,7 @@ const mmlBuilder = require('../lib/mmlBuilder');
 const logger = require('../log/logger');
 
 module.exports = {
-    
+
     buildExtRef: function (e) {
         var ref = {
             attr: {
@@ -31,7 +31,9 @@ module.exports = {
      * @param {string} - idType MML0024(全国統一:national 地域:local 施設固有:facility)
      * @param {string} - facilityId 医療機関のId
      */
-    buildPersonId: function (pid, idType, facilityId) {
+    buildPersonId: function (pid, facilityId) {
+        // 千年カルテ仕様
+        var idType = 'facility';    // 施設固有
         // idTypeが施設固有の場合(===facility) tableIdに施設Idを設定する
         return {
             value: pid,                     // 付番されているId
@@ -44,6 +46,8 @@ module.exports = {
 
     // 人名
     buildPersonName: function (repCode, fullName) {
+        // 千年カルテ仕様
+        fullName = fullName.replace(' ', '　');            // 全角区切り
         return {
             attr: {
                 repCode: repCode,                          // 表記法 (漢字:I カナ:P ローマ字:A)
@@ -98,7 +102,9 @@ module.exports = {
     },
 
     // 施設情報 MMLで病院は施設で表現 漢字のみ
-    buildFacility: function(fId, idType, fName) {
+    buildFacility: function(fId, fName) {
+        // 千年カルテ仕様
+        var idType = 'OID';                         // OID
         // 施設名称 漢字
         var facilityName = {
             value: fName,
@@ -122,7 +128,9 @@ module.exports = {
     },
 
     // 診療科情報
-    buildDepartment: function(dId, idType, dName) {
+    buildDepartment: function(dId, dName) {
+        // 千年カルテ仕様
+        var idType = 'facility';                    // idType=facility, 施設固有
         // 診療科Id
         var deptId = {
             value: dId,                             // medicalの場合はMML0028 dentalの場合はMML0030を参照
@@ -145,20 +153,11 @@ module.exports = {
             Id: deptId                                // 診療科ID
         };
     },
-    buildMedicalDepartment: function(dId, dName) {
-        return this.buildDepartment(dId, 'medical', dName);
-    },
-    buildDentalDepartment: function(dId, dName) {
-        return this.buildDepartment(dId, 'dental', dName);
-    },
-    buildFacilityDepartment: function(dId, dName) {
-        return this.buildDepartment(dId, 'facility', dName);
-    },
 
     // creator(医師等)個人情報
     buildPersonalizedInfo: function (person) {
         // 作成者(creator)Id
-        var creatorId = this.buildPersonId(person.id, person.idType, person.facilityId);
+        var creatorId = this.buildPersonId(person.id, person.facilityId);
 
         // 作成者氏名
         var creatorNames = [];
@@ -187,7 +186,7 @@ module.exports = {
         }
 
         // 施設情報
-        var facility = this.buildFacility(person.facilityId, person.facilityIdType, person.facilityName);
+        var facility = this.buildFacility(person.facilityId, person.facilityName);
 
         // 医療機関住所
         var facilityAddress = this.buildBusinessAddress(person.facilityZipCode, person.facilityAddress);
@@ -200,15 +199,13 @@ module.exports = {
             Id: creatorId,                               // ID情報
             personName: creatorNames,                    // 人名 Name の配列
             Facility: facility,                          // 施設情報 Facility
-            //Department: department,                      // 診療科情報 Department
             addresses: [facilityAddress],                // 住所
-            //emailAddresses: [email],                   // 電子メール
             phones: [facilityPhone]                      // 電話番号
         };
 
         // 診療科情報
         if (person.hasOwnProperty('departmentId')) {
-            var department = this.buildDepartment(person.departmentId, person.departmentIdType, person.departmentName);
+            var department = this.buildDepartment(person.departmentId, person.departmentName);
             personalizedInfo.Department = department;
         }
 
@@ -223,7 +220,7 @@ module.exports = {
     // 医療資格
     buildCreatorLicense: function (license) {
         return {
-            value: license,                                // 生成者の資格 MML0026を使用
+            value: license,                               // 生成者の資格 MML0026を使用
             attr: {
                 tableId: 'MML0026'                        // 生成者の資格を規定するテーブル名 MML0026
             }
@@ -355,7 +352,7 @@ module.exports = {
                     personCode: 'patient',
                     tableId: 'MML0036',
                     personId: patientId,                            // 患者ID
-                    personIdType: 'dolphinUserId_2001-10-03'        // ToDo
+                    personIdType: '1000_Years_Karte'                // ToDo
                 },
                 value: patientName
             }]
@@ -473,7 +470,7 @@ module.exports = {
         };*******************************************************************/
 
         // 患者Id
-        var id = this.buildPersonId(simplePatient.id, simplePatient.idType, simplePatient.facilityId);
+        var id = this.buildPersonId(simplePatient.id, simplePatient.facilityId);
 
         // patientModule
         var patientModule = {
@@ -913,7 +910,7 @@ module.exports = {
                 dest.birthInfo = {};
                 if (src.birthInfo.hasOwnProperty('facilityId') && src.birthInfo.hasOwnProperty('facilityName')) {
                     // 共通形式の Facility
-                    dest.birthInfo.Facility = this.buildFacility(src.birthInfo.facilityId, 'OID', src.birthInfo.facilityName);
+                    dest.birthInfo.Facility = this.buildFacility(src.birthInfo.facilityId, src.birthInfo.facilityName);
                 }
                 if (src.birthInfo.hasOwnProperty('deliveryWeeks')) {
                     dest.birthInfo.deliveryWeeks = src.birthInfo.deliveryWeeks;
@@ -1108,11 +1105,11 @@ module.exports = {
             result.surgicalInfo.duration = simpleSurgery.context.duration;
         }
         if (simpleSurgery.context.hasOwnProperty('surgicalDepartmentId') && simpleSurgery.context.hasOwnProperty('surgicalDepartmentName') ) {
-            var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, 'facility', simpleSurgery.context.surgicalDepartmentName);
+            var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, simpleSurgery.context.surgicalDepartmentName);
             result.surgicalInfo.surgicalDepartment = [sdp];
         }
         if (simpleSurgery.context.hasOwnProperty('patientDepartmentId') && simpleSurgery.context.hasOwnProperty('patientDepartmentName') ) {
-            var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, 'facility', simpleSurgery.context.patientDepartmentName);
+            var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, simpleSurgery.context.patientDepartmentName);
             result.surgicalInfo.patientDepartment = [pdp];
         }
         // logger.info(JSON.stringify(result, null,4));
@@ -1921,6 +1918,8 @@ module.exports = {
         };
         ********************************************************************************/
 
+        logger.info(JSON.stringify(simpleReport, null, 4));
+
         var information = {};
         var reportBody = {};
         var result = {
@@ -1942,7 +1941,7 @@ module.exports = {
             value: context.reportStatus,
             attr: {
                 statusCode: context.statusCode,                     // mid 検査中 final 最終報告 required
-                statusCodeId: 'mmlLb0001と入力'                      // mmlLb0001と入力 required
+                statusCodeId: 'mmlLb0001'                      // mmlLb0001と入力 required
             }
         };
 
@@ -1951,7 +1950,7 @@ module.exports = {
             value: context.testClass,
             attr: {
                 testClassCode: context.testClassCode,               // MML0033 required
-                testClassCodeId: context.testClassCodeId            // MML0033 required
+                testClassCodeId: 'MML0033'            // MML0033 required
             }
         };
 
@@ -1965,6 +1964,7 @@ module.exports = {
                 }
             };
         }
+        logger.info(JSON.stringify(context, null, 4));
 
         // organ
         if (context.hasOwnProperty('organ')) {
@@ -1989,14 +1989,14 @@ module.exports = {
                 information.consultFrom.conDepartment = {                 // 依頼施設 ?
                     value: cFrom.department,
                     attr: {
-                        departmentCode: cFrom.departmentCode,
-                        departmentCodeId: cFrom.departmentCodeId
+                        depCode: cFrom.departmentCode,
+                        depCodeId: cFrom.departmentCodeId
                     }
                 };
             }
             if (cFrom.hasOwnProperty('ward')) {
                 information.consultFrom.conWard = {                 // 依頼施設 ?
-                    value: cFrom.department,
+                    value: cFrom.ward,
                     attr: {
                         wardCode: cFrom.wardCode,
                         wardCodeId: cFrom.wardCodeId
@@ -2005,7 +2005,7 @@ module.exports = {
             }
             if (cFrom.hasOwnProperty('client')) {
                 information.consultFrom.client = {                 // 依頼施設 ?
-                    value: cFrom.department,
+                    value: cFrom.client,
                     attr: {
                         clientCode: cFrom.clientCode,
                         clientCodeId: cFrom.clientCodeId
@@ -2032,8 +2032,8 @@ module.exports = {
                 information.perform.pDepartment = {                 // 依頼施設 ?
                     value: perform.department,
                     attr: {
-                        departmentCode: perform.departmentCode,
-                        departmentCodeId: perform.departmentCodeId
+                        depCode: perform.departmentCode,
+                        depCodeId: perform.departmentCodeId
                     }
                 };
             }
@@ -2114,7 +2114,7 @@ module.exports = {
         if (body.hasOwnProperty('testMemoF')) {
             reportBody.testMemoF = body.testMemoF;
         }
-
+        logger.info(JSON.stringify(result, null, 4));
         return result;
     },
 

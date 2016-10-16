@@ -33,12 +33,6 @@ app.use(helmet.contentSecurityPolicy({
 		imgSrc: ["'self'"]
 	}
 }));
-app.use((req, res, next) => {
-    res.header('Content-Type', 'application/json;charset=UTF-8');
-    res.header('Cache-Control', 'no-store');
-    res.header('Pragma', 'no-cache');
-    next();
-});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(':remote-addr [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));

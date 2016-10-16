@@ -40,7 +40,7 @@ var getAccessToken = function (callback) {
     var base64 = btoa(consumerKey + ':'　+　secret);
 
     // ポスト先は /oauth2/token
-    xhr.open('POST', '/simple/api/v1/oauth2/token', true);
+    xhr.open('POST', '/mml/api/v1/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
@@ -88,11 +88,11 @@ var getAccessToken = function (callback) {
 //------------------------------------------------------------------
 // 1000-builderへsimpleCompositionをポストする
 //------------------------------------------------------------------
-var post = function (simpleComposition) {
+var post = function (contentType, simpleComposition) {
     var xhr = new XMLHttpRequest();
 
-    // ポスト先 /1000/simple/v1
-    xhr.open('POST', '/simple/api/v1/mml', true);
+    // ポスト先 /mml/api/v1/contentType
+    xhr.open('POST', '/mml/api/v1/' + contentType, true);
 
     // Authorizationヘッダーを Bearer access_token にセットする
     xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
@@ -136,11 +136,9 @@ var post = function (simpleComposition) {
 // 患者
 var simplePatient = {
     id: '0516',                                        // 患者ID
-    idType: 'facility',                                // IDのタイプ MML0024 を使用する
-    facilityId: 'JPN012345678901',                     // 医療連携用の施設IDでプロジェクトから指定される
+    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設IDでプロジェクトから指定される
     kanjiName: '宮田 奈々',                             // 漢字の氏名（氏名は漢字、カナ、ローマ字のどれか一つ必須）
     kanaName: 'ミヤタ ナナ',                             // カナの氏名（同上）
-    romanName: 'Nana Miyata',                          // ローマ字の氏名（同上）
     gender: 'femail',                                  // 性別 MML0010を使用 (女:female 男:male その他:other 不明:unknown)
     dateOfBirth: '1994-11-26',                         // 生年月日 YYYY-MM-DD 形式
     maritalStatus: 'single',                           // 婚姻状況 MML0011を使用（オプション）
@@ -155,18 +153,15 @@ var simplePatient = {
 // 医師等
 var simpleCreator = {
     id: '201605',                                      // 医師のID
-    idType: 'facility',                                // IDのタイプ MML0024 を使用する
     kanjiName: '青山 慶二',                             // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
     prefix: 'Professor',                               // 肩書き等（オプション）
     degree: 'MD/PhD',                                  // 学位（オプション）
-    facilityId: 'JPN012345678901',                     // 医療連携用の施設ID プロジェクトから指定される
-    facilityIdType: 'JMARI',                           // 上記施設IDを発番している体系 MML0027を使用（ca|insurance|monbusho|JMARI|OID)
+    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設ID プロジェクトから指定される
     facilityName: 'シルク内科',                          // 施設名
     facilityZipCode: '231-0023',                       // 施設郵便番号
     facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
     facilityPhone: '045-571-6572',                     // 施設電話番号
     departmentId: '01',                                // 医科用の場合は MML0028、歯科用の場合は MML0030 から選ぶ（オプション）
-    departmentIdType: 'medical',                       // 医科用の診療科コードの場合はmedicalを、歯科用の診療科コードの場合はdentalを指定する MML0029(medical|dental|facility)から選ぶ（オプション）
     departmentName: '第一内科',                         // 診療科名（オプション）
     license: 'doctor'                                  // 医療資格 MML0026を使用（オプション）
 };
@@ -177,7 +172,6 @@ var simplePrescription = function () {
     var startDate = nowAsDate();                        // YYYY-MM-DD形式
     // 生成する simplePrescription
     var simple = {
-        contentType: 'Medication',                      // contentTypeをMedicationにする
         medication: []                                  // 処方の配列
     };
 
@@ -223,7 +217,6 @@ var simplePrescription = function () {
 var simpleInjection = function () {
     // 生成する simpleInjection
     var simple = {
-        contentType: 'Injection',                       // contentTypeをInjectionにする
         medication: []                                  // 注射の配列
     };
     // 投与開始日時（デモなので現在時刻）
@@ -287,7 +280,6 @@ var simpleDiagnosis = function () {
     var dateOfOnset = toDateString(now);                    // 疾患開始日
 
     return {
-        contentType: 'Medical Diagnosis',                   // contentTypeをMedical Diagnosisにする
         diagnosis: 'colon carcinoid',                       // 疾患名
         code: 'C189-.006',                                  // 疾患コード
         system: 'ICD10',                                    // 疾患コード体系名
@@ -346,7 +338,6 @@ var createTestItems = function (content) {
 // 検査サンプル
 var simpleLabTest = function (callback) {
     var laboratoryTest = {
-        contentType: 'Laboratory Report',                   // contentTypeをLaboratory Reportにする
         context: {
             issuedId: uuid.v4(),                            // 検査依頼ID
             issuedTime: nowAsDateTime(),                    // 受付日時 YYYY-MM-DDTHH:mm:ss 形式
@@ -396,7 +387,6 @@ var simpleLabTest = function (callback) {
 // Vital Sign サンプル
 var simpleVitalSign = function () {
     var vitalSign = {
-        contentType: 'Vital Sign',                              // contentTypeをVital Signにする
         context: {                                              // バイタルサインが計測された時のコンテキスト（オプション）
             observer: '花田 綾子'                                // バイタルサインを計測した人（オプション）
         },
@@ -422,109 +412,6 @@ var simpleVitalSign = function () {
     });
     return vitalSign;
 };
-
-// 生活習慣
-var simpleLifestyle = {
-    occupation: '会社員',
-    tobacco: '吸わない',
-    alcohol: 'Beer 350ml/日',
-    other: 'ウォーキング'
-};
-
-// 基礎的診療情報
-var simpleBaseClinic = {                                    // 基礎的診療情報
-    allergy: [],                                            // アレルギー情報 ? [allergyItem]
-    bloodtype: {
-        abo: 'a',                                           // ABO 式血液型 MML0018
-        rh: 'rhD+'                                          // Rho(D) 式血液型 ? MML0019
-    }
-    // infection: []                                        // 感染性情報 ? [infectionItem]
-};
-var allergyItem = {
-    factor: 'crab',                                         // アレルギー原因
-    severity: 'mild',                                       // アレルギー反応程度 ? MML0017
-    identifiedDate: 'since almost 20 years ago',            // アレルギー同定日 ?
-    memo: 'no reaction to shrimp'                           // アレルギーメモ ?
-};
-simpleBaseClinic.allergy.push(allergyItem);
-
-// 初診時特有情報
-var simpleFirstClinic = {                                   // 初診時特有情報
-    contentType: 'firstClinic',
-    familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
-    childhood: {},                                          // 小児期情報 ?
-    pastHistory: {},                                        // 既往歴情報 ?
-    chiefComplaints: '頭痛',                                    // 主訴 ?
-    presentIllnessNotes: '2週間前より一日に数回側頭部から頭頂部にかけてのずきずきする痛みがあり。' // 現病歴自由記載 ?
-};
-
-var familyHistoryItem = {
-    relation: 'motherInLaw',                                // 続柄コード MML0020
-    simpleDiagnosis: {
-        contentType: 'Medical Diagnosis',                   // contentTypeをMedical Diagnosisにする
-        diagnosis: 'gastric cancer',                        // 疾患名
-        code: 'C169-.007',                                  // 疾患コード
-        system: 'ICD10',                                    // 疾患コード体系名
-        dateOfRemission: '1989-08-25',                      // 疾患終了日 YYYY-MM-DD 形式（オプション）
-        outcome: 'died'                                     // 転帰 MML0016を使用（オプション）
-    },
-    age: 'P40Y'                                            // 家族の疾患時年齢 ?
-};
-simpleFirstClinic.familyHistory.push(familyHistoryItem);
-
-var childhood = {                                           // 出生時情報
-    birthInfo: {
-        deliveryWeeks: 'P40W',                              // 分娩時週数 ? PnW
-        deliveryMethod: 'cesarean section',                 // 分娩方法 ?
-        bodyWeight: '3270',                                 // 出生時体重 ? g
-        bodyHeight: '50'                                    // 出生時身長 ? cm
-    },
-    vaccination: []                                         // 予防接種情報 ? [vaccinationItem]
-};
-
-var vaccinationItem1 = {
-    vaccine: 'polio',                                       // 接種ワクチン名
-    injected: 'true',                                       // 実施状態．true：ワクチン接種，false：接種せず
-    age: 'P6M',                                             // 接種時年齢 ? PnYnM 1歳6ヶ月=P1Y6M
-    memo: 'first administration'                            // 実施時メモ ?
-};
-var vaccinationItem2 = {
-    vaccine: 'polio',                                       // 接種ワクチン名
-    injected: 'true',                                       // 実施状態．true：ワクチン接種，false：接種せず
-    age: 'P1Y6M',                                           // 接種時年齢 ? PnYnM 1歳6ヶ月=P1Y6M
-    memo: 'second administration'                           // 実施時メモ ?
-};
-childhood.vaccination.push(vaccinationItem1);
-childhood.vaccination.push(vaccinationItem2);
-simpleFirstClinic.childhood = childhood;
-
-var pastHistory = {                                         // 既往歴情報 choice
-    pastHistoryItem: []                                     // 時間表現併用 choice Not support
-};
-
-var pastHistoryItem1 = {
-    timeExpression: '6 years old',                          // 時間表現
-    eventExpression: appendectomy                           // 時間表現に対応するイベント表現 ? [string]
-};
-var pastHistoryItem2 = {
-    timeExpression: '5 years ago (1994)',                   // 時間表現
-    eventExpression: hypertension                           // 時間表現に対応するイベント表現 ? [string]
-};
-pastHistory.pastHistoryItem.push(pastHistoryItem1);
-pastHistory.pastHistoryItem.push(pastHistoryItem2);
-simpleFirstClinic.pastHistory = pastHistory;
-
-// 手術記録
-
-
-
-
-
-
-
-
-
-
 
 // 処方せんサンプルをPOSTする
 var showPrescription = function () {
@@ -565,7 +452,7 @@ var showPrescription = function () {
     var text = arr.join('');
     document.getElementById('simple_box').innerHTML = text;
     // POST する
-    post(simpleComposition);
+    post('prescription', simpleComposition);
 };
 
 // 注射サンプルをPOSTする
@@ -607,7 +494,7 @@ var showInjection = function () {
     var text = arr.join('');
     document.getElementById('simple_box').innerHTML = text;
     // send する
-    post(simpleComposition);
+    post('injection', simpleComposition);
 };
 
 // 病名サンプルをPOSTする
@@ -649,7 +536,7 @@ var showDiagnosis = function () {
     var text = arr.join('');
     document.getElementById('simple_box').innerHTML = text;
     // POST する
-    post(simpleComposition);
+    post('registeredDiagnosis', simpleComposition);
 };
 
 // 検査サンプルをPOSTする
@@ -692,7 +579,7 @@ var showLabTest = function () {
         var text = arr.join('');
         document.getElementById('simple_box').innerHTML = text;
         // POST する
-        post(simpleComposition);
+        post('test', simpleComposition);
     });
 };
 
@@ -735,7 +622,7 @@ var showVitalSign = function () {
     var text = arr.join('');
     document.getElementById('simple_box').innerHTML = text;
     // POST する
-    post(simpleComposition);
+    post('vitalsign', simpleComposition);
 };
 
 // selectionが変更された
