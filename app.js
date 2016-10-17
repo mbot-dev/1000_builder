@@ -13,7 +13,7 @@ const simpleRouter = require('./api/simpleRouter');
 
 const app = express();
 (function (param) {
-	if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+	if (process.env.NODE_ENV) {
 		param.enable('trust proxy');
 		param.use ((req, res, next) => {
 			if (req.secure) {
