@@ -12,20 +12,20 @@
 </head>
 <body onload="startApp();">
     <header class="w3-container w3-blue">
-        <h2 class="w3-center">千年ビルダー</h2><a href="https://github.com/mbot-dev/1000_builder"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
+        <h2 class="w3-center">千年ビルダー</h2><a href="https://github.com/mbot-dev/1000_builder/wiki/simple"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
     </header>
     <div class="w3-container w3-margin">
         <div class="w3-container">
-            <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテプロジェクトが必要とするMML4.0形式のデータを生成するサーバーアプリケーションです。</p>
+            <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテが必要とするMML4.0形式のデータを生成するAPIサーバーです。</p>
             <h4>利用イメージ</h4>
             <ul>
                 <li>患者さんがクリニックを受診しました。</li>
                 <li>医師は処方せんを出しました。</li>
             </ul>
-            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.0にエンコードされたデータを返します。下記では、処方・病名・検査・バイタルサインのポストデータとその結果を見ることができます。</p>
+            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.0にエンコードされたデータを返却します。下記は、左がAPI、右が生成されたMMLです。</p>
         </div>
         <div class="w3-row-padding">
-            <p class="w3-half">クライアントがポストするデータ:
+            <p class="w3-half">API:
                 <select onchange="changeModule(this);">
                     <option value='showPrescription'>処 方</option>
                     <option value='showInjection'>注 射</option>
@@ -49,32 +49,24 @@
         <div class="w3-container">
             <p>　</p>
             <p class="w3-small w3-center">サンプルデータの個人名には<a href="http://kazina.com/dummy/">なんちゃって個人情報</a>を使用しています。</p>
-            <h4>データ利用</h4>
-            <ul>
-                <li>サーバーが生成したMMLを千年カルテプロジェクトに送信します。</li>
-                <li>この時デフォルトで次のアクセス権が設定されます。
-                    <ul>
-                        <li>診察した病院: 参照、修正、削除する全権限</li>
-                        <li>患者: 参照のみ</li>
-                        <li>患者が受診したことのある病院: 参照可</li>
-                    </ul>
-                </li>
-            </ul>
-            <h4>このサーバーの目的</h4>
-            <p>MMLは医療情報を1000年に渡って活用できるようにするため、情報を多くの名前空間と深い階層によって定義しています。これをサポートするのは、新規のアプリケーションであっても既存の製品であっても、かなりのコストが必要です。千年ビルダーはそこへシンプルなAPIを提供します。クライアントがポストするのは簡単なJSONで、属性は殆どが自明なものばかりです。
-                したがって、
-            </p>
+            <h4>APIを使用するメリット</h4>
             <uL>
-                <li>医療システムベンダーは、自社の製品に（既存であっても）千年カルテの機能をより簡単に組み込むことができます。</li>
-                <li>千年基盤はこのサーバーだけを検証すればよく、信頼性が向上し、コストが下がります(このサーバーで生成するXMLはバリデーション試験に合格しています)。</li>
-                <li>モバイルアプリからの送信も容易となり、院内の全ての場所、薬局、介護、リハビリ等、医療連携の幅が広がります。</li>
+                <li>MMLを直接サポートする場合に比べ、開発の時間が大幅に短縮されます。</li>
+                <li>千年カルテに固有なデータ設定が隠蔽されているため、医療情報そのものに集中できます。</li>
+                <li>MML/openEHR の理解に役立ちます。</li>
             </ul>
-            <h4>クライアントの開発資料</h4>
+            <h4>千年ビルダーの特長</h4>
             <uL>
-                <li><a href="https://github.com/mbot-dev/1000_builder/wiki/simple">Wiki</a> に仕様及び設定ガイドがあります。</li>
-                <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
-                <li>クライアントとサーバは REST API を使用して通信します（システムの実装言語に依存しません）。</li>
+                <li>医療情報システムの種類（業務の種類やプログラムの実装言語）に依存しません。</li>
+                <li>病院の規模を問わず、大病院からクリニックまでカバーします。</li>
+                <li>安全に運用できます。</li>
+            </ul>
+            <h4>API資料</h4>
+            <uL>
+                <li>APIのスタイルはREST、データ形式はJSONです。</li>
                 <li>プロジェクトに参加するとこれと同等のサーバーが SaaS で提供されます。</li>
+                <li><a href="https://github.com/mbot-dev/1000_builder/wiki/simple">Wiki</a> に仕様及びガイドがあります。</li>
+                <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
                 <li>MML インスタンスの<a href="https://1000-validator.au-syd.mybluemix.net/">バリデーション・チェックはこちら</a>で行うことができます。</li>
             </ul>
             <h4>関連情報</h4>
@@ -87,7 +79,7 @@
         </div>
     </div>
     <footer class="w3-container w3-blue">
-        <p class="w3-center">&copy;2016 Kazushi Minagawa.</p>
+        <p class="w3-center">&copy;2016 千年カルテ</p>
     </footer>
 </body>
 </html>
