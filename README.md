@@ -1,9 +1,22 @@
 ## 千年ビルダー
 
-千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテプロジェクトが必要とするMML4.0形式のデータを生成するAPIサーバーです。
+　千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテが必要とするMML4.0形式のデータを生成するAPIサーバーです。
+
+### 動作サンプル
+
+ * [このページ](https://1000-builder.au-syd.mybluemix.net)でAPIとサーバーのレスポンスを確認することができます。
+
+
+### API情報
+
+  1. [Wiki simple](https://github.com/mbot-dev/1000_builder/wiki/simple)にあります。
+  2. 稼働サンプルのJavaScriptも参考にしてください。
 
 
 ### インストール
+　APIのみをサポートする場合は、インストールは不要です。千年カルテプロジェクトから支給される開発サーバーをご利用ください。  
+　以下は独自に拡張される場合等に参考にしてください。
+
  * Node.jsをインストール
  * このリポジトリをクローン
   - git clone git@github.com:mbot-dev/1000_builder.git
@@ -14,15 +27,6 @@
 ブラウザーで
 
  * http://localhost:6001 へアクセス
-
-
-### APIの詳細
-
- 1. [Wiki simple](https://github.com/mbot-dev/1000_builder/wiki/simple)にあります。
- 2. このリポジトリの /public/js/index.js（動作確認ページ）の JavaScript を参考にしてください。
-  - startApp() がエントリーポイントでここから順を追うと全体がつかめます。
-  - 最初に Access Token を取得します。
-  - その後JSONサンプルをPOSTします。
 
 
 ### サーバープログラムの概要
