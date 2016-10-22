@@ -2,6 +2,8 @@
 
 const express = require('express');
 const config = require('config');
+const fs = require('fs');
+const utils = require('../lib/utils');
 const logger = require('../log/logger');
 const jweSimple = require('../api/jweSimple');
 const simpleBuilder = require('../api/simpleBuilder');
@@ -45,21 +47,55 @@ var generateXSDJson = function (req, res, next) {
     try {
         var contentType = req.params.contentType;
         var parsed = req.body;
-        req.xsdJson = simpleBuilder.build(parsed, contentType);
+        // logger.info(JSON.stringify(parsed, null, 4));
+        var wrapper = simpleBuilder.build(parsed, contentType);
+        // logger.info(JSON.stringify(wrapper, null, 4));
+        req.mmlWrapper = wrapper;
         next();
     } catch (err) {
         sendError(500, err, req, res);
     }
 };
 
-var generateMml = function (req, res) {
-    var mml = mmlBuilder.build(req.xsdJson);
+var generateMml = function (req, res, next) {
+    try {
+        // generate MML instance from json(XSD)
+        var mml = mmlBuilder.build(req.mmlWrapper.json);
+        // set json null
+        req.mmlWrapper.json = null;
+        // set mml generated one
+        req.mmlWrapper.instance = mml;
+        next();
+    } catch (err) {
+        sendError(500, err, req, res);
+    }
+};
+
+var publish = function (req, res, next) {
+    // publish
+    var pretty = utils.formatXml(req.mmlWrapper.instance);
+    var buf = new Buffer(pretty, 'utf8');
+    var arr = [];
+    arr.push(config.mmlOutput.path);
+    arr.push('/');
+    arr.push(req.mmlWrapper.fileName);
+    arr.push('.xml');
+    var path = arr.join('');
+    fs.writeFile(path, buf, (err) => {
+        // log
+        logger.warn(err);
+    });
+    next();
+};
+
+var respond = function (req, res) {
+    // respond
     res.status(200).json({
         result: 'success',
-        mml: mml
+        mml: req.mmlWrapper.instance
     });
 };
 
-router.post('/:contentType', [generateXSDJson, generateMml]);
+router.post('/:contentType', [generateXSDJson, generateMml, publish, respond]);
 
 module.exports = router;

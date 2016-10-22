@@ -33,8 +33,8 @@ app.use(helmet.contentSecurityPolicy({
 		imgSrc: ["'self'"]
 	}
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json({limit: '256mb'}));
+app.use(bodyParser.urlencoded({limit: '256mb', extended: true}));
 app.use(morgan(':remote-addr [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));
 app.use(express.static(__dirname + '/public'));
 app.use(indexRouter);

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- Security XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Security/1.0" xmlns:mmlSc="http://www.medxml.net/MML/v4/SharedComponent/Security/1.0">
+  
+  <xs:element name="securityLevel">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSc:accessRight"/>     
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="accessRight">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="mmlSc:facility"/>
+        <xs:element minOccurs="0" ref="mmlSc:person"/>
+        <xs:element minOccurs="0" ref="mmlSc:license"/>
+        <xs:element minOccurs="0" ref="mmlSc:department"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlSc:attlist.accessRight"/>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:attributeGroup name="attlist.accessRight">
+    <xs:attribute name="permit" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="none"/>
+          <xs:enumeration value="read"/>
+          <xs:enumeration value="write"/>
+          <xs:enumeration value="delete"/>
+          <xs:enumeration value="all"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="startDate"/>
+    <xs:attribute name="endDate"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="facility">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlSc:facilityName"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="facilityName">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlSc:attlist.facilityName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.facilityName">
+    <xs:attribute name="facilityCode" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="all"/>
+          <xs:enumeration value="creator"/>
+          <xs:enumeration value="experience"/>
+          <xs:enumeration value="individual"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="tableId" default="MML0035">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="MML0035"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="facilityId" form="qualified"/>
+    <xs:attribute name="facilityIdType">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="ca"/>
+          <xs:enumeration value="insurance"/>
+          <xs:enumeration value="monbusho"/>
+          <xs:enumeration value="JMARI"/>
+        </xs:restriction>
+      </xs:simpleType>    
+    </xs:attribute>
+  </xs:attributeGroup>
+  
+  <xs:element name="person">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlSc:personName"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="personName">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlSc:attlist.mmlSc.personName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.mmlSc.personName">
+    <xs:attribute name="personCode" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="all"/>
+          <xs:enumeration value="creator"/>
+          <xs:enumeration value="patient"/>
+          <xs:enumeration value="individual"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="tableId">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="MML0036"/>
+        </xs:restriction>
+      </xs:simpleType> 
+    </xs:attribute>
+    <xs:attribute name="personId" form="qualified"/>
+    <xs:attribute name="personIdType" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="license">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlSc:licenseName"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="licenseName">
+    <xs:complexType>
+      <xs:attributeGroup ref="mmlSc:attlist.licenseName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.licenseName">
+    <xs:attribute name="licenseCode" use="required" form="qualified"/>
+    <xs:attribute name="tableId" default="MML0026">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="MML0026"/>
+        </xs:restriction>
+      </xs:simpleType> 
+    </xs:attribute>
+  </xs:attributeGroup>
+  
+  <xs:element name="department">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlSc:departmentName"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="departmentName">
+    <xs:complexType>
+      <xs:attributeGroup ref="mmlSc:attlist.departmentName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.departmentName">
+    <xs:attribute name="departmentCode" use="required" form="qualified"/>
+    <xs:attribute name="tableId" default="MML0028">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="MML0028"/>
+        </xs:restriction>
+      </xs:simpleType> 
+    </xs:attribute>
+  </xs:attributeGroup>
+</xs:schema>

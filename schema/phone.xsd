@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 電話番号表現形式 -->
+<!-- Phone XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0" xmlns:mmlPh="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0">
+  <xs:element name="Phone">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="mmlPh:full" minOccurs="0" maxOccurs="1"/>
+          <xs:sequence>
+            <xs:element ref="mmlPh:area" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="mmlPh:city" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="mmlPh:number" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="mmlPh:extension" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="mmlPh:country" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="mmlPh:memo"  minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>          
+        </xs:choice>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlPh:attlist.Phone"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.Phone">
+    <xs:attribute name="telEquipType" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="PH"/>
+          <xs:enumeration value="FX"/>
+          <xs:enumeration value="MD"/>
+          <xs:enumeration value="CP"/>
+          <xs:enumeration value="BP"/>
+          <xs:enumeration value="Internet"/>
+          <xs:enumeration value="H"/>
+          <xs:enumeration value="HP"/>
+          <xs:enumeration value="HV"/>
+          <xs:enumeration value="WP"/>
+          <xs:enumeration value="DIR"/>
+          <xs:enumeration value="PUB"/>
+          <xs:enumeration value="BAD"/>
+          <xs:enumeration value="TMP"/>
+          <xs:enumeration value="AS"/>
+          <xs:enumeration value="EC"/>
+          <xs:enumeration value="MC"/>
+          <xs:enumeration value="PG"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  
+  <xs:element name="memo" type="xs:string"/>
+  <xs:element name="country" type="xs:string"/>
+  <xs:element name="extension" type="xs:string"/>
+  <xs:element name="number" type="xs:string"/>
+  <xs:element name="city" type="xs:string"/>
+  <xs:element name="area" type="xs:string"/>
+  <xs:element name="full" type="xs:string"/>
+</xs:schema>

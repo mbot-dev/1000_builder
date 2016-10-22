@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 作成者情報形式 -->
+<!-- CreatorInfo XSD  Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/CreatorInfo/1.0" 
+  xmlns:mmlCi="http://www.medxml.net/MML/v4/SharedComponent/CreatorInfo/1.0"
+  xmlns:mmlPsi="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0">
+
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0" schemaLocation="personalizedinfo.xsd" />
+  
+  <xs:element name="CreatorInfo" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPsi:PersonalizedInfo"/>
+        <xs:element ref="mmlCi:creatorLicense"  maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="creatorLicense">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlCi:attlist.creatorLicense"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.creatorLicense">
+    <xs:attribute name="tableId" form="qualified"/>
+  </xs:attributeGroup>
+</xs:schema>

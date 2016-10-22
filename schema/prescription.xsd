@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  xmlns:mmlPs="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0">
+  <xs:element name="PrescriptionModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPs:issuedTo" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:medication" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="mmlPs:narcoticPrescriptionLicenseNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:comment" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="medication">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="mmlPs:medicine" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlPs:dose" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlPs:doseUnit" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlPs:frequencyPerDay" minOccurs="0" maxOccurs="1"/>  
+        <xs:element ref="mmlPs:startDate" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlPs:duration" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:instruction" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:PRN" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:repetitions" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="mmlPs:route" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="mmlPs:form" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:batchNo" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:brandSubstitutionPermitted" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:longTerm" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPs:additionalInstruction" minOccurs="0" maxOccurs="1"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="issuedTo">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="internal"/>
+        <xs:enumeration value="external"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="medicine">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPs:name" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlPs:code" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="batchNo" type="xs:integer"/>
+
+  <xs:element name="name" type="xs:string"/>
+
+  <xs:element name="code">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="system" type="xs:string" use="required" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:element name="dose" type="xs:decimal"/>
+  <xs:element name="doseUnit" type="xs:string"/>
+  <xs:element name="frequencyPerDay" type="xs:string"/>
+  <xs:element name="startDate" type="xs:date"/>
+  <xs:element name="duration" type="xs:duration"/>
+  <xs:element name="instruction" type="xs:string"/>
+  <xs:element name="PRN" type="xs:boolean"/>
+  <xs:element name="repetitions" type="xs:decimal"/>
+  <xs:element name="route" type="xs:string"/>
+  <xs:element name="form" type="xs:string"/>
+  <xs:element name="brandSubstitutionPermitted" type="xs:boolean"/>
+  <xs:element name="longTerm" type="xs:boolean"/>
+  <xs:element name="additionalInstruction" type="xs:string"/>
+  <xs:element name="narcoticPrescriptionLicenseNumber" type="xs:string"/>
+  <xs:element name="comment" type="xs:string"/>
+</xs:schema>

@@ -4,10 +4,70 @@ const uuid = require('node-uuid');
 const utils = require('../lib/utils');
 const mmlBuilder = require('../lib/mmlBuilder');
 const logger = require('../log/logger');
+const moduleNames = {
+    patientInfo: 'mmlPi',
+    healthInsurance: 'mmlHi',
+    registeredDiagnosis: 'mmlRd',
+    lifestyle: 'mmlLs',
+    baseClinic: 'mmlBc',
+    firstClinic: 'mmlFcl',
+    progressCourse: 'mmlPc',
+    surgery: 'mmlSg',
+    summary: 'mmlSm',
+    referral: 'mmlRe',
+    test: 'mmlLb',
+    report: 'mmlRp',
+    flowsheet: 'mmlFs',
+    vitalsign: 'mmlVs',
+    prescription: 'mmlPs',
+    injection: 'mmlInj',
+    hemodialysis: 'mmlHd'
+};
 
 module.exports = {
 
+    getModuleName: function (contentType) {
+        return moduleNames[contentType];
+    },
+
+    hrefWith1000: function (docId, index, href) {
+        var arr = [];
+        arr.push(docId);
+        arr.push('_');
+        arr.push(utils.addZero(index, 2));
+        var lastDot = href.lastIndexOf('.');
+        arr.push(href.substring(lastDot));
+        return arr.join('');
+    },
+
+    buildNoBase64ExtRef: function (src) {
+        var copyExt = {
+            attr: {
+                href: src.href
+            }
+        };
+        if (src.hasOwnProperty('contentType')) {
+            copyExt.attr.contentType = src.contentType;
+        }
+        if (src.hasOwnProperty('medicalRole')) {
+            copyExt.attr.medicalRole = src.medicalRole;
+        }
+        if (src.hasOwnProperty('title')) {
+            copyExt.attr.title = src.title;
+        }
+        return copyExt;
+    },
+
     buildExtRef: function (e) {
+        /*********************
+        var e = {
+            href: '',                           // uri
+            contentType: '',                    // コンテントタイプ ?
+            medicalRole: '',                    // 役割 ?
+            title: '',                          // タイトル ?
+            base64: ''                          // PDF、画像等の base64
+        };
+        *********************/
         var ref = {
             attr: {
                 href: e.href
@@ -21,6 +81,10 @@ module.exports = {
         }
         if (e.hasOwnProperty('title')) {
             ref.attr.title = e.title;
+        }
+        // base64 ここは中間オブジェクト
+        if (e.hasOwnProperty('base64')) {
+            ref.attr.base64 = e.base64;
         }
         return ref;
     },
@@ -364,14 +428,13 @@ module.exports = {
 
     /**
      * docInfo を生成する
-     * @param {baseDocInfo} baseDocInfo
+     * @param {metaInfo} metaInfo
      * @param {CreatorInfo} creatorInfo - このドキュメントのcreator
      * @params {[]} defaultAccessRight - このプロジェクトのデフォルトアクセス権
      * @returns {docInfo}
      */
-    buildDocInfo: function (baseDocInfo, creatorInfo, accessRight) {
-        // buildDocInfo: function (baseDocInfo, creatorInfo, defaultAccessRight) {
-        /***************************************
+    buildDocInfo: function (metaInfo, creatorInfo, accessRight) {
+        /*********************************************************************:
         var simpleDocInfo = {
             contentModuleType: '',
             uuid: '',
@@ -379,59 +442,76 @@ module.exports = {
             title: '',
             parentUUID: '',
             parentConfirmDate: '',
-        };***************************************/
+        };
+        var metaInfo = {
+            contentModuleType: contentType,             // コンテントタイプ
+            facilityId: context.patient.facilityId,     // 医療機関ID
+            patientId: context.patient.id,              // 患者ID
+            uuid: context.uuid                          // uuid
+            confirmDate: context.confirmDate            // 確定日時はMMLの確定日時
+        };
+        ***********************************************************************/
+
+        // 千年仕様 docId = moduleName_facilityId_patientId_uuid
+        var arr = [];
+        arr.push(this.getModuleName(metaInfo.contentModuleType));   // moduleName fron contentType
+        arr.push(metaInfo.facilityId);
+        arr.push(metaInfo.patientId);
+        arr.push(metaInfo.uuid);
+        var docUUID = arr.join('_');
 
         // title
-        var title = baseDocInfo.hasOwnProperty('title') ? baseDocInfo.title : baseDocInfo.contentModuleType;
+        var title = metaInfo.hasOwnProperty('title') ? metaInfo.title : metaInfo.contentModuleType;
 
         // 対象
         var docInfo = {
             attr: {
-                contentModuleType: baseDocInfo.contentModuleType  // 文書の種類コード MML0005を使用
-                //moduleVersion: ''                                // 使用モジュールのDTDのURIを記載
+                contentModuleType: metaInfo.contentModuleType  // 文書の種類コード MML0005を使用
+                // moduleVersion: ''                               // 使用モジュールのDTDのURIを記載
             },
             securityLevel: accessRight,                            // accessRight の配列
             title: {
                 value: title,                                      // 文書タイトル
                 attr: {
-                    generationPurpose: 'record'                     // 文書詳細種別 MML0007を使用
+                    generationPurpose: 'record'                    // 文書詳細種別 MML0007を使用
                 }
             },
-            docId: {                                              // 文書 ID 情報
-                uid: baseDocInfo.uuid                             // 文書ユニークID ユニーク番号の形式は UUID とする (UUID はハイフンを含めた形式とする)
-                //parentId: [],                                    // 関連親文書ID parentId  の配列
-                //groupId: []                                      // グループ ID groupIdの配列
+            docId: {                                               // 文書 ID 情報
+                uid: docUUID                                       // 文書ユニークID
+                // parentId: [],                                   // 関連親文書ID parentId  の配列
+                // groupId: []                                     // グループ ID groupIdの配列
             },
             confirmDate: {
-                value: baseDocInfo.confirmDate                   // カルテ電子保存の確定日時
-                //attr: {
-                //start: 'YYYY-MM-DDThh:mm:ss',                 // 時系列情報場合の開始日時
-                //end: 'YYYY-MM-DDThh:mm:ss',                   // 時系列情報場合の終了日時
-                //firstConfirmDate: 'YYYY-MM-DDThh:mm:ss',      // 修正が発生した場合の，初回確定日時
-                //eventDate: 'YYYY-MM-DDThh:mm:ss'              // 実際に記載された診療イベントが発生した日時
-                //}
+                value: metaInfo.confirmDate                    // カルテ電子保存の確定日時
+                // attr: {
+                //   start: 'YYYY-MM-DDThh:mm:ss',                   // 時系列情報場合の開始日時
+                //   end: 'YYYY-MM-DDThh:mm:ss',                     // 時系列情報場合の終了日時
+                //   firstConfirmDate: 'YYYY-MM-DDThh:mm:ss',        // 修正が発生した場合の，初回確定日時
+                //   eventDate: 'YYYY-MM-DDThh:mm:ss'                // 実際に記載された診療イベントが発生した日時
+                // }
             },
             CreatorInfo: creatorInfo,                             // 個々の文書の作成者情報．構造は MML 共通形式 (作成者情報形式)
             extRefs: []                                           // content 内に記載されているすべての外部リンク情報のリスト extRefの配列
         };
 
         // groupId
-        if (baseDocInfo.hasOwnProperty('groupId')) {
+        if (metaInfo.hasOwnProperty('groupId')) {
             var group = {
-                value: baseDocInfo.groupId,
+                value: metaInfo.groupId,
                 attr: {
-                    groupClass: baseDocInfo.contentModuleType
+                    groupClass: metaInfo.contentModuleType
                 }
             };
             docInfo.docId.groupId = [group];
         }
 
         // 修正版かどうか -> parentUUID && parentConfirmDate
-        if (baseDocInfo.hasOwnProperty('parentUUID') &&
-        baseDocInfo.hasOwnProperty('parentConfirmDate')) {
+        // 千年では使用しない
+        if (metaInfo.hasOwnProperty('parentUUID') &&
+            metaInfo.hasOwnProperty('parentConfirmDate')) {
 
             var parentId = {
-                value: baseDocInfo.parentUUID,                    // 元の版のUUID
+                value: metaInfo.parentUUID,                    // 元の版のUUID
                 attr: {
                     relation: 'oldEdition'                        // 関連の種別 MML0008から使用
                 }
@@ -439,7 +519,7 @@ module.exports = {
             docInfo.docId.parentId = [parentId];
 
             docInfo.confirmDate.attr = {
-                firstConfirmDate: baseDocInfo.parentConfirmDate  // 最初の確定日
+                firstConfirmDate: metaInfo.parentConfirmDate  // 最初の確定日
             };
         }
 
@@ -449,7 +529,7 @@ module.exports = {
     /**
      * 1. PatientModule
      */
-    patientInfo: function (simplePatient) {
+    patientInfo: function (docInfo, simplePatient) {
         /********************************************************************
         var simplePatient = {
             id: '',                                         // Id
@@ -543,7 +623,7 @@ module.exports = {
     /**
      * 2. HealthInsuranceModule
      */
-    healthInsurance: function (simpleHealthInsurance) {
+    healthInsurance: function (docInfo, simpleHealthInsurance) {
         /*******************************************************************************
         // 保険種別
         insuranceClass;
@@ -689,7 +769,7 @@ module.exports = {
                     provider: entry.provider,
                     recipient: entry.recipient,
                     startDate: entry.startDate,
-                    expiredDate: entry.expiredDate,
+                    expiredDate: entry.expiredDate
                 };
 
                 if (entry.hasOwnProperty('providerName')) {
@@ -713,7 +793,7 @@ module.exports = {
     /**
      * 3. RegisteredDiagnosisModule
      */
-    registeredDiagnosis: function (simpleDiagnosis) {
+    registeredDiagnosis: function (docInfo, simpleDiagnosis) {
         /****************************************************
         var simpleDiagnosis = {
             diagnosis: '',
@@ -771,7 +851,7 @@ module.exports = {
     /**
      * 4. LifestyleModule
      */
-    lifestyle: function (simpleLifestyle) {
+    lifestyle: function (docInfo, simpleLifestyle) {
         /******************************************
         var simpleLifestyle = {
             occupation: '',
@@ -786,7 +866,7 @@ module.exports = {
     /**
      * 5. BaseClinicModule
      */
-    baseClinic: function (simpleBaseClinic) {
+    baseClinic: function (docInfo, simpleBaseClinic) {
         /*******************************************************************************
         var simpleBaseClinic = {                    // 基礎的診療情報
             allergy: [],                            // アレルギー情報 ? [allergyItem]
@@ -827,7 +907,7 @@ module.exports = {
     /**
      * 6. FirstClinicModule
      */
-    firstClinic: function (simpleFirstClinic) {
+    firstClinic: function (docInfo, simpleFirstClinic) {
         /******************************************************************************
         var simpleFirstClinic = {                                   // 初診時特有情報
             familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
@@ -888,7 +968,7 @@ module.exports = {
                 var fhItem = {
                     relation: entry.relation
                 };
-                fhItem.RegisteredDiagnosisModule = this.registeredDiagnosis(entry.simpleDiagnosis);
+                fhItem.RegisteredDiagnosisModule = this.registeredDiagnosis(docInfo, entry.simpleDiagnosis);
                 // logger.info(JSON.stringify(fhItem, null, 4));
                 if (entry.hasOwnProperty('age')) {
                     fhItem.age = entry.age;
@@ -1009,20 +1089,34 @@ module.exports = {
     /**
      * 7. ProgressCourceModule
      */
-    progressCourse: function (simpleProgressCource) {
+    progressCourse: function (docInfo, simpleProgressCource) {
         /*******************************************************
         var simpleProgressCource = {
-            content: '',
+            freeExpression: '',
             extRef: []
         };
         *******************************************************/
         var result = {
-            value: simpleProgressCource.content
+            freeExpression: simpleProgressCource.freeExpression
         };
         if (simpleProgressCource.hasOwnProperty('extRef')) {
+
             result.extRef = [];
+            var index = 0;
+            var docId = docInfo.docId.uid;
+            var newHREF = null;
+
             simpleProgressCource.extRef.forEach((entry) => {
-                result.extRef.push(this.buildExtRef(entry));
+
+                // entry.href = docId_index.file's ext
+                newHREF = this.hrefWith1000(docId, index++, entry.href);
+                entry.href = newHREF;
+
+                // 1. base64 なし => resul.extRef へ
+                result.extRef.push(this.buildNoBase64ExtRef(entry));
+
+                // 2. base64あり => docInfo.extRefs にまとめる
+                docInfo.extRefs.push(this.buildExtRef(entry));
             });
         }
         return result;
@@ -1031,7 +1125,7 @@ module.exports = {
     /**
      * 8. SurgeryModule
      */
-    buildSurgeryItem: function (simpleSurgery) {
+    buildSurgeryItem: function (docInfo, simpleSurgery) {
         /*******************************************************************************
         var simpleSurgery = {                                   // 手術記録情報
             surgeryItem: []                                     // [surgeryItem]
@@ -1055,7 +1149,9 @@ module.exports = {
             anesthesiologists: [],                              // 麻酔医情報 ? [staff]
             anesthesiaDuration: '',                             // 麻酔時間 ? PTnHnM
             operativeNotes: '',                                 // 手術記録の自由文章表現 ?
-            referenceInfo: {},                                  // 手術記録に用いる図や写真を外部参照 ? mmlCm:extRef
+            referenceInfo: {                                    // 手術記録に用いる図や写真を外部参照 ?
+                extRef: {}                                      // 解説では extRef [extRef]  xsdは {extRef}
+            },
             memo: ''                                            // 手術に関する追加事項 ?
         };
 
@@ -1117,7 +1213,7 @@ module.exports = {
         // surgicalDiagnosis
         result.surgicalDiagnosis = [];
         simpleSurgery.surgicalDiagnosis.forEach((entry) => {
-            result.surgicalDiagnosis.push(this.registeredDiagnosis(entry));
+            result.surgicalDiagnosis.push(this.registeredDiagnosis(docInfo, entry));
         });
         // logger.info(JSON.stringify(result, null,4));
 
@@ -1223,22 +1319,22 @@ module.exports = {
         }
 
         // referenceInfo
+        // 解説では [extRef]
+        // logger.info('before referenceInfo');
         if (simpleSurgery.hasOwnProperty('referenceInfo')) {
-            result.referenceInfo = {
-                attr: {
-                    href: simpleSurgery.referenceInfo.href
-                }
-            };
-            if (simpleSurgery.referenceInfo.hasOwnProperty('contentType')) {
-                result.referenceInfo.attr.contentType = simpleSurgery.referenceInfo.contentType;
-            }
-            if (simpleSurgery.referenceInfo.hasOwnProperty('medicalRole')) {
-                result.referenceInfo.attr.medicalRole = simpleSurgery.referenceInfo.medicalRole;
-            }
-            if (simpleSurgery.referenceInfo.hasOwnProperty('title')) {
-                result.referenceInfo.attr.title = simpleSurgery.referenceInfo.title;
-            }
+            // logger.info(JSON.stringify(simpleSurgery.referenceInfo, null, 4));
+            // e.href
+            var newHREF = this.hrefWith1000(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
+            simpleSurgery.referenceInfo.href = newHREF;
+            logger.info(newHREF);
+
+            // No base64
+            result.referenceInfo = this.buildNoBase64ExtRef(simpleSurgery.referenceInfo);
+
+            // With base64
+            docInfo.extRefs.push(this.buildExtRef(simpleSurgery.referenceInfo));
         }
+        // logger.info('after referenceInfo');
 
         // memo
         if (simpleSurgery.hasOwnProperty('memo')) {
@@ -1249,12 +1345,12 @@ module.exports = {
         return result;
     },
 
-    surgery: function (simpleSurgery) {
+    surgery: function (docInfo, simpleSurgery) {
         var result = {
             surgeryItem: []
         };
         simpleSurgery.surgeryItem.forEach((entry) => {
-            result.surgeryItem.push(this.buildSurgeryItem(entry));
+            result.surgeryItem.push(this.buildSurgeryItem(docInfo, entry));
         });
         return result;
     },
@@ -1262,49 +1358,66 @@ module.exports = {
     /**
      * 9. SummaryModule
      */
-    summary: function (simpleSummary) {
+    summary: function (docInfo, simpleSummary) {
         /***********************************************************************
         var SummaryModule = {                                       // 臨床経過サマリー情報
-            context: {                                              // 期間情報
-                start: '',                                          // サマリー対象期間の開始日
-                end: ''                                             // サマリー対象期間の終了日
-                outPatient: [],                                         // 外来受診歴情報 ? [outPatientItem]
-                inPatient: []                                           // 入院暦情報 ? [inPatientItem]
+            serviceHistory: {                                       // 期間情報
+                attr: {
+                    start: '',                                      // サマリー対象期間の開始日
+                    end: ''                                         // サマリー対象期間の終了日
+                },
+                outPatient: [],                                     // 外来受診歴情報 ? [outPatientItem]
+                inPatient: []                                       // 入院暦情報 ? [inPatientItem]
             },
-            simpleDiagnosis: {},                                      // サマリーにおける診断履歴情報 ? 解説は* []
+            RegisteredDiagnosisModule: [],                          // サマリーにおける診断履歴情報 ? 解説は* []
             deathInfo: {                                            // 死亡関連情報 ?
-                info: '',
-                date: '',                                           // 死亡日時
-                autopsy: ''                                         // 剖検の有無．true：剖検あり，false：なし
+                value: '',
+                attr: {
+                    date: '',                                           // 死亡日時
+                    autopsy: ''                                         // 剖検の有無．true：剖検あり，false：なし
+                }
             },
-            simpleSurgery: [],                                      // サマリーにおける手術記録情報 ?
+            SurgeryModule: [],                                      // サマリーにおける手術記録情報 ?
             chiefComplaints: '',                                    // 主訴 ?
             patientProfile: '',                                     // 患者プロフィール ?
             history: '',                                            // 入院までの経過 ?
             physicalExam: {                                         // 入院時理学所見 ?
-                value: ''                                           // extRef *
+                value: '',                                          // 所見 ?
+                any: [],                                            // xs:any *  Not Supported
+                extRef: []                                          // [extRef] *
             },
-            clinicalCourse: [],                                     // 経過および治療 ? mmlSm:clinicalRecord
+            clinicalCourse: [],                                     // 経過および治療 ? [clinicalRecord]
             dischargeFindings: {                                    // 退院時所見 ?
-                value: ''                                           // mixed=true extRef *
+                value: '',                                          // 所見
+                any: [],                                            // xs:any * Not Supported
+                extRef: []                                          // extRef * [extRef]
             },
             medication: {                                           // 退院時処方 ? medication
                 value: '',                                          // mixed=true
-                PrescriptionModule: {},                             // PrescriptionModule ?
-                extRef: []                                          // extRef *
+                simplePrescription: {},                             // simplePrescription ?
+                extRef: []                                          // extRef * [extRef]
             },
-            testResults: [],                                        // 退院時検査結果 ? mmlSm:testResult
+            testResults: [],                                        // 退院時検査結果 ? [testResult]
             plan: {                                                 // 退院後治療方針 ? plan
-                value: '',                                          // extRef *
+                value: '',                                          // 方針
+                any: [],                                            // xs:any * Not Supported
+                extRef: []                                          // extRef * [extRef]
             },
-            remarks: ''                                             // 患者に関する留意事項 ?
+            remarks: {                                              // 患者に関する留意事項 ?
+                value: '',                                          // 留意事項
+                any: []                                             // xs:any * NotSupported
+            }                                                       // 患者に関する留意事項 ?
         };
 
         var outPatientItem = {
             date: '',                                               // 外来受診日 date　書式：CCYY-MM-DD
-            outPatientCondition: '',                                // 外来受診状態 ?
-            first: '',                                              // 初診．true：初診，false：再診
-            emergency: '',                                          // 救急受診．true：救急，false：通常
+            outPatientCondition: {                                  // 外来受診状態 ?
+                value: '',
+                attr: {
+                    first: '',                                      // 初診．true：初診，false：再診
+                    emergency: ''                                   // 救急受診．true：救急，false：通常
+                }
+            },
             staffs: []                                              // 患者担当スタッフ情報 ? [staffInfo]
         };
 
@@ -1321,41 +1434,59 @@ module.exports = {
 
         var admission = {                                           // 入院
             date: '',                                               // 入院 (転入) 日 CCYY-MM-DD
-            admissionCondition: '',                                 // 入院時状態 ?
-            emergency: '',                                          // 緊急入院．true：緊急入院，false：通常
+            admissionCondition: {                                   // 入院時状態 ?
+                value: '',
+                attr: {
+                    emergency: ''                                   // 緊急入院．boolean true：緊急入院，false：通常
+                }
+            },
             referFrom: {}                                           // 紹介元情報 ? mmlPsi:PersonalizedInfo
         };
 
         var discharge = {                                           // 退院
             date: '',                                               // 退院 (転出) 日 CCYY-MM-DD
-            dischargeCondition: '',                                 // 退院時状態 ?
-            outcome: '',                                            // 退院時転帰 MML0016
+            dischargeCondition: {                                   // 退院時状態 ?
+                value: '',
+                attr: {
+                    outcome: ''                                     // 退院時転帰 MML0016
+                }
+            },
             referTo: {}                                             // 紹介先情報 ? mmlPsi:PersonalizedInfo
         };
 
         // contains both text and other elements
         var clinicalRecord = {
-            date: '',                                               // イベント発生日時
-            recode: '',
-            relatedDoc: [],
-            extRef: []
+            attr: {
+                date: ''                                            // イベント発生日時
+            },
+            value: '',
+            relatedDoc: [],                                         // 関連文書 * [relatedDoc]
+            extRef: []                                              // extref * [extRef]
         };
 
         // contains both text and other elements
         var testResult = {                                          // 個々の検査結果
-            date: '',
-            testResult: '',
-            extRef: [],
-            relatedDoc: []
+            attr: {
+                date: ''                                            // YYYY-MM-DDThhTHH:mm:ss
+            },
+            value: '',
+            extRef: [],                                             // extRef * [extRef]
+            relatedDoc: []                                          // 関連文書 * [relatedDoc]
         };
 
         var relatedDoc = {
-            uuid: '',                                              // MmlModuleItemのuid
-            relation: ''                                           // MML0008
+            value: '',                                              // MmlModuleItemのuid
+            attr: {
+                relation: ''                                        // MML0008
+            }
         };
     ***********************************************************************/
 
         // logger.info(JSON.stringify(simpleSummary, null, 4));
+        var docId = docInfo.docId.uid;
+        var refIndex = 0;
+        var newHREF = null;
+
         var result = {
             serviceHistory: {                                       // 期間情報
                 attr: {
@@ -1471,8 +1602,9 @@ module.exports = {
 
         // RegisteredDiagnosisModule ?  != *
         if (simpleSummary.hasOwnProperty('simpleDiagnosis')) {
-            result.RegisteredDiagnosisModule = this.buildRegisteredDiagnosisModule(simpleSummary.simpleDiagnosis);
+            result.RegisteredDiagnosisModule = this.registeredDiagnosis(docInfo, simpleSummary.simpleDiagnosis);
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
         // deathInfo
         if (simpleSummary.hasOwnProperty('deathInfo')) {
@@ -1493,7 +1625,7 @@ module.exports = {
         if (simpleSummary.hasOwnProperty('simpleSurgery')) {
             result.SurgeryModule = [];
             simpleSummary.simpleSurgery.forEach((entry) => {
-                result.SurgeryModule.push(this.buildSummaryModule(entry));
+                result.SurgeryModule.push(this.surgery(docInfo, entry));
             });
         }
 
@@ -1513,11 +1645,20 @@ module.exports = {
         }
         // logger.info(JSON.stringify(result, null, 4));
 
-        // physicalExam  extRef *
+        // physicalExam  value:'' xs:any * extRef *
         if (simpleSummary.hasOwnProperty('physicalExam')) {
             result.physicalExam = {
                 value: simpleSummary.physicalExam.value
             };
+            if (simpleSummary.physicalExam.hasOwnProperty('extRef')) {
+                result.physicalExam.extRef = [];
+                simpleSummary.physicalExam.extRef.forEach((e) => {
+                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.physicalExam.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
         // logger.info(JSON.stringify(result, null, 4));
 
@@ -1546,33 +1687,32 @@ module.exports = {
                 if (entry.hasOwnProperty('extRef')) {
                     clinicalRecord.extRef = [];
                     entry.extRef.forEach((e) => {
-                        var ref = {
-                            attr: {
-                            }
-                        };
-                        ref.attr.href = e.href;
-                        if (e.hasOwnProperty('contentType')) {
-                            ref.attr.contentType = e.contentType;
-                        }
-                        if (e.hasOwnProperty('medicalRole')) {
-                            ref.attr.medicalRole = e.medicalRole;
-                        }
-                        if (e.hasOwnProperty('title')) {
-                            ref.attr.title = e.title;
-                        }
-                        clinicalRecord.extRef.push(ref);
+                        newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                        e.href = newHREF;
+                        clinicalRecord.extRef.push(this.buildNoBase64ExtRef(e));
+                        docInfo.extRefs.push(this.buildExtRef(e));
                     });
                 }
                 // logger.info(JSON.stringify(clinicalRecord, null, 4));
                 result.clinicalCourse.push(clinicalRecord);
             });
         }
+        // logger.info(JSON.stringify(result, null, 4));
 
-        // dischargeFindings
+        // dischargeFindings value: '' xs:any extRef *
         if (simpleSummary.hasOwnProperty('dischargeFindings')) {
             result.dischargeFindings = {
                 value: simpleSummary.dischargeFindings
             };
+            if (simpleSummary.dischargeFindings.hasOwnProperty('extRef')) {
+                result.dischargeFindings.extRef = [];
+                simpleSummary.dischargeFindings.extRef.forEach((e) => {
+                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.dischargeFindings.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
         // logger.info(JSON.stringify(result, null, 4));
 
@@ -1584,27 +1724,16 @@ module.exports = {
             };
             if (simpleSummary.medication.hasOwnProperty('simplePrescription')) {
                 // xsd 1 個だけ....
-                var preArr = this.prescription(simpleSummary.medication.simplePrescription);
+                var preArr = this.prescription(docInfo, simpleSummary.medication.simplePrescription);
                 result.medication.PrescriptionModule = preArr[0];
             }
             if (simpleSummary.medication.hasOwnProperty('extRef')) {
                 result.medication.extRef = [];
-                simpleSummary.medication.forEach((e) => {
-                    var ref = {
-                        attr: {
-                        }
-                    };
-                    ref.attr.href = e.href;
-                    if (e.hasOwnProperty('contentType')) {
-                        ref.attr.contentType = e.contentType;
-                    }
-                    if (e.hasOwnProperty('medicalRole')) {
-                        ref.attr.medicalRole = e.medicalRole;
-                    }
-                    if (e.hasOwnProperty('title')) {
-                        ref.attr.title = e.title;
-                    }
-                    result.medication.extRef.push(ref);
+                simpleSummary.medication.extRef.forEach((e) => {
+                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.medication.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
             // logger.info(JSON.stringify(result.medication, null, 4));
@@ -1619,7 +1748,7 @@ module.exports = {
                     attr: {
                         date: entry.date
                     },
-                    value: entry.testResult,
+                    value: entry.testResult
                 };
                 result.testResults.push(tr);
 
@@ -1638,21 +1767,10 @@ module.exports = {
                 if (entry.hasOwnProperty('extRef')) {
                     tr.extRef = [];
                     entry.extRef.forEach((e) => {
-                        var ref = {
-                            attr: {
-                            }
-                        };
-                        ref.attr.href = e.href;
-                        if (e.hasOwnProperty('contentType')) {
-                            ref.attr.contentType = e.contentType;
-                        }
-                        if (e.hasOwnProperty('medicalRole')) {
-                            ref.attr.medicalRole = e.medicalRole;
-                        }
-                        if (e.hasOwnProperty('title')) {
-                            ref.attr.title = e.title;
-                        }
-                        tr.extRef.push(ref);
+                        newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                        e.href = newHREF;
+                        tr.extRef.push(this.buildNoBase64ExtRef(e));
+                        docInfo.extRefs.push(this.buildExtRef(e));
                     });
                 }
                 // logger.info(JSON.stringify(tr, null, 4));
@@ -1660,16 +1778,27 @@ module.exports = {
         }
         //logger.info(JSON.stringify(result, null, 4));
 
-        // plan
+        // plan value: '' xs:any extRef *
         if (simpleSummary.hasOwnProperty('plan')) {
             result.plan = {
                 value: simpleSummary.plan.value
             };
+            if (simpleSummary.plan.hasOwnProperty('extRef')) {
+                result.plan.extRef = [];
+                simpleSummary.plan.extRef.forEach((e) => {
+                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.plan.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
 
         // remarks
         if (simpleSummary.hasOwnProperty('remarks')) {
-            result.remarks = simpleSummary.remarks;
+            result.remarks = {
+                value: simpleSummary.remarks
+            };
         }
 
         // logger.info(JSON.stringify(result, null, 4));
@@ -1679,7 +1808,7 @@ module.exports = {
     /**
      * 10. TestModule
      */
-    test: function (simpleTest) {
+    test: function (docInfo, simpleTest) {
         /***********************************
         var simpleTest = {
             context: {
@@ -1846,7 +1975,7 @@ module.exports = {
     /**
      * 11. ReportModule
      */
-    report: function (simpleReport) {
+    report: function (docInfo, simpleReport) {
         /********************************************************************************
         var simpleReport = {
             context: {},                                      // 報告書ヘッダー情報
@@ -1877,7 +2006,7 @@ module.exports = {
                 wardCode: '',
                 wardCodeId: '',
                 client: '',                                     // 依頼者 ?
-                lientCode: '',
+                clientCode: '',
                 clientCodeId: ''
             },
             perform: {                                          // 実施者情報
@@ -1900,14 +2029,20 @@ module.exports = {
         };
 
         var body = {                                            // 報告書本文情報
-            chiefComplaints: '',                                    // 主訴 ?
-            testPurpose: '',                                        // 検査目的 ?
-            testDx: '',                                             // 検査診断 ?
-            testNotes: {                                            // 検査所見記載 ?
-                value: ''                                           // mixed=true extRef * 外部参照図
+            chiefComplaints: '',                                // 主訴 ?
+            testPurpose: '',                                    // 検査目的 ?
+            testDx: '',                                         // 検査診断 ?
+            testNotes: {                                        // 検査所見記載 ?
+                value: ''                                       // mixed=true
+                extRef: []                                      // 外部参照図 * [extRef]
             },
-            testMemo: [],                                           // 検査コメント ? [testMemo]
-            testMemoF: ''                                           // 検査フリーコメント ?
+            testMemo: [],                                       // 検査コメント ? [testMemo]
+            testMemoF: ''                                       // 検査フリーコメント ?
+        };
+
+        var testNotes = {
+            value: '',
+            extRef: []                                          // [extRef]
         };
 
         var testMemo = {
@@ -1918,7 +2053,7 @@ module.exports = {
         };
         ********************************************************************************/
 
-        logger.info(JSON.stringify(simpleReport, null, 4));
+        // logger.info(JSON.stringify(simpleReport, null, 4));
 
         var information = {};
         var reportBody = {};
@@ -1964,7 +2099,7 @@ module.exports = {
                 }
             };
         }
-        logger.info(JSON.stringify(context, null, 4));
+        // logger.info(JSON.stringify(context, null, 4));
 
         // organ
         if (context.hasOwnProperty('organ')) {
@@ -2083,8 +2218,30 @@ module.exports = {
 
         // testNotes
         if (body.hasOwnProperty('testNotes')) {
-            reportBody.testNotes = body.testNotes;
+            reportBody.testNotes = {
+                value: body.testNotes.value
+            };
             // extRef[]
+            if (body.testNotes.hasOwnProperty('extRef')) {
+                reportBody.testNotes.extRef = [];
+                var index = 0;
+                var docId = docInfo.docId.uid;
+                var newHREF = null;
+                body.testNotes.extRef.forEach((entry) => {
+                    // correct entry.href
+                    newHREF = this.hrefWith1000(docId, index++, entry.href);
+                    entry.href = newHREF;
+                    // logger.info(newHREF);
+
+                    // 1. base64 なし => resul.extRef へ
+                    reportBody.testNotes.extRef.push(this.buildNoBase64ExtRef(entry));
+
+                    // 2. base64あり => docInfo.extRefs にまとめる
+                    var tmp = this.buildExtRef(entry);
+                    // logger.info(JSON.stringify(tmp, null, 4));
+                    docInfo.extRefs.push(tmp);
+                });
+            }
         }
 
         // testMemo
@@ -2104,7 +2261,7 @@ module.exports = {
                         memo.attr.tmCode = entry.memoCode;
                     }
                     if (entry.hasOwnProperty('memoCodeId')) {
-                        memo.attr.tmCodeId = entry.memoCodeId
+                        memo.attr.tmCodeId = entry.memoCodeId;
                     }
                 }
             });
@@ -2114,14 +2271,14 @@ module.exports = {
         if (body.hasOwnProperty('testMemoF')) {
             reportBody.testMemoF = body.testMemoF;
         }
-        logger.info(JSON.stringify(result, null, 4));
+        // logger.info(JSON.stringify(result, null, 4));
         return result;
     },
 
     /**
      * 12. ReferralModule
      */
-    referral: function (simpleReferral) {
+    referral: function (docInfo, simpleReferral) {
         /*******************************************************************************
         var simpleReferral = {
             patient: {},                                            // 患者情報
@@ -2131,17 +2288,34 @@ module.exports = {
             greeting: '',                                           // 挨拶文 ?
             chiefComplaints: '',                                    // 主訴
             clinicalDiagnosis: '',                                  // 病名 ?
-            pastHistory: '',
-            familyHistory: '',
-            presentIllness: '',
-            testResults: '',
+            pastHistory: {                                          // 既往歴 ?
+                value: '',                                          // 既往歴
+                extRef: []                                          // extRef * [extRef]
+            },
+            familyHistory:  {                                       // 家族歴 ?
+                value: '',                                          // 家族歴
+                extRef: []                                          // extRef * [extRef]
+            },
+            presentIllness: {                                       // 現病歴 ?
+                value: '',                                          // 現病歴
+                extRef: []                                          // extRef * [extRef]
+            },
+            testResults: {                                          // 検査結果 ?
+                value: '',                                          // 検査結果
+                extRef: []                                          // extRef * [extRef]
+            }
             clinicalCourse: '',                                     // 治療経過 ?
             medication: {},                                         // 現在の処方 ?
             referPurpose: '',                                       // 紹介目的
-            remarks: '',
+            remarks: {                                              // 備考 ?
+                value: '',                                          // 備考
+                extRef: []                                          // extRef * [extRef]
+            },
             referToFacility: {                                      // 紹介先医療機関名
-                Facility: {},
-                Department: {}
+                facilityId: '',                                     // 施設ID   -> Facility
+                facilityName: '',                                   // 施設名称  -> Facility
+                departmentId: '',                                   // 診療科ID ?  -> Department
+                departmentName: ''                                  // 診療科名称 ?
             },
             referToPerson: {},                                      // 紹介先医師 ? mmlPsi:PersonalizedInfo
             referToUnknownName: ''                                  // 医師名を指定しない相手 ?
@@ -2149,16 +2323,19 @@ module.exports = {
 
         var medication = {
             value: '',                                              // テキストとmmlCm:extRefの混在可
-            PrescriptionModule: {},                                 // mmlPs:PrescriptionModule
-            InjectionModule: {},                                    // mmlInj:InjectionModule
-            extRef: []
+            simplePrescription: {},                                 // simplePrescription
+            simpleInjection: {},                                    // simpleInjection
+            extRef: []                                              // extRef * [extRef]
         };
         *******************************************************************************/
 
         var result = {};
+        var refIndex = 0;
+        var docId = docInfo.docId.uid;
+        var newHREF = null;
 
         // PatientModule
-        result.PatientModule = this.patientInfo(simpleReferral.patient);
+        result.PatientModule = this.patientInfo(docInfo, simpleReferral.patient);
 
         // occupation
         if (simpleReferral.hasOwnProperty('occupation')) {
@@ -2189,6 +2366,16 @@ module.exports = {
             result.pastHistory = {
                 value: simpleReferral.pastHistory
             };
+            if (simpleReferral.pastHistory.hasOwnProperty('extRef')) {
+                result.pastHistory.extRef = [];
+
+                simpleReferral.pastHistory.extRef.forEach((e) => {
+                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.pastHistory.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
 
         // familyHistory
@@ -2196,6 +2383,15 @@ module.exports = {
             result.familyHistory = {
                 value: simpleReferral.familyHistory
             };
+            if (simpleReferral.familyHistory.hasOwnProperty('extRef')) {
+                result.familyHistory.extRef = [];
+                simpleReferral.familyHistory.extRef.forEach((e) => {
+                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.familyHistory.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
 
         // presentIllness
@@ -2203,6 +2399,15 @@ module.exports = {
             result.presentIllness = {
                 value: simpleReferral.presentIllness
             };
+            if (simpleReferral.presentIllness.hasOwnProperty('extRef')) {
+                result.presentIllness.extRef = [];
+                simpleReferral.presentIllness.extRef.forEach((e) => {
+                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.presentIllness.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
 
         // testResults
@@ -2210,6 +2415,15 @@ module.exports = {
             result.testResults = {
                 value: simpleReferral.testResults
             };
+            if (simpleReferral.testResults.hasOwnProperty('extRef')) {
+                result.testResults.extRef = [];
+                simpleReferral.testResults.extRef.forEach((e) => {
+                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.testResults.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
 
         // clinicalCourse
@@ -2219,11 +2433,16 @@ module.exports = {
 
         // medication
         if (simpleReferral.hasOwnProperty('medication')) {
-            result.medication = {
-                value: simpleReferral.medication.medication,    // medication
-                PrescriptionModule: this.buildPrescriptionModule(simpleReferral.medication.simplePrescription),
-                InjectionModule: this.buildInjectionModule(simpleReferral.medication.simpleInjection)
-            };
+            result.medication = {};
+            if (simpleReferral.medication.hasOwnProperty('value')) {
+                result.medication.value = simpleReferral.medication.value;
+            }
+            if (simpleReferral.medication.hasOwnProperty('simplePrescription')) {
+                result.medication.PrescriptionModule = this.prescription(docInfo, simpleReferral.medication.simplePrescription);
+            }
+            if (simpleReferral.medication.hasOwnProperty('simpleInjection')) {
+                result.medication.InjectionModule = this.injection(docInfo, simpleReferral.medication.simpleInjection);
+            }
             if (simpleReferral.medication.hasOwnProperty('extRef')) {
                 result.medication.extRef = [];
                 simpleReferral.medication.extRef.forEach((entry) => {
@@ -2240,18 +2459,27 @@ module.exports = {
         // remarks
         if (simpleReferral.hasOwnProperty('remarks')) {
             result.remarks = {
-                value: simpleReferral.remarks
+                value: simpleReferral.remarks.value
             };
+            if (simpleReferral.remarks.hasOwnProperty('extRef')) {
+                result.remarks.extRef = [];
+                simpleReferral.remarks.extRef.forEach((e) => {
+                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    e.href = newHREF;
+                    result.remarks.extRef.push(this.buildNoBase64ExtRef(e));
+                    docInfo.extRefs.push(this.buildExtRef(e));
+                });
+            }
         }
 
         // referToFacility
         if (simpleReferral.hasOwnProperty('referToFacility')) {
             result.referToFacility = {};
-            if (simpleReferral.referToFacility.hasOwnProperty('facility')) {
-                result.referToFacility.Facility = this.buildFacility(simpleReferral.referToFacility.facility);
+            if (simpleReferral.referToFacility.hasOwnProperty('facilityId') && simpleReferral.referToFacility.hasOwnProperty('facilityName')) {
+                result.referToFacility.Facility = this.buildFacility(simpleReferral.referToFacility.facilityId, simpleReferral.referToFacility.facilityName);
             }
-            if (simpleReferral.referToFacility.hasOwnProperty('department')) {
-                result.referToFacility.Department = this.buildDepartment(simpleReferral.referToFacility.department);
+            if (simpleReferral.referToFacility.hasOwnProperty('departmentId') && simpleReferral.referToFacility.hasOwnProperty('departmentName')) {
+                result.referToFacility.Department = this.buildDepartment(simpleReferral.referToFacility.departmentId, simpleReferral.referToFacility.departmentName);
             }
         }
 
@@ -2271,7 +2499,7 @@ module.exports = {
     /**
      * 13. VitalSignModule
      */
-    vitalsign: function (simpleVitalSign) {
+    vitalsign: function (docInfo, simpleVitalSign) {
         // 必須属性
         var vitalSign = {
             item: [],
@@ -2395,7 +2623,7 @@ module.exports = {
     /**
      * 14. FlowSheetModule
      */
-    flowsheet: function (simpleFlowSheet) {
+    flowsheet: function (docInfo, simpleFlowSheet) {
         /*******************************************************************************
         var simpleFlowSheet = {
             context: {},
@@ -2504,7 +2732,7 @@ module.exports = {
         if (simpleFlowSheet.hasOwnProperty('vitalSign')) {
             result.VitalSignModule = [];
             simpleFlowSheet.vitalSign.forEach((entry) => {
-                result.VitalSignModule.push(this.buildVitalSignModule(entry));
+                result.VitalSignModule.push(this.vitalSign(docInfo, entry));
             });
         }
 
@@ -2535,7 +2763,7 @@ module.exports = {
     /**
      * 15. PrescriptionModule
      */
-    prescription: function (simplePrescription) {
+    prescription: function (docInfo, simplePrescription) {
         /**********************************************************
         var simplePrescription = {
             medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
@@ -2640,7 +2868,7 @@ module.exports = {
     /**
      * 16. InjectionModule
      */
-    injection: function (simpleInjection) {
+    injection: function (docInfo, simpleInjection) {
         /**********************************************************
         var simpleInjection = {
             medication: [],
@@ -2723,7 +2951,7 @@ module.exports = {
     /**
      * 17. HemoDialysysModule
      */
-    hemodialysis: function (simpleHemoDialysys) {
+    hemodialysis: function (docInfo, simpleHemoDialysys) {
         return null;
     },
 
@@ -2733,6 +2961,7 @@ module.exports = {
       * @returns {MML}
      */
     build: function (simpleComposition, contentType) {
+        // logger.info(JSON.stringify(simpleComposition, null, 4));
         /***************************************************
         var simpleComposition = {
             context: {
@@ -2749,8 +2978,8 @@ module.exports = {
         var createDate = utils.nowAsDateTime();
         // context
         var context = simpleComposition.context;
-        // 患者情報モジュールを生成する
-        var patientModule = this.patientInfo(context.patient);
+        // 患者情報モジュールを生成する docInfo=null
+        var patientModule = this.patientInfo(null, context.patient);
         // アクセス権
         var simpleAccessRight = {};
         if (context.hasOwnProperty('accessRight')) {
@@ -2783,12 +3012,16 @@ module.exports = {
                 MmlModuleItem: []
             }
         };
-        // docInfoを生成する際のもとにする上hぷ
-        var baseDocInfo = {
-            confirmDate: context.confirmDate,       // 確定日時はMMLの確定日時
-            groupId: context.uuid                   // groupingId = 含まれているMMLのuuid
+        // docInfoを生成する際のもとにするObject
+        var metaInfo = {
+            contentModuleType: contentType,             // コンテントタイプ
+            facilityId: context.patient.facilityId,     // 医療機関ID
+            patientId: context.patient.id,              // 患者ID
+            uuid: context.uuid,                         // uuid
+            confirmDate: context.confirmDate            // 確定日時はMMLの確定日時
         };
-        // MML 規格のdocInfo でbaseDocInfoを基に生成される
+        // logger.info(JSON.stringify(metaInfo, null, 4));
+        // MML 規格のdocInfo でmetaInfoを基に生成される
         // MML のモジュール単位に付加される
         var docInfo = {};
         var content = {};
@@ -2796,32 +3029,44 @@ module.exports = {
         simpleComposition.content.forEach((entry) => {
             if (contentType === 'prescription') {
                 // contentModuleTypeをセットする
-                baseDocInfo.contentModuleType = contentType;
+                // metaInfo.contentModuleType = contentType;
                 // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
-                var arr = this.prescription(entry);
+                // ToDo ToDo
+                var arr = this.prescription(docInfo, entry);
                 // 結果は配列で返る
                 arr.forEach((prescription) => {
                     // それに薬が入っていたらModuleItemへ加える
                     if (prescription.medication.length > 0) {
                         // MML 規格によりModule単位にuuidを付番する
-                        baseDocInfo.uuid = uuid.v4();
+                        // metaInfo.uuid = uuid.v4();
                         // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
-                        docInfo = this.buildDocInfo(baseDocInfo, creatorInfo, accessRight);
+                        docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                        // logger.info(JSON.stringify(docInfo, null, 4));
                         result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
                     }
                 });
             } else {
                 // 検体検査のcreatorは検査会社の代表
                 var creator = (contentType === 'test') ? this.buildCreatorInfo(entry.context.laboratory) : creatorInfo;
-
-                baseDocInfo.contentModuleType = contentType;
-                baseDocInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(baseDocInfo, creator, accessRight);
-                content = this[contentType].call(this, entry);
+                // metaInfo.contentModuleType = contentType;
+                // metaInfo.uuid = uuid.v4();
+                docInfo = this.buildDocInfo(metaInfo, creator, accessRight);
+                content = this[contentType].call(this, docInfo, entry);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
         });
+        // logger.info(JSON.stringify(docInfo.docId, null, 4));
+        // logger.info(JSON.stringify(result, null, 4));
 
-        return result;
+        // MML instance file を生成するためにラッパーで返す
+        var tmpArr = [];
+        tmpArr.push(utils.compactDateTime(createDate));
+        tmpArr.push(docInfo.docId.uid);
+        var fileName = tmpArr.join('_');
+
+        return {
+            fileName: fileName,
+            json: result
+        };
     }
 };

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 生活習慣情報 -->
+<!-- LifestyleModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Lifestyle/1.0" 
+  xmlns:mmlLs="http://www.medxml.net/MML/v4/ContentModule/Lifestyle/1.0"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <xs:element name="LifestyleModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlLs:occupation"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlLs:tobacco"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlLs:alcohol"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlLs:other"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="occupation" type="xs:string"/>
+  <xs:element name="tobacco" type="xs:string"/>
+  <xs:element name="alcohol" type="xs:string"/>
+  <xs:element name="other" type="xs:string"/>
+</xs:schema>

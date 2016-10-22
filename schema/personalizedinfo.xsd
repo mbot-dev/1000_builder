@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 個人情報形式 -->
+<!-- PersonalizedInfo XSD  Version 1.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0" 
+  xmlns:mmlPsi="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0"
+  xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0"
+  xmlns:mmlPh="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0"
+  xmlns:mmlAd="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0"
+  xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0">
+
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0" schemaLocation="department.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0" schemaLocation="phone.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0" schemaLocation="address.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" schemaLocation="name.xsd" />
+  
+  <xs:element name="PersonalizedInfo" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlCm:Id" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlPsi:personName" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlFc:Facility" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlDp:Department" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPsi:addresses" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPsi:emailAddresses" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlPsi:phones" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="phones" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPh:Phone" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="emailAddresses">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlCm:email" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="addresses" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlAd:Address" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="personName" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlNm:Name" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

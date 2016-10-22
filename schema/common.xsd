@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- Id形式，外部参照形式およびEmail -->
+<!-- MML Common XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
+
+  <xs:element name="Id">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlCm:attlist.Id"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.Id">
+    <xs:attribute name="type" use="required" form="qualified"/>
+    <xs:attribute name="checkDigitSchema" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="M10"/>
+          <xs:enumeration value="M11"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="checkDigit" form="qualified"/>
+    <xs:attribute name="tableId" use="required" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="extRef">
+    <xs:complexType>
+      <xs:attributeGroup ref="mmlCm:attlist.extRef"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.extRef">
+    <xs:attribute name="contentType" form="qualified"/>
+    <xs:attribute name="medicalRole" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="laboratoryTest"/>
+          <xs:enumeration value="endoScopy"/>
+          <xs:enumeration value="xRay"/>
+          <xs:enumeration value="upperGi"/>
+          <xs:enumeration value="baEnema"/>
+          <xs:enumeration value="ctScan"/>
+          <xs:enumeration value="mri"/>
+          <xs:enumeration value="riInVivo"/>
+          <xs:enumeration value="angioGraphy"/>
+          <xs:enumeration value="otherRadiology"/>
+          <xs:enumeration value="echo"/>
+          <xs:enumeration value="ecg"/>
+          <xs:enumeration value="eeg"/>
+          <xs:enumeration value="emg"/>
+          <xs:enumeration value="pcg"/>
+          <xs:enumeration value="pulmonaryFunction"/>
+          <xs:enumeration value="otherPhysiologicalTest"/>
+          <xs:enumeration value="prescription"/>
+          <xs:enumeration value="vitalSign"/>
+          <xs:enumeration value="physicalExam"/>
+          <xs:enumeration value="anesthesiaCourse"/>
+          <xs:enumeration value="pathology"/>
+          <xs:enumeration value="surgicalFigure"/>
+          <xs:enumeration value="referencePaper"/>
+          <xs:enumeration value="referenceFigure"/>
+          <xs:enumeration value="treatment"/>
+          <xs:enumeration value="other"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="title" form="qualified"/>
+    <xs:attribute name="href" use="required" form="qualified"/>
+  </xs:attributeGroup>
+  <xs:element name="email" type="xs:string"/>
+</xs:schema>

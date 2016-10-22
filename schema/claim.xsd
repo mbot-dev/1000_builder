@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 予約請求モジュール -->
+<!-- ClaimModule XSD Version 2.1 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/claim/claimModule/2.1" 
+  xmlns:claim="http://www.medxml.net/claim/claimModule/2.1"
+  xmlns:mmlHi="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1"
+  xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0">
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1" schemaLocation="healthinsurance.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0" schemaLocation="department.xsd" />
+  
+  <xs:element name="ClaimModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="claim:information"/>
+        <xs:element maxOccurs="unbounded" ref="claim:bundle"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="information">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="claim:appoint"/>
+        <xs:element minOccurs="0" ref="claim:patientDepartment"/>
+        <xs:element minOccurs="0" ref="claim:patientWard"/>
+        <xs:element minOccurs="0" ref="mmlHi:insuranceClass"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="claim:attlist.information"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.information">
+    <xs:attribute name="status" use="required" form="qualified"/>
+    <xs:attribute name="orderTime" form="qualified"/>
+    <xs:attribute name="appointTime" form="qualified"/>
+    <xs:attribute name="registTime" form="qualified"/>
+    <xs:attribute name="performTime" form="qualified"/>
+    <xs:attribute name="admitFlag" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="true"/>
+          <xs:enumeration value="false"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="timeClass">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="0"/>
+          <xs:enumeration value="1"/>
+          <xs:enumeration value="2"/>
+          <xs:enumeration value="3"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="insuranceUid" form="qualified"/>
+    <xs:attribute name="defaultTableId" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="bundle">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="claim:className"/>
+        <xs:element minOccurs="0" ref="claim:administration"/>
+        <xs:element minOccurs="0" ref="claim:admMemo"/>
+        <xs:element minOccurs="0" ref="claim:bundleNumber"/>
+        <xs:element maxOccurs="unbounded" ref="claim:item"/>
+        <xs:element minOccurs="0" ref="claim:memo"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="claim:attlist.bundle"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.bundle">
+    <xs:attribute name="classCode" form="qualified"/>
+    <xs:attribute name="classCodeId" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="appoint">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="claim:appName"/>
+        <xs:element minOccurs="0" ref="claim:memo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="appName">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="claim:attlist.appName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.appName">
+    <xs:attribute name="appCode" form="qualified"/>
+    <xs:attribute name="appCodeId" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="patientDepartment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlDp:Department"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="patientWard">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlDp:Department"/>
+      </xs:sequence>
+    </xs:complexType>    
+  </xs:element>
+  
+  
+  <xs:element name="className" type="xs:string"/>
+  
+  <xs:element name="administration">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="claim:attlist.administration"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.administration">
+    <xs:attribute name="adminCode" form="qualified"/>
+    <xs:attribute name="adminCodeId" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="admMemo" type="xs:string"/>
+  
+  <xs:element name="bundleNumber" type="xs:string"/>
+  
+  <xs:element name="item">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="claim:name"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="claim:number"/>
+        <xs:element minOccurs="0" ref="claim:duration"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="claim:location"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="claim:film"/>
+        <xs:element minOccurs="0" ref="claim:event"/>
+        <xs:element minOccurs="0" ref="claim:memo"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="claim:attlist.item"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.item">
+    <xs:attribute name="subclassCode" form="qualified"/>
+    <xs:attribute name="subclassCodeId" form="qualified"/>
+    <xs:attribute name="code" use="required" form="qualified"/>
+    <xs:attribute name="tableId" form="qualified"/>
+    <xs:attribute name="aliasCode" form="qualified"/>
+    <xs:attribute name="aliasTableId" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="name" type="xs:string"/>
+  
+  <xs:element name="number">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="claim:attlist.number"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.number">
+    <xs:attribute name="numberCode" use="required" form="qualified"/>
+    <xs:attribute name="numberCodeId" use="required" form="qualified"/>
+    <xs:attribute name="unit" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="duration" type="xs:string"/>
+  
+  <xs:element name="location" type="xs:string"/>
+  
+  <xs:element name="film">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="claim:filmSize"/>
+        <xs:element ref="claim:filmNumber"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="event">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="claim:attlist.event"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.event">
+    <xs:attribute name="eventStart" form="qualified"/>
+    <xs:attribute name="eventEnd" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="memo" type="xs:string"/>
+  
+  <xs:element name="filmSize">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="claim:attlist.filmSize"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.filmSize">
+    <xs:attribute name="sizeCode" form="qualified"/>
+    <xs:attribute name="sizeCodeId" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="filmNumber" type="xs:string"/>
+  
+</xs:schema>

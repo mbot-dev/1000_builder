@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 報告書情報 -->
+<!-- ReportModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/report/1.0"
+  xmlns:mmlRp="http://www.medxml.net/MML/v4/ContentModule/report/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
+
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+
+  <xs:element name="ReportModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:information"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:reportBody"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="information">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:reportStatus"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:testClass"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:testSubclass"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:organ"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:consultFrom"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:perform"/>
+      </xs:sequence>
+      <xs:attribute name="performTime" type="xs:dateTime" use="required" form="qualified"/>
+      <xs:attribute name="reportTime" type="xs:dateTime" use="required" form="qualified"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="reportStatus">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="statusCode" type="xs:string" use="required" form="qualified"/>
+          <xs:attribute name="statusCodeId" type="xs:string" use="required" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="testClass">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="testClassCode" use="required" form="qualified"/>
+          <xs:attribute name="testClassCodeId" use="required" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="testSubclass">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="testSubclassCode" use="required" form="qualified"/>
+          <xs:attribute name="testSubclassCodeId" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="organ" type="xs:string"/>
+ 
+  <xs:element name="consultFrom">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:conFacility"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:conDepartment"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:conWard"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:client"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="conFacility">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="facilityCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="facilityCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="conDepartment">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="depCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="depCodeId" type="xs:string" use="optional" default="MML0028" form ="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="conWard">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="wardCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="wardCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="client">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="clientCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="clientCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="perform">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:pFacility"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:pDepartment"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:pWard"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRp:performer"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:supervisor"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:element name="pFacility">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="facilityCode" type="xs:string" use="required" form="qualified"/>
+          <xs:attribute name="facilityCodeId" type="xs:string" use="required" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="pDepartment">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="depCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="depCodeId" type="xs:string" use="optional" default="MML0028" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="pWard">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="wardCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="wardCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="performer">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="performerCode" type="xs:string" use="required" form="qualified"/>
+          <xs:attribute name="performerCodeId" type="xs:string" use="required" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="supervisor">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="supervisorCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="supervisorCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="reportBody">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:chiefComplaints"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:testPurpose"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:testDx"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:testNotes"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlRp:testMemo"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRp:testMemoF"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:element name="chiefComplaints" type="xs:string"/>
+  
+  <xs:element name="testPurpose" type="xs:string"/>
+  
+  <xs:element name="testDx" type="xs:string"/>
+  
+  <xs:element name = "testNotes">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="testMemo">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="tmCodeName" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="tmCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="tmCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="testMemoF" type="xs:string"/>
+</xs:schema>

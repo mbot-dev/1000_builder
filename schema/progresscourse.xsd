@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 経過記録情報 -->
+<!-- ProgressCourseModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/ProgressCourse/1.0" 
+  xmlns:mmlPc="http://www.medxml.net/MML/v4/ContentModule/ProgressCourse/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlPs="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0"
+  xmlns:mmlInj="http://www.medxml.net/MML/v4/ContentModule/Injection/1.0"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml" >
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0" schemaLocation="prescription.xsd"/>
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Injection/1.0" schemaLocation="injection.xsd"/>
+  <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-transitional.xsd"/>
+  
+  <xs:element name="ProgressCourseModule">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="mmlPc:FreeExpression"/>
+        <xs:element ref="mmlPc:structuredExpression"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="FreeExpression">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="structuredExpression">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlPc:problemItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="problemItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:problem"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:subjective"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:objective"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:assessment"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:plan"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="problem">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlPc:attlist.problem"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.problem">
+    <xs:attribute name="dxUid" use="optional" type="xs:string" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="freeNotes">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>             
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="subjective">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="mmlPc:freeNotes"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlPc:subjectiveItem"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="subjectiveItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPc:timeExpression"/>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlPc:eventExpression"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="timeExpression" type="xs:string"/>
+  
+  <xs:element name="eventExpression">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>             
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="objective">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:objectiveNotes"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:physicalExam"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:testResult"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:rxRecord"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:txRecord"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="objectiveNotes">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>             
+    </xs:complexType>
+  </xs:element>  
+  
+  <xs:element name="physicalExam">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlPc:physicalExamItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="physicalExamItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPc:title"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPc:result"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:interpretation"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPc:referenceInfo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="title" type="xs:string"/>
+  
+  <xs:element name="result" type="xs:string"/>
+  
+  <xs:element name="interpretation">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>             
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="referenceInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlCm:extRef" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>   
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="testResult" >
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="rxRecord" >
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlPs:PrescriptionModule"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlInj:InjectionModule"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="txRecord" >
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="assessment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlPc:assessmentItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="assessmentItem">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>             
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="plan">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="mmlPc:testOrder"/>
+        <xs:element minOccurs="0" ref="mmlPc:rxOrder"/>
+        <xs:element minOccurs="0" ref="mmlPc:txOrder"/>
+        <xs:element minOccurs="0" ref="mmlPc:planNotes"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="testOrder">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="rxOrder">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlPs:PrescriptionModule"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="txOrder">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="planNotes">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  
+  
+  
+  
+</xs:schema>

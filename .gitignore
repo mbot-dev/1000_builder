@@ -38,4 +38,4 @@ node_modules
 manifest.yml
 
 .DS_Store
-/nbproject/private/
+nbproject

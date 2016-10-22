@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 基礎的診療情報 -->
+<!-- BaseClinicModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    targetNamespace="http://www.medxml.net/MML/v4/ContentModule/BaseClinic/1.0" 
+  xmlns:mmlBc="http://www.medxml.net/MML/v4/ContentModule/BaseClinic/1.0"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <xs:element name="BaseClinicModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:allergy"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:bloodtype"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:infection"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="allergy">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlBc:allergyItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="allergyItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlBc:factor"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:severity"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:identifiedDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:memo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="factor" type="xs:string"/>
+  
+  <xs:element name="severity" type="xs:string"/>
+  
+  <xs:element name="identifiedDate" type="xs:string"/>
+  
+  <xs:element name="memo" type="xs:string"/>
+  
+  <xs:element name="bloodtype">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlBc:abo"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:rh"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:others"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:memo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="rh" type="xs:string"/>
+  
+  <xs:element name="abo" type="xs:string"/>
+
+  <xs:element name="others">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlBc:other"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="other">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlBc:typeName"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlBc:typeJudgement"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:description"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="typeName" type="xs:string"/>
+  
+  <xs:element name="typeJudgement" type="xs:string"/>
+  
+  <xs:element name="description" type="xs:string"/>
+  
+  <xs:element name="infection">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlBc:infectionItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="infectionItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlBc:factor"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlBc:examValue"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:identifiedDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlBc:memo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="examValue" type="xs:string"/>  
+</xs:schema>

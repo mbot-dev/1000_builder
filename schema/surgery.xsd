@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 手術記録情報 -->
+<!-- SurgeryModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Surgery/1.0" 
+  xmlns:mmlSg="http://www.medxml.net/MML/v4/ContentModule/Surgery/1.0"
+  xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0"
+  xmlns:mmlRd="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0"
+  xmlns:mmlPsi="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0" schemaLocation="department.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0" schemaLocation="registereddiagnosis.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0" schemaLocation="personalizedinfo.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+  
+  <xs:element name="SurgeryModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlSg:surgeryItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="surgeryItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSg:surgicalInfo"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSg:surgicalDiagnosis"/>
+        <xs:element minOccurs="1" maxOccurs="1"  ref="mmlSg:surgicalProcedure"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:surgicalStaffs"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:anesthesiaProcedure"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:anesthesiologists"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:anesthesiaDuration"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:operativeNotes"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:referenceInfo"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:memo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="surgicalInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSg:date"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:startTime"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:duration"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:surgicalDepartment"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSg:patientDepartment"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlSg:attlist.surgicalInfo"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.surgicalInfo">
+    <xs:attribute name="type" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="elective"/>
+          <xs:enumeration value="emergent"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  
+  <xs:element name="date" type="xs:date"/>
+  <xs:element name="startTime" type="xs:time"/>
+  <xs:element name="duration" type="xs:duration"/>
+
+  <xs:element name="surgicalDepartment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlDp:Department" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="patientDepartment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlDp:Department" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="surgicalDiagnosis">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlRd:RegisteredDiagnosisModule" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="surgicalProcedure">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlSg:procedureItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="surgicalStaffs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlSg:staff"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="staff">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlSg:staffInfo"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlSg:attlist.staff"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.staff">
+    <xs:attribute name="superiority" form="qualified"/>
+    <xs:attribute name="staffClass" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="staffInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlPsi:PersonalizedInfo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="title">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlSg:attlist.title"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.title">
+    <xs:attribute name="code" form="qualified" type="xs:string"/>
+    <xs:attribute name="system" form="qualified" type="xs:string"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="memo" type="xs:string"/>
+  
+  <xs:element name="procedureItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="mmlSg:operation"/>
+          <xs:element ref="mmlSg:operationElement"/>
+        </xs:choice>
+        <xs:element minOccurs="0" ref="mmlSg:procedureMemo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="operationElement">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlSg:operationElementItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="operationElementItem" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlSg:title" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="anesthesiaProcedure">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlSg:title" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="anesthesiologists">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSg:staff"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="anesthesiaDuration" type="xs:string"/>
+  <xs:element name="operativeNotes" type="xs:string"/>
+  
+  <xs:element name="referenceInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>   
+  </xs:element>
+  
+  <xs:element name="operation">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="code" type="xs:string" use="optional"/>
+          <xs:attribute name="system" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="procedureMemo" type="xs:string"/>  
+</xs:schema>

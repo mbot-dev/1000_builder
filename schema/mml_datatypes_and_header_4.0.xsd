@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/base/1.0" 
+  xmlns:mml="http://www.medxml.net/MML/v4/base/1.0">
+   <!-- *************************************************** -->
+  <!-- MML data types -->
+  <!-- *************************************************** -->
+  <!-- MML0001 -->
+  <xs:simpleType name="mmlDt.MML0001">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="M10"/>
+      <xs:enumeration value="M11"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0002 -->
+  <xs:simpleType name="mmlDt.MML0002">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="current"/>
+      <xs:enumeration value="permanent"/>
+      <xs:enumeration value="mailing"/>
+      <xs:enumeration value="business"/>
+      <xs:enumeration value="office"/>
+      <xs:enumeration value="home"/>
+      <xs:enumeration value="birth"/>
+      <xs:enumeration value="county"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0003 -->
+  <xs:simpleType name="mmlDt.MML0003">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="PH"/>
+      <xs:enumeration value="FX"/>
+      <xs:enumeration value="MD"/>
+      <xs:enumeration value="CP"/>
+      <xs:enumeration value="BP"/>
+      <xs:enumeration value="Internet"/>
+      <xs:enumeration value="X.400"/>
+      <xs:enumeration value="H"/>
+      <xs:enumeration value="HP"/>
+      <xs:enumeration value="HV"/>
+      <xs:enumeration value="WP"/>
+      <xs:enumeration value="DIR"/>
+      <xs:enumeration value="PUB"/>
+      <xs:enumeration value="BAD"/>
+      <xs:enumeration value="TMP"/>
+      <xs:enumeration value="AS"/>
+      <xs:enumeration value="EC"/>
+      <xs:enumeration value="MC"/>
+      <xs:enumeration value="PG"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0004 -->
+  <xs:simpleType name="mmlDt.MML0004">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="firstEncounter"/>
+      <xs:enumeration value="laboratory"/>
+      <xs:enumeration value="prescription"/>
+      <xs:enumeration value="summary"/>
+      <xs:enumeration value="random"/>
+      <xs:enumeration value="nonExtracted"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0005 -->
+  <xs:simpleType name="mmlDt.MML0005">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="patientInfo"/>
+      <xs:enumeration value="healthInsurance"/>
+      <xs:enumeration value="registeredDiagnosis"/>
+      <xs:enumeration value="lifestyle"/>
+      <xs:enumeration value="baseClinic"/>
+      <xs:enumeration value="firstClinic"/>
+      <xs:enumeration value="progressCourse"/>
+      <xs:enumeration value="surgery"/>
+      <xs:enumeration value="summary"/>
+      <xs:enumeration value="referral"/>
+      <xs:enumeration value="test"/>
+      <xs:enumeration value="report"/>
+      <xs:enumeration value="claim"/>
+      <xs:enumeration value="claimAmount"/>
+      <xs:enumeration value="vitalsign"/>
+      <xs:enumeration value="flowsheet"/>
+      <xs:enumeration value="prescription"/>
+      <xs:enumeration value="injection"/>
+      <xs:enumeration value="hemodialysis"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0006 -->
+  <xs:simpleType name="mmlDt.MML0006">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="all"/>
+      <xs:enumeration value="creatorFacility"/>
+      <xs:enumeration value="creatorDepartment"/>
+      <xs:enumeration value="creaotr"/>
+      <xs:enumeration value="patient"/>
+      <xs:enumeration value="doctor"/>
+      <xs:enumeration value="nurse"/>
+      <xs:enumeration value="dentist"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0007 -->
+  <xs:simpleType name="mmlDt.MML0007">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="record"/>
+      <xs:enumeration value="recordAdmission"/>
+      <xs:enumeration value="recordInpatient"/>
+      <xs:enumeration value="recordConsult"/>
+      <xs:enumeration value="recordDischarge"/>
+      <xs:enumeration value="recordOutpatient"/>
+      <xs:enumeration value="legalRecord"/>
+      <xs:enumeration value="consult"/>
+      <xs:enumeration value="report"/>
+      <xs:enumeration value="reportRadiology"/>
+      <xs:enumeration value="reportPathology"/>
+      <xs:enumeration value="reportTest"/>
+      <xs:enumeration value="summary"/>
+      <xs:enumeration value="summaryAdmission"/>
+      <xs:enumeration value="summaryPreoperation"/>
+      <xs:enumeration value="summaryPostoperation"/>
+      <xs:enumeration value="summaryMid"/>
+      <xs:enumeration value="summaryDischarge"/>
+      <xs:enumeration value="summaryOutpatient"/>
+      <xs:enumeration value="disclosure"/>
+      <xs:enumeration value="informedConsent"/>
+      <xs:enumeration value="study"/>
+      <xs:enumeration value="other"/>
+      <xs:enumeration value="claim"/>
+      <xs:enumeration value="vitalsign"/>
+      <xs:enumeration value="flowsheet"/>
+      <xs:enumeration value="prescription"/>
+      <xs:enumeration value="injection"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0008 -->
+  <xs:simpleType name="mmlDt.MML0008">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="origin"/>
+      <xs:enumeration value="oldEdition"/>
+      <xs:enumeration value="order"/>
+      <xs:enumeration value="consult"/>
+      <xs:enumeration value="originalDiagnosis"/>
+      <xs:enumeration value="diagnosis"/>
+      <xs:enumeration value="surgery"/>
+      <xs:enumeration value="patient"/>
+      <xs:enumeration value="healthInsurance"/>
+      <xs:enumeration value="detail"/>
+      <xs:enumeration value="simpleLink"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0009 -->
+  <xs:simpleType name="mmlDt.MML0009">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="temporaryPatientId"/>
+      <xs:enumeration value="spouseId"/>
+      <xs:enumeration value="motherId"/>
+      <xs:enumeration value="fatherId"/>
+      <xs:enumeration value="childId"/>
+      <xs:enumeration value="relativeId"/>
+      <xs:enumeration value="roommateId"/>
+      <xs:enumeration value="friendId"/>
+      <xs:enumeration value="representativeId"/>
+      <xs:enumeration value="emergencyContactId"/>
+      <xs:enumeration value="coWorkerId"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0010 -->
+  <xs:simpleType name="mmlDt.MML0010">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="female"/>
+      <xs:enumeration value="male"/>
+      <xs:enumeration value="other"/>
+      <xs:enumeration value="unknown"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0011 -->
+  <xs:simpleType name="mmlDt.MML0011">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="separated"/>
+      <xs:enumeration value="divorced"/>
+      <xs:enumeration value="married"/>
+      <xs:enumeration value="single"/>
+      <xs:enumeration value="widowed"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0012 -->
+  <xs:simpleType name="mmlDt.MML0012">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="mainDiagnosis"/>
+      <xs:enumeration value="complication"/>
+      <xs:enumeration value="drg"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0013 -->
+  <xs:simpleType name="mmlDt.MML0013">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="academicDiagnosis"/>
+      <xs:enumeration value="claimingDiagnosis"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0014 -->
+  <xs:simpleType name="mmlDt.MML0014">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="clinicalDiagnosis"/>
+      <xs:enumeration value="pathologicalDiagnosis"/>
+      <xs:enumeration value="laboratoryDiagnosis"/>
+      <xs:enumeration value="operativeDiagnosis"/>
+      <xs:enumeration value="preOperativeDiagnosis"/>
+      <xs:enumeration value="intraOperativeDiagnosis"/>
+      <xs:enumeration value="postOperativeDiagnosis"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0015 -->
+  <xs:simpleType name="mmlDt.MML0015">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="confirmedDiagnosis"/>
+      <xs:enumeration value="suspectedDiagnosis"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0016 -->
+  <xs:simpleType name="mmlDt.MML0016">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="died"/>
+      <xs:enumeration value="worsening"/>
+      <xs:enumeration value="unchanged"/>
+      <xs:enumeration value="recovering"/>
+      <xs:enumeration value="fullyRecovered"/>
+      <xs:enumeration value="sequelae"/>
+      <xs:enumeration value="end"/>
+      <xs:enumeration value="pause"/>
+      <xs:enumeration value="continued"/>
+      <xs:enumeration value="transfer"/>
+      <xs:enumeration value="transferAcute"/>
+      <xs:enumeration value="transferChronic"/>
+      <xs:enumeration value="home"/>
+      <xs:enumeration value="unknown"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0021 -->
+  <!-- MML0027 -->
+  <xs:simpleType name="mmlDt.MML0027">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="ca"/>
+      <xs:enumeration value="insurance"/>
+      <xs:enumeration value="monbusho"/>
+      <xs:enumeration value="JMARI"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0032 -->
+  <!-- MML0033 -->
+  <xs:simpleType name="mmlDt.MML0033">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="laboratoryTest"/>
+      <xs:enumeration value="endoScopy"/>
+      <xs:enumeration value="xRay"/>
+      <xs:enumeration value="upperGi"/>
+      <xs:enumeration value="baEnema"/>
+      <xs:enumeration value="ctScan"/>
+      <xs:enumeration value="mri"/>
+      <xs:enumeration value="riInVivo"/>
+      <xs:enumeration value="angioGraphy"/>
+      <xs:enumeration value="otherRadiology"/>
+      <xs:enumeration value="echo"/>
+      <xs:enumeration value="ecg"/>
+      <xs:enumeration value="eeg"/>
+      <xs:enumeration value="emg"/>
+      <xs:enumeration value="pcg"/>
+      <xs:enumeration value="pulmonaryFunction"/>
+      <xs:enumeration value="otherPhysiologicalTest"/>
+      <xs:enumeration value="prescription"/>
+      <xs:enumeration value="vitalSign"/>
+      <xs:enumeration value="physicalExam"/>
+      <xs:enumeration value="anesthesiaCourse"/>
+      <xs:enumeration value="pathology"/>
+      <xs:enumeration value="surgicalFigure"/>
+      <xs:enumeration value="referencePaper"/>
+      <xs:enumeration value="referenceFigure"/>
+      <xs:enumeration value="treatment"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- MML0034 -->
+  <xs:simpleType name="mmlDt.MML0034">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="read"/>
+      <xs:enumeration value="write"/>
+      <xs:enumeration value="delete"/>
+      <xs:enumeration value="all"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

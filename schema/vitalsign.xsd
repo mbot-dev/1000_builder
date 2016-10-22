@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  xmlns:mmlVs="http://www.medxml.net/MML/v4/ContentModule/VitalSign/1.0"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/VitalSign/1.0">
+
+  <xs:element name="VitalSignModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlVs:context" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:item" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="mmlVs:observedTime" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlVs:protocol" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:vsMemo" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="context">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlVs:facility" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:department" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:ward" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:observer" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="facility">
+    <xs:complexType mixed="true">
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="facilityCode" use="required" form="qualified"/>
+          <xs:attribute name="facilityCodeId" use="required" form="qualified">
+            <xs:simpleType>
+              <xs:restriction base="xs:token">
+                <xs:enumeration value="ca"/>
+                <xs:enumeration value="insurance"/>
+                <xs:enumeration value="monbusho"/>
+                <xs:enumeration value="JMARI"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="department">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="depCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="depCodeId" type="xs:string" use="optional" form="qualified"/>        
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ward">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="wardCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="wardCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="observer">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="obsCode" type="xs:string"/>
+          <xs:attribute name="obsCodeId" type="xs:string"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="item">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlVs:itemName" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlVs:value" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:numValue" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:unit" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlVs:itemMemo" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="itemName" type="xs:string"/>
+  <xs:element name="value" type="xs:string"/>
+  <xs:element name="numValue" type="xs:decimal"/>
+  <xs:element name="unit" type="xs:string"/>
+  <xs:element name="itemMemo" type="xs:string"/>
+  <xs:element name="observedTime" type="xs:dateTime"/>
+
+  <xs:element name="protocol">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="procedure" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="position" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="device" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="bodyLocation" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="protMemo" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="vsMemo" type="xs:string"/>
+</xs:schema>

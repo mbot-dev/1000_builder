@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  xmlns:mmlFs="http://www.medxml.net/MML/v4/ContentModule/FlowSheet/1.0"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/FlowSheet/1.0"
+  xmlns:mmlVs="http://www.medxml.net/MML/v4/ContentModule/VitalSign/1.0">
+
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/VitalSign/1.0"
+    schemaLocation="vitalsign.xsd"/>
+
+  <xs:element name="FlowSheetModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlFs:context" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlVs:VitalSignModule" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="mmlFs:intake" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="mmlFs:bodilyOutput" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="mmlFs:fsMemo" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="context">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlFs:facility" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlFs:department" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlFs:ward" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlFs:observer" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="facility">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="facilityCode" use="required" form="qualified"/>
+          <xs:attribute name="facilityCodeId" use="required" form="qualified">
+            <xs:simpleType>
+              <xs:restriction base="xs:token">
+                <xs:enumeration value="ca"/>
+                <xs:enumeration value="insurance"/>
+                <xs:enumeration value="monbusho"/>
+                <xs:enumeration value="JMARI"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="department">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="depCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="depCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ward">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="wardCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="wardCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="observer">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="obsCode" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="obsCodeId" type="xs:string" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="intake">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="intakeType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="intakeVolume" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="intakeUnit" type="xs:string" minOccurs="0" maxOccurs="1" />
+        <xs:element name="intakePathway" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="intakeStartTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="intakeEndTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="intakeMemo" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="bodilyOutput">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="boType" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="boVolume" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="boUnit" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="boStatus" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="boColor" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="boPathway" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="boStartTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="boEndTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlFs:boFrequency" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="boMemo" type="xs:string" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="boFrequency">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="bofTimes" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="bofPeriodStartTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="bofPeriodEndTime" type="xs:dateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="bofMemo" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="fsMemo" type="xs:string"/>
+</xs:schema>

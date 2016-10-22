@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 臨床サマリー情報 -->
+<!-- SummaryModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0" 
+  xmlns:mmlSm="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0"
+  xmlns:mmlRd="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0"
+  xmlns:mmlSg="http://www.medxml.net/MML/v4/ContentModule/Surgery/1.0"
+  xmlns:mmlPsi="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0"
+  xmlns:mmlCi="http://www.medxml.net/MML/v4/SharedComponent/CreatorInfo/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlPs="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0">
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0" schemaLocation="registereddiagnosis.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Surgery/1.0" schemaLocation="surgery.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0" schemaLocation="personalizedinfo.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/CreatorInfo/1.0" schemaLocation="creatorinfo.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0" schemaLocation="prescription.xsd"/>
+ 
+  <xs:element name="SummaryModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSm:serviceHistory"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlRd:RegisteredDiagnosisModule"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:deathInfo"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSg:SurgeryModule"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:chiefComplaints"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:patientProfile"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:history"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:physicalExam"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:clinicalCourse"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:dischargeFindings"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:medication"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:testResults"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:plan"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:remarks"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="serviceHistory">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:outPatient"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:inPatient"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlSm:attlist.serviceHistory"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.serviceHistory">
+    <xs:attribute name="start" type="xs:date" use="optional" form="qualified"/>
+    <xs:attribute name="end" type="xs:date" use="optional" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="outPatient">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSm:outPatientItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="inPatient">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSm:inPatientItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="outPatientItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlSm:date"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:outPatientCondition"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:staffs"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="inPatientItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSm:admission"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSm:discharge"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:staffs"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="date" type="xs:date"/>
+  
+  <xs:element name="outPatientCondition">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="first" type="xs:boolean" use="optional" form="qualified"/>
+          <xs:attribute name="emergency" type="xs:boolean" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="staffs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlSm:staffInfo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="staffInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPsi:PersonalizedInfo"/>
+        <xs:element ref="mmlCi:creatorLicense" minOccurs="1" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>       
+  </xs:element>
+
+  <xs:element name="admission">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSm:date"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:admissionCondition"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:referFrom"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="discharge">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlSm:date"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:dischargeCondition"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlSm:referTo"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="admissionCondition">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="emergency" type="xs:boolean" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+    
+  <xs:element name="referFrom">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPsi:PersonalizedInfo"/>
+      </xs:sequence>
+    </xs:complexType>   
+  </xs:element>
+  
+  <xs:element name="dischargeCondition">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="outcome" form="qualified">
+            <xs:simpleType>
+              <xs:restriction base="xs:token">
+                <xs:enumeration value="died"/>
+                <xs:enumeration value="worsening"/>
+                <xs:enumeration value="unchanged"/>
+                <xs:enumeration value="recovering"/>
+                <xs:enumeration value="fullyRecovered"/>
+                <xs:enumeration value="sequelae"/>
+                <xs:enumeration value="end"/>
+                <xs:enumeration value="pause"/>
+                <xs:enumeration value="continued"/>
+                <xs:enumeration value="transfer"/>
+                <xs:enumeration value="transferAcute"/>
+                <xs:enumeration value="transferChronic"/>
+                <xs:enumeration value="home"/>
+                <xs:enumeration value="unknown"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="referTo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPsi:PersonalizedInfo"/>
+      </xs:sequence>
+    </xs:complexType>   
+  </xs:element>
+
+  <xs:element name="deathInfo">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="date" type="xs:dateTime" use="optional" form="qualified"/>
+          <xs:attribute name="autopsy" type="xs:boolean" use="optional" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="chiefComplaints" type="xs:string"/>
+  
+  <xs:element name="patientProfile" type="xs:string"/>
+  
+  <xs:element name="history" type="xs:string"/>
+  
+  <xs:element name="physicalExam">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="clinicalCourse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlSm:clinicalRecord"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="clinicalRecord">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSm:relatedDoc"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+      <xs:attribute name="date" type="xs:dateTime" use="optional" form="qualified"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="dischargeFindings">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="medication">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPs:PrescriptionModule"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="testResults">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlSm:testResult"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="testResult">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSm:relatedDoc"/>
+      </xs:sequence>
+      <xs:attribute name="date" type="xs:dateTime" use="optional" form="qualified"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="plan">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="remarks">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="relatedDoc">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="relation" use="optional" type="xs:string" form="qualified"/>          
+        </xs:extension>
+      </xs:simpleContent>
+      <xs:attributeGroup ref="mmlSm:attlist.relatedDoc"/>
+    </xs:complexType>
+  </xs:element> 
+</xs:schema>

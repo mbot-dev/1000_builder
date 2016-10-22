@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 紹介状情報 -->
+<!-- ReferralModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Referral/1.0" 
+  xmlns:mmlRe="http://www.medxml.net/MML/v4/ContentModule/Referral/1.0"
+  xmlns:mmlPi="http://www.medxml.net/MML/v4/ContentModule/PatientInfo/1.0"
+  xmlns:mmlSm="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0"
+  xmlns:mmlPsi="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0"
+  xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0"
+  xmlns:mmlPs="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0"
+  xmlns:mmlInj="http://www.medxml.net/MML/v4/ContentModule/Injection/1.0">
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/PatientInfo/1.0" schemaLocation="patientinfo.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0" schemaLocation="summary.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0" schemaLocation="personalizedinfo.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0" schemaLocation="department.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0" schemaLocation="prescription.xsd"/>
+  <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Injection/1.0" schemaLocation="injection.xsd"/>
+  
+  <xs:element name="ReferralModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPi:PatientModule"/>
+        <xs:element ref="mmlRe:occupation" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:referFrom" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlRe:title" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlRe:greeting" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:chiefComplaints" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlRe:clinicalDiagnosis" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:pastHistory" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:familyHistory" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:presentIllness" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlRe:testResults" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlSm:clinicalCourse" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:medication" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:referPurpose" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlRe:remarks" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:referToFacility" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlRe:referToPerson" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlRe:referToUnknownName" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="occupation" type="xs:string"/>
+  
+  <xs:element name="referFrom">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPsi:PersonalizedInfo"/> 
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="title" type="xs:string"/>
+  
+  <xs:element name="greeting" type="xs:string"/>
+  
+  <xs:element name="chiefComplaints" type="xs:string"/>
+  
+  <xs:element name="clinicalDiagnosis" type="xs:string"/>
+  
+  <xs:element name="pastHistory" >
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="familyHistory">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="presentIllness">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="testResults">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>    
+  </xs:element>
+  
+  <xs:element name="medication">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPs:PrescriptionModule"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlInj:InjectionModule"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>        
+  </xs:element>
+  
+  <xs:element name="referPurpose" type="xs:string"/>
+  
+  <xs:element name="remarks">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+      </xs:sequence>
+    </xs:complexType>    
+  </xs:element>
+  
+  <xs:element name="referToFacility">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlFc:Facility" minOccurs="1" maxOccurs="1"/> 
+        <xs:element ref="mmlDp:Department" minOccurs="0" maxOccurs="1"/> 
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="referToPerson">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPsi:PersonalizedInfo" minOccurs="1" maxOccurs="1"/> 
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="referToUnknownName" type="xs:string"/>
+
+</xs:schema>

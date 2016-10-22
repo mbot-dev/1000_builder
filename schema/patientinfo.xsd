@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 患者情報 -->
+<!-- PatientModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/PatientInfo/1.0" 
+  xmlns:mmlPi="http://www.medxml.net/MML/v4/ContentModule/PatientInfo/1.0"
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlPh="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0"
+  xmlns:mmlAd="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0"
+  xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0">
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0" schemaLocation="phone.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0" schemaLocation="address.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" schemaLocation="name.xsd" />
+  
+  <xs:element name="PatientModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPi:uniqueInfo"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPi:personName"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPi:birthday"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPi:sex"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:nationality"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:race"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:marital"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:addresses"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:emailAddresses"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:phones"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:accountNumber"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:socialIdentification"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlPi:death"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="uniqueInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlPi:masterId"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlPi:otherId"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="masterId">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlCm:Id"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="otherId">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlCm:Id"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlPi:attlist.otherId"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.otherId">
+    <xs:attribute name="type" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="temporaryPatientId"/>
+          <xs:enumeration value="otherPatientId"/>
+          <xs:enumeration value="spouseId"/>
+          <xs:enumeration value="motherId"/>
+          <xs:enumeration value="fatherId"/>
+          <xs:enumeration value="childId"/>
+          <xs:enumeration value="relativeId"/>
+          <xs:enumeration value="roommateId"/>
+          <xs:enumeration value="friendId"/>
+          <xs:enumeration value="representativeId"/>
+          <xs:enumeration value="emergencyContactId"/>
+          <xs:enumeration value="coWorkerId"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  
+  <xs:element name="death">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:boolean">
+          <xs:attribute name="date" use="optional" form="qualified" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="socialIdentification" type="xs:string"/>
+  
+  <xs:element name="accountNumber" type="xs:string"/>
+  
+  <xs:element name="phones">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlPh:Phone" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="emailAddresses">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlCm:email" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>      
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="addresses">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlAd:Address" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>      
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="marital" type="xs:string"/>
+  
+  <xs:element name="nationality">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="subtype" form="qualified" use="optional" type="xs:string"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:element name="race">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="raceCode" form="qualified" type="xs:string" use="optional"/>
+          <xs:attribute name="raceCodeId" form="qualified" type="xs:string" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="sex" type="xs:string"/>
+  
+  <xs:element name="birthday" type="xs:date"/>
+  
+  <xs:element name="personName" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlNm:Name" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>  
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 人名表現形式 -->
+<!-- Name XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0">
+  <xs:element name="Name">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:sequence>
+            <xs:element ref="mmlNm:family"/>
+            <xs:element ref="mmlNm:given"/>
+            <xs:element minOccurs="0" ref="mmlNm:middle"/>
+          </xs:sequence>
+          <xs:element ref="mmlNm:fullname"/>
+        </xs:choice>
+        <xs:element minOccurs="0" ref="mmlNm:prefix"/>
+        <xs:element minOccurs="0" ref="mmlNm:degree"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlNm:attlist.Name"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.Name">
+    <xs:attribute name="repCode" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="I"/>
+          <xs:enumeration value="A"/>
+          <xs:enumeration value="P"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="tableId" type="xs:string" form="qualified" default="MML0025"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="degree" type="xs:string"/>
+  <xs:element name="prefix" type="xs:string"/>
+  <xs:element name="fullname" type="xs:string"/>
+  <xs:element name="middle" type="xs:string"/>
+  <xs:element name="given" type="xs:string"/>
+  <xs:element name="family" type="xs:string"/>
+</xs:schema>

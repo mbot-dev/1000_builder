@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 診断履歴情報 -->
+<!-- RegisteredDiagnosisModule XSD Version 1.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0" xmlns:mmlRd="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0">
+  <xs:element name="RegisteredDiagnosisModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="mmlRd:diagnosis"/>
+          <xs:element ref="mmlRd:diagnosisContents"/>
+        </xs:choice>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRd:categories"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRd:startDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRd:endDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRd:outcome"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRd:firstEncounterDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlRd:relatedHealthInsurance"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="diagnosis">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="code" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="system" type="xs:string" use="optional" form="qualified"/>          
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="diagnosisContents">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlRd:dxItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="dxItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlRd:name"/>
+      </xs:sequence>
+    </xs:complexType>   
+  </xs:element>
+ 
+  <xs:element name="name">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="code" type="xs:string" use="optional" form="qualified"/>
+          <xs:attribute name="system" type="xs:string" use="optional" form="qualified"/>       
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="categories">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlRd:category"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="category">
+    <xs:complexType>
+      <xs:attributeGroup ref="mmlRd:attlist.mmlRd.category"/>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:attributeGroup name="attlist.mmlRd.category">
+    <xs:attribute name="tableId" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="MML0012"/>
+          <xs:enumeration value="MML0013"/>
+          <xs:enumeration value="MML0014"/>
+          <xs:enumeration value="MML0015"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+ 
+  <xs:element name="startDate" type="xs:date"/>
+  <xs:element name="endDate" type="xs:date"/>
+  <xs:element name="outcome" type="xs:string"/>
+  <xs:element name="firstEncounterDate" type="xs:string"/>
+  <xs:element name="relatedHealthInsurance">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="uid" type="xs:string" use="optional" form="qualified"/>          
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

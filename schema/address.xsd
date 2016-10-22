@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 住所表現形式 -->
+<!-- Address XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0"
+  xmlns:mmlAd="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0">
+  <xs:element name="Address">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element minOccurs="0" ref="mmlAd:full"/>
+          <xs:sequence>
+            <xs:element minOccurs="0" ref="mmlAd:prefecture"/>
+            <xs:element minOccurs="0" ref="mmlAd:city"/>
+            <xs:element minOccurs="0" ref="mmlAd:town"/>
+            <xs:element minOccurs="0" ref="mmlAd:homeNumber"/>
+          </xs:sequence>
+        </xs:choice>
+        <xs:element minOccurs="0" ref="mmlAd:zip"/>
+        <xs:element minOccurs="0" ref="mmlAd:countryCode"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlAd:attlist.Address"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.Address">
+    <xs:attribute name="repCode" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="A"/>
+          <xs:enumeration value="I"/>
+          <xs:enumeration value="P"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="addressClass" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="current"/>
+          <xs:enumeration value="permanent"/>
+          <xs:enumeration value="mailing"/>
+          <xs:enumeration value="business"/>
+          <xs:enumeration value="office"/>
+          <xs:enumeration value="home"/>
+          <xs:enumeration value="birth"/>
+          <xs:enumeration value="county"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="tableId" default="MML0025" form="qualified" type="xs:string"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="countryCode" type="xs:string"/>
+  <xs:element name="zip" type="xs:string"/>
+  <xs:element name="homeNumber" type="xs:string"/>
+  <xs:element name="town" type="xs:string"/>
+  <xs:element name="city" type="xs:string"/>
+  <xs:element name="prefecture" type="xs:string"/>
+  <xs:element name="full" type="xs:string"/>
+</xs:schema>
+

@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- *************************************************** -->
+<!-- 健康保険情報（日本版） -->
+<!-- HealthInsuranceModule XSD Version 4.0 -->
+<!-- *************************************************** -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1" 
+  xmlns:mmlHi="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1"
+  xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0"
+  xmlns:mmlAd="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0"
+  xmlns:mmlPh="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0"
+  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0">
+  
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" schemaLocation="name.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0" schemaLocation="address.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0" schemaLocation="phone.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd" />
+  
+  <xs:element name="HealthInsuranceModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:insuranceClass"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:insuranceNumber"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:clientId"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:familyClass"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:clientInfo"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:continuedDiseases"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:startDate"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:expiredDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:paymentInRatio"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:paymentOutRatio"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:insuredInfo"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:workInfo"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:publicInsurance"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlHi:attlist.HealthInsuranceModule"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.HealthInsuranceModule">
+    <xs:attribute name="countryType" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="ISL"/>
+          <xs:enumeration value="IRL"/>
+          <xs:enumeration value="AZE"/>
+          <xs:enumeration value="AFG"/>
+          <xs:enumeration value="USA"/>
+          <xs:enumeration value="ASM"/>
+          <xs:enumeration value="ARE"/>
+          <xs:enumeration value="DZA"/>
+          <xs:enumeration value="ARG"/>
+          <xs:enumeration value="ABW"/>
+          <xs:enumeration value="ALB"/>
+          <xs:enumeration value="ARM"/>
+          <xs:enumeration value="AIA"/>
+          <xs:enumeration value="AGO"/>
+          <xs:enumeration value="ATG"/>
+          <xs:enumeration value="AND"/>
+          <xs:enumeration value="YEM"/>
+          <xs:enumeration value="GBR"/>
+          <xs:enumeration value="IOT"/>
+          <xs:enumeration value="ISR"/>
+          <xs:enumeration value="ITA"/>
+          <xs:enumeration value="IRQ"/>
+          <xs:enumeration value="IRN"/>
+          <xs:enumeration value="IND"/>
+          <xs:enumeration value="IDN"/>
+          <xs:enumeration value="UGA"/>
+          <xs:enumeration value="UKR"/>
+          <xs:enumeration value="UZB"/>
+          <xs:enumeration value="URY"/>
+          <xs:enumeration value="ECU"/>
+          <xs:enumeration value="EGY"/>
+          <xs:enumeration value="EST"/>
+          <xs:enumeration value="ETH"/>
+          <xs:enumeration value="ERI"/>
+          <xs:enumeration value="SLV"/>
+          <xs:enumeration value="AUS"/>
+          <xs:enumeration value="AUT"/>
+          <xs:enumeration value="OMN"/>
+          <xs:enumeration value="NLD"/>
+          <xs:enumeration value="ANT"/>
+          <xs:enumeration value="GHA"/>
+          <xs:enumeration value="CPV"/>
+          <xs:enumeration value="GUY"/>
+          <xs:enumeration value="KAZ"/>
+          <xs:enumeration value="QAT"/>
+          <xs:enumeration value="CAN"/>
+          <xs:enumeration value="GAB"/>
+          <xs:enumeration value="CMR"/>
+          <xs:enumeration value="KOR"/>
+          <xs:enumeration value="GMB"/>
+          <xs:enumeration value="KHM"/>
+          <xs:enumeration value="PRK"/>
+          <xs:enumeration value="MNP"/>
+          <xs:enumeration value="GIN"/>
+          <xs:enumeration value="GNB"/>
+          <xs:enumeration value="CYP"/>
+          <xs:enumeration value="CUB"/>
+          <xs:enumeration value="GRC"/>
+          <xs:enumeration value="KIR"/>
+          <xs:enumeration value="KGZ"/>
+          <xs:enumeration value="GTM"/>
+          <xs:enumeration value="GLP"/>
+          <xs:enumeration value="GUM"/>
+          <xs:enumeration value="KWT"/>
+          <xs:enumeration value="COK"/>
+          <xs:enumeration value="GRL"/>
+          <xs:enumeration value="CXR"/>
+          <xs:enumeration value="GEO"/>
+          <xs:enumeration value="GRD"/>
+          <xs:enumeration value="HRV"/>
+          <xs:enumeration value="CYM"/>
+          <xs:enumeration value="KEN"/>
+          <xs:enumeration value="CIV"/>
+          <xs:enumeration value="CCK"/>
+          <xs:enumeration value="CRI"/>
+          <xs:enumeration value="COM"/>
+          <xs:enumeration value="COL"/>
+          <xs:enumeration value="COG"/>
+          <xs:enumeration value="ZAR"/>
+          <xs:enumeration value="SAU"/>
+          <xs:enumeration value="SGS"/>
+          <xs:enumeration value="STP"/>
+          <xs:enumeration value="ZMB"/>
+          <xs:enumeration value="SPM"/>
+          <xs:enumeration value="SMR"/>
+          <xs:enumeration value="SLE"/>
+          <xs:enumeration value="DJI"/>
+          <xs:enumeration value="GIB"/>
+          <xs:enumeration value="JAM"/>
+          <xs:enumeration value="SYR"/>
+          <xs:enumeration value="SGP"/>
+          <xs:enumeration value="ZWE"/>
+          <xs:enumeration value="CHE"/>
+          <xs:enumeration value="SWE"/>
+          <xs:enumeration value="SDN"/>
+          <xs:enumeration value="SJM"/>
+          <xs:enumeration value="ESP"/>
+          <xs:enumeration value="SUR"/>
+          <xs:enumeration value="LKA"/>
+          <xs:enumeration value="SVK"/>
+          <xs:enumeration value="SVN"/>
+          <xs:enumeration value="SWZ"/>
+          <xs:enumeration value="SYC"/>
+          <xs:enumeration value="GNQ"/>
+          <xs:enumeration value="SEN"/>
+          <xs:enumeration value="KNA"/>
+          <xs:enumeration value="VCT"/>
+          <xs:enumeration value="SHN"/>
+          <xs:enumeration value="LCA"/>
+          <xs:enumeration value="SOM"/>
+          <xs:enumeration value="SLB"/>
+          <xs:enumeration value="TCA"/>
+          <xs:enumeration value="THA"/>
+          <xs:enumeration value="TWN"/>
+          <xs:enumeration value="TJK"/>
+          <xs:enumeration value="TZA"/>
+          <xs:enumeration value="CZE"/>
+          <xs:enumeration value="TCD"/>
+          <xs:enumeration value="CAF"/>
+          <xs:enumeration value="CHN"/>
+          <xs:enumeration value="TUN"/>
+          <xs:enumeration value="CHL"/>
+          <xs:enumeration value="TUV"/>
+          <xs:enumeration value="DNK"/>
+          <xs:enumeration value="DEU"/>
+          <xs:enumeration value="TGO"/>
+          <xs:enumeration value="TKL"/>
+          <xs:enumeration value="DMA"/>
+          <xs:enumeration value="DOM"/>
+          <xs:enumeration value="TTO"/>
+          <xs:enumeration value="TKM"/>
+          <xs:enumeration value="TUR"/>
+          <xs:enumeration value="TON"/>
+          <xs:enumeration value="NGA"/>
+          <xs:enumeration value="NRU"/>
+          <xs:enumeration value="NAM"/>
+          <xs:enumeration value="ATA"/>
+          <xs:enumeration value="NIU"/>
+          <xs:enumeration value="NIC"/>
+          <xs:enumeration value="NER"/>
+          <xs:enumeration value="ESH"/>
+          <xs:enumeration value="WSM"/>
+          <xs:enumeration value="JPN"/>
+          <xs:enumeration value="NCL"/>
+          <xs:enumeration value="NZL"/>
+          <xs:enumeration value="NPL"/>
+          <xs:enumeration value="NFK"/>
+          <xs:enumeration value="NOR"/>
+          <xs:enumeration value="VGB"/>
+          <xs:enumeration value="VIR"/>
+          <xs:enumeration value="HMD"/>
+          <xs:enumeration value="BMU"/>
+          <xs:enumeration value="HTI"/>
+          <xs:enumeration value="PAK"/>
+          <xs:enumeration value="VAT"/>
+          <xs:enumeration value="PAN"/>
+          <xs:enumeration value="VUT"/>
+          <xs:enumeration value="BHS"/>
+          <xs:enumeration value="BHR"/>
+          <xs:enumeration value="PNG"/>
+          <xs:enumeration value="PLW"/>
+          <xs:enumeration value="PRY"/>
+          <xs:enumeration value="BRB"/>
+          <xs:enumeration value="HUN"/>
+          <xs:enumeration value="BGD"/>
+          <xs:enumeration value="PCN"/>
+          <xs:enumeration value="TMP"/>
+          <xs:enumeration value="FJI"/>
+          <xs:enumeration value="PHL"/>
+          <xs:enumeration value="FIN"/>
+          <xs:enumeration value="BTN"/>
+          <xs:enumeration value="BVT"/>
+          <xs:enumeration value="PRI"/>
+          <xs:enumeration value="FRO"/>
+          <xs:enumeration value="FLK"/>
+          <xs:enumeration value="BRA"/>
+          <xs:enumeration value="FRA"/>
+          <xs:enumeration value="FXX"/>
+          <xs:enumeration value="GUF"/>
+          <xs:enumeration value="PYF"/>
+          <xs:enumeration value="BGR"/>
+          <xs:enumeration value="BFA"/>
+          <xs:enumeration value="BRN"/>
+          <xs:enumeration value="BDI"/>
+          <xs:enumeration value="VNM"/>
+          <xs:enumeration value="BEN"/>
+          <xs:enumeration value="VEN"/>
+          <xs:enumeration value="BLR"/>
+          <xs:enumeration value="BLZ"/>
+          <xs:enumeration value="PER"/>
+          <xs:enumeration value="BEL"/>
+          <xs:enumeration value="POL"/>
+          <xs:enumeration value="BIH"/>
+          <xs:enumeration value="BWA"/>
+          <xs:enumeration value="BOL"/>
+          <xs:enumeration value="PRT"/>
+          <xs:enumeration value="HKG"/>
+          <xs:enumeration value="HND"/>
+          <xs:enumeration value="MHL"/>
+          <xs:enumeration value="MAC"/>
+          <xs:enumeration value="MKD"/>
+          <xs:enumeration value="MDG"/>
+          <xs:enumeration value="MYT"/>
+          <xs:enumeration value="MWI"/>
+          <xs:enumeration value="MLI"/>
+          <xs:enumeration value="MLT"/>
+          <xs:enumeration value="MTQ"/>
+          <xs:enumeration value="MYS"/>
+          <xs:enumeration value="FSM"/>
+          <xs:enumeration value="ZAF"/>
+          <xs:enumeration value="MMR"/>
+          <xs:enumeration value="MEX"/>
+          <xs:enumeration value="MUS"/>
+          <xs:enumeration value="MRT"/>
+          <xs:enumeration value="MOZ"/>
+          <xs:enumeration value="MCO"/>
+          <xs:enumeration value="MDV"/>
+          <xs:enumeration value="MDA"/>
+          <xs:enumeration value="MAR"/>
+          <xs:enumeration value="MNG"/>
+          <xs:enumeration value="MSR"/>
+          <xs:enumeration value="YUG"/>
+          <xs:enumeration value="JOR"/>
+          <xs:enumeration value="LAO"/>
+          <xs:enumeration value="LVA"/>
+          <xs:enumeration value="LTU"/>
+          <xs:enumeration value="LBY"/>
+          <xs:enumeration value="LIE"/>
+          <xs:enumeration value="LBR"/>
+          <xs:enumeration value="ROM"/>
+          <xs:enumeration value="LUX"/>
+          <xs:enumeration value="RWA"/>
+          <xs:enumeration value="LSO"/>
+          <xs:enumeration value="LBN"/>
+          <xs:enumeration value="REU"/>
+          <xs:enumeration value="RUS"/>
+          <xs:enumeration value="WLF"/>
+          <xs:enumeration value="ATF"/>
+          <xs:enumeration value="UMI"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  
+  <xs:element name="insuranceClass">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlHi:attlist.insuranceClass"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:attributeGroup name="attlist.insuranceClass">
+    <xs:attribute name="ClassCode" use="required" form="qualified"/>
+    <xs:attribute name="tableId" use="required" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="insuranceNumber" type="xs:string"/>
+  
+  <xs:element name="clientId">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlHi:group"/>
+        <xs:element ref="mmlHi:number"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="group" type="xs:string"/>
+  
+  <xs:element name="number" type="xs:string"/>
+  
+  <xs:element name="familyClass" type="xs:string"/>
+  
+  <xs:element name="clientInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="mmlHi:personName"/>
+        <xs:element minOccurs="0" ref="mmlHi:addresses"/>
+        <xs:element minOccurs="0" ref="mmlHi:phones"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="personName">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlNm:Name"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="addresses">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlAd:Address"/>
+      </xs:sequence>      
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="phones">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlPh:Phone"/>
+      </xs:sequence>            
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="continuedDiseases">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="mmlHi:diseases"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="diseases" type="xs:string"/>
+  
+  <xs:element name="startDate" type="xs:string"/>
+  
+  <xs:element name="expiredDate" type="xs:string"/>
+  
+  <xs:element name="paymentInRatio" type="xs:string"/>
+  
+  <xs:element name="paymentOutRatio" type="xs:string"/>
+  
+  <xs:element name="insuredInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:facility"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:addresses"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:phones"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="facility">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlFc:Facility"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="workInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:facility"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:addresses"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:phones"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="publicInsurance">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="mmlHi:publicInsuranceItem"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="publicInsuranceItem">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:providerName"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:provider"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:recipient"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:startDate"/>
+        <xs:element minOccurs="1" maxOccurs="1" ref="mmlHi:expiredDate"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mmlHi:paymentRatio"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="mmlHi:attlist.publicInsuranceItem"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.publicInsuranceItem">
+    <xs:attribute name="priority" use="required" form="qualified"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="providerName" type="xs:string"/>
+  
+  <xs:element name="provider" type="xs:string"/>
+  
+  <xs:element name="recipient" type="xs:string"/>
+  
+  <xs:element name="paymentRatio">
+    <xs:complexType mixed="true">
+      <xs:attributeGroup ref="mmlHi:attlist.paymentRatio"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:attributeGroup name="attlist.paymentRatio">
+    <xs:attribute name="ratioType" form="qualified" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="fix"/>
+          <xs:enumeration value="ratio"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+</xs:schema>

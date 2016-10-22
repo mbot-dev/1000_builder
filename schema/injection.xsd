@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  xmlns:mmlInj="http://www.medxml.net/MML/v4/ContentModule/Injection/1.0"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Injection/1.0">
+
+  <xs:element name="InjectionModule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlInj:medication" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="mmlInj:narcoticPrescriptionLicenseNumber" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:comment" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>    
+  </xs:element>
+  <xs:element name="medication">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="mmlInj:medicine" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlInj:dose" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlInj:doseUnit" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlInj:startDateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:endDateTime" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:instruction" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:route" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:site" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:deliveryMethod" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:batchNo" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="mmlInj:additionalInstruction" minOccurs="0" maxOccurs="1"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="medicine">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="mmlInj:name" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="mmlInj:code" minOccurs="0" maxOccurs="unbounded">
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="name" type="xs:string"/>
+
+  <xs:element name="code">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="system" type="xs:string" use="required" form="qualified"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="dose" type="xs:decimal"/>
+  <xs:element name="doseUnit" type="xs:string"/>
+  <xs:element name="startDateTime" type="xs:dateTime"/>
+  <xs:element name="endDateTime" type="xs:dateTime"/>
+  <xs:element name="instruction" type="xs:string"/>
+  <xs:element name="route" type="xs:string"/>
+  <xs:element name="site" type="xs:string"/>
+  <xs:element name="deliveryMethod" type="xs:string"/>
+  <xs:element name="batchNo" type="xs:integer"/>
+  <xs:element name="additionalInstruction" type="xs:string"/>
+  <xs:element name="narcoticPrescriptionLicenseNumber" type="xs:string"/>
+  <xs:element name="comment" type="xs:string"/>
+  </xs:schema>
