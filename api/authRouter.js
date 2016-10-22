@@ -3,7 +3,7 @@
 const express = require('express');
 const config = require('config');
 const uuid = require('node-uuid');
-const logger = require('../log/logger');
+const logger = require('../logger/logger');
 const jweSimple = require('../api/jweSimple');
 
 const router = express.Router();

@@ -9,6 +9,6 @@
       "expires": 7200
   },
   "mmlOutput": {
-      "path": "mml-out"
+      "path": "output/mml-out"
   }
 }

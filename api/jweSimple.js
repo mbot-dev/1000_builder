@@ -1,7 +1,7 @@
 'use strict';
 
 var crypto = require('crypto');
-const logger = require('../log/logger');
+const logger = require('../logger/logger');
 
 // encrypt/decrypt functions
 module.exports = {

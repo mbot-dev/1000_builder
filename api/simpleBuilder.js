@@ -3,7 +3,7 @@
 const uuid = require('node-uuid');
 const utils = require('../lib/utils');
 const mmlBuilder = require('../lib/mmlBuilder');
-const logger = require('../log/logger');
+const logger = require('../logger/logger');
 const moduleNames = {
     patientInfo: 'mmlPi',
     healthInsurance: 'mmlHi',
