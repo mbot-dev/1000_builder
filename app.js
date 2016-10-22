@@ -13,7 +13,7 @@ const simpleRouter = require('./api/simpleRouter');
 
 const app = express();
 (function (param) {
-	if (process.env.NODE_ENV) {
+	if (process.env.VCAP_APPLICATION) {
 		param.enable('trust proxy');
 		param.use ((req, res, next) => {
 			if (req.secure) {
@@ -29,7 +29,7 @@ app.use(helmet.contentSecurityPolicy({
 	directives: {
 		defaultSrc: ["'self'"],
 		scriptSrc: ["'self'", "'unsafe-inline'"],
-		styleSrc: ["'self'"],
+		styleSrc: ["'self'", 'www.w3schools.com'],
 		imgSrc: ["'self'"]
 	}
 }));

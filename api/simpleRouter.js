@@ -96,6 +96,7 @@ var respond = function (req, res) {
     });
 };
 
-router.post('/:contentType', [generateXSDJson, generateMml, publish, respond]);
+// router.post('/:contentType', [generateXSDJson, generateMml, publish, respond]);
+router.post('/:contentType', [generateXSDJson, generateMml, respond]);
 
 module.exports = router;
