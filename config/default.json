@@ -9,6 +9,6 @@
       "expires": 7200
   },
   "mmlOutput": {
-      "path": "/Users/kazushi/Desktop/mml-out"
+      "path": "mml-out"
   }
 }
