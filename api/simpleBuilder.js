@@ -30,7 +30,7 @@ module.exports = {
         return moduleNames[contentType];
     },
 
-    hrefWith1000: function (docId, index, href) {
+    createHREF: function (docId, index, href) {
         var arr = [];
         arr.push(docId);
         arr.push('_');
@@ -40,7 +40,7 @@ module.exports = {
         return arr.join('');
     },
 
-    buildNoBase64ExtRef: function (src) {
+    buildExtRefWithoutBase64: function (src) {
         var copyExt = {
             attr: {
                 href: src.href
@@ -1052,7 +1052,7 @@ module.exports = {
             }
         }
 
-        // 既往歴 freeNotes のみ
+        // 既往歴 freeNotes
         if (simpleFirstClinic.hasOwnProperty('pastHistory') &&
                 simpleFirstClinic.pastHistory.hasOwnProperty('freeNotes')) {
             result.pastHistory = {
@@ -1109,11 +1109,11 @@ module.exports = {
             simpleProgressCource.extRef.forEach((entry) => {
 
                 // entry.href = docId_index.file's ext
-                newHREF = this.hrefWith1000(docId, index++, entry.href);
+                newHREF = this.createHREF(docId, index++, entry.href);
                 entry.href = newHREF;
 
                 // 1. base64 なし => resul.extRef へ
-                result.extRef.push(this.buildNoBase64ExtRef(entry));
+                result.extRef.push(this.buildExtRefWithoutBase64(entry));
 
                 // 2. base64あり => docInfo.extRefs にまとめる
                 docInfo.extRefs.push(this.buildExtRef(entry));
@@ -1324,12 +1324,12 @@ module.exports = {
         if (simpleSurgery.hasOwnProperty('referenceInfo')) {
             // logger.info(JSON.stringify(simpleSurgery.referenceInfo, null, 4));
             // e.href
-            var newHREF = this.hrefWith1000(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
+            var newHREF = this.createHREF(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
             simpleSurgery.referenceInfo.href = newHREF;
             logger.info(newHREF);
 
             // No base64
-            result.referenceInfo = this.buildNoBase64ExtRef(simpleSurgery.referenceInfo);
+            result.referenceInfo = this.buildExtRefWithoutBase64(simpleSurgery.referenceInfo);
 
             // With base64
             docInfo.extRefs.push(this.buildExtRef(simpleSurgery.referenceInfo));
@@ -1653,9 +1653,9 @@ module.exports = {
             if (simpleSummary.physicalExam.hasOwnProperty('extRef')) {
                 result.physicalExam.extRef = [];
                 simpleSummary.physicalExam.extRef.forEach((e) => {
-                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.physicalExam.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.physicalExam.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -1687,9 +1687,9 @@ module.exports = {
                 if (entry.hasOwnProperty('extRef')) {
                     clinicalRecord.extRef = [];
                     entry.extRef.forEach((e) => {
-                        newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                        newHREF = this.createHREF(docId, refIndex++, e.href);
                         e.href = newHREF;
-                        clinicalRecord.extRef.push(this.buildNoBase64ExtRef(e));
+                        clinicalRecord.extRef.push(this.buildExtRefWithoutBase64(e));
                         docInfo.extRefs.push(this.buildExtRef(e));
                     });
                 }
@@ -1707,9 +1707,9 @@ module.exports = {
             if (simpleSummary.dischargeFindings.hasOwnProperty('extRef')) {
                 result.dischargeFindings.extRef = [];
                 simpleSummary.dischargeFindings.extRef.forEach((e) => {
-                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.dischargeFindings.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.dischargeFindings.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -1730,9 +1730,9 @@ module.exports = {
             if (simpleSummary.medication.hasOwnProperty('extRef')) {
                 result.medication.extRef = [];
                 simpleSummary.medication.extRef.forEach((e) => {
-                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.medication.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.medication.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -1767,9 +1767,9 @@ module.exports = {
                 if (entry.hasOwnProperty('extRef')) {
                     tr.extRef = [];
                     entry.extRef.forEach((e) => {
-                        newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                        newHREF = this.createHREF(docId, refIndex++, e.href);
                         e.href = newHREF;
-                        tr.extRef.push(this.buildNoBase64ExtRef(e));
+                        tr.extRef.push(this.buildExtRefWithoutBase64(e));
                         docInfo.extRefs.push(this.buildExtRef(e));
                     });
                 }
@@ -1786,9 +1786,9 @@ module.exports = {
             if (simpleSummary.plan.hasOwnProperty('extRef')) {
                 result.plan.extRef = [];
                 simpleSummary.plan.extRef.forEach((e) => {
-                    newHREF = this.hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.plan.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.plan.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -1820,7 +1820,7 @@ module.exports = {
                 codeSystem: 'YBS_2016',                         // 検査コード体系名
                 facilityName: simpleCreator.facilityName,       // 検査依頼施設
                 facilityId: simpleCreator.facilityId,           // 検査依頼施設
-                facilityIdType: 'JMARI',                        // 検査依頼施設
+                facilityIdType: 'OID',                          // 検査依頼施設
                 laboratory: {
                     id: '303030',                                // 検査実施会社内での Id
                     idType: 'facility',                          // 施設で付番されているIdであることを示す
@@ -1857,6 +1857,10 @@ module.exports = {
         var numValue = false;               // 数値結果かどうか ToDo..
         var itemMemo = {};                  // テスト項目のメモ
 
+        // コード体系 千年でラボセンターコードを発番?
+        var facilityCodeId = context.hasOwnProperty('facilityIdType') ? context.facilityIdType : 'OID';
+        var centerCodeId = context.laboratory.hasOwnProperty('facilityIdType') ? context.laboratory.facilityIdType : 'OID';
+
         var testModule = {
             information: {
                 attr: {
@@ -1873,17 +1877,17 @@ module.exports = {
                     }
                 },
                 facility: {
-                    value: context.facilityName,                       // 依頼施設
+                    value: context.facilityName,                        // 依頼施設
                     attr: {
                         facilityCode: context.facilityId,               // 依頼施設コード
-                        facilityCodeId: context.facilityIdType          // 用いたコード体系の名称を記載
+                        facilityCodeId: facilityCodeId                  // 用いたコード体系の名称を記載
                     }
                 },
                 laboratoryCenter: {
                     value: context.laboratory.facilityName,             // 検査実施施設
                     attr: {
-                        centerCode: context.laboratory.facilityId,       // ユーザー指定
-                        centerCodeId: context.laboratory.facilityIdType  // 用いたテーブル名を入力
+                        centerCode: context.laboratory.facilityId,      // ユーザー指定
+                        centerCodeId: centerCodeId                      // 用いたテーブル名を入力
                     }
                 }
             },
@@ -2229,12 +2233,12 @@ module.exports = {
                 var newHREF = null;
                 body.testNotes.extRef.forEach((entry) => {
                     // correct entry.href
-                    newHREF = this.hrefWith1000(docId, index++, entry.href);
+                    newHREF = this.createHREF(docId, index++, entry.href);
                     entry.href = newHREF;
                     // logger.info(newHREF);
 
                     // 1. base64 なし => resul.extRef へ
-                    reportBody.testNotes.extRef.push(this.buildNoBase64ExtRef(entry));
+                    reportBody.testNotes.extRef.push(this.buildExtRefWithoutBase64(entry));
 
                     // 2. base64あり => docInfo.extRefs にまとめる
                     var tmp = this.buildExtRef(entry);
@@ -2370,9 +2374,9 @@ module.exports = {
                 result.pastHistory.extRef = [];
 
                 simpleReferral.pastHistory.extRef.forEach((e) => {
-                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.pastHistory.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.pastHistory.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -2386,9 +2390,9 @@ module.exports = {
             if (simpleReferral.familyHistory.hasOwnProperty('extRef')) {
                 result.familyHistory.extRef = [];
                 simpleReferral.familyHistory.extRef.forEach((e) => {
-                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.familyHistory.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.familyHistory.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -2402,9 +2406,9 @@ module.exports = {
             if (simpleReferral.presentIllness.hasOwnProperty('extRef')) {
                 result.presentIllness.extRef = [];
                 simpleReferral.presentIllness.extRef.forEach((e) => {
-                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.presentIllness.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.presentIllness.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -2418,9 +2422,9 @@ module.exports = {
             if (simpleReferral.testResults.hasOwnProperty('extRef')) {
                 result.testResults.extRef = [];
                 simpleReferral.testResults.extRef.forEach((e) => {
-                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.testResults.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.testResults.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }
@@ -2464,9 +2468,9 @@ module.exports = {
             if (simpleReferral.remarks.hasOwnProperty('extRef')) {
                 result.remarks.extRef = [];
                 simpleReferral.remarks.extRef.forEach((e) => {
-                    newHREF = hrefWith1000(docId, refIndex++, e.href);
+                    newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.remarks.extRef.push(this.buildNoBase64ExtRef(e));
+                    result.remarks.extRef.push(this.buildExtRefWithoutBase64(e));
                     docInfo.extRefs.push(this.buildExtRef(e));
                 });
             }

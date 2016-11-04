@@ -9,11 +9,29 @@
     <link type="text/css" rel="stylesheet" href="css/simple.css">
     <script type="text/javascript" src="js/uuid.js"></script>
     <script type="text/javascript" src="js/1000-utils.js"></script>
+    <script type="text/javascript" src="js/sample-00-common.js"></script>
+    <script type="text/javascript" src="js/sample-01-patientInfo.js"></script>
+    <script type="text/javascript" src="js/sample-02-healthInsurance.js"></script>
+    <script type="text/javascript" src="js/sample-03-registeredDiagnosis.js"></script>
+    <script type="text/javascript" src="js/sample-04-lifestyle.js"></script>
+    <script type="text/javascript" src="js/sample-05-baseClinic.js"></script>
+    <script type="text/javascript" src="js/sample-06-firstClinic.js"></script>
+    <!-- script type="text/javascript" src="js/sample-07-progressCourse.js"></script -->
+    <script type="text/javascript" src="js/sample-08-surgery.js"></script>
+    <script type="text/javascript" src="js/sample-09-summary.js"></script>
+    <script type="text/javascript" src="js/sample-10-test.js"></script>
+    <script type="text/javascript" src="js/sample-11-report.js"></script>
+    <!-- script type="text/javascript" src="js/sample-12-referral.js"></script -->
+    <script type="text/javascript" src="js/sample-13-vitalSign.js"></script>
+    <!-- script type="text/javascript" src="js/sample-14-flowSheet.js"></script -->
+    <script type="text/javascript" src="js/sample-15-prescription.js"></script>
+    <script type="text/javascript" src="js/sample-16-injection.js"></script>
+    <!-- script type="text/javascript" src="js/sample-17-hemodialysis.js"></script -->
     <script type="text/javascript" src="js/index.js"></script>
 </head>
 <body onload="startApp();">
     <header class="w3-container w3-blue">
-        <h2 class="w3-center">千年ビルダー</h2><a href="https://github.com/mbot-dev/1000_builder/wiki/simple"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
+        <h2 class="w3-center">千年ビルダー</h2><a href="https://github.com/mbot-dev/1000_builder/wiki/home"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
     </header>
     <div class="w3-container w3-margin">
         <div class="w3-container">
@@ -28,11 +46,19 @@
         <div class="w3-row-padding">
             <p class="w3-half">API:
                 <select onchange="changeModule(this);">
-                    <option value='showPrescription'>処 方</option>
-                    <option value='showInjection'>注 射</option>
-                    <option value='showDiagnosis'>病 名</option>
-                    <option value='showLabTest'>検 査</option>
-                    <option value='showVitalSign'>バイタルサイン</option>
+                    <option value='prescription'>処方せん</option>
+                    <option value='registeredDiagnosis'>診断履歴</option>
+                    <option value='test'>検歴情報</option>
+                    <option value='report'>報告書</option>
+                    <option value='patientInfo'>患者情報</option>
+                    <option value='healthInsurance'>健康保険</option>
+                    <option value='lifestyle'>生活習慣</option>
+                    <option value='baseClinic'>基礎的診療情報</option>
+                    <option value='firstClinic'>初診時特有情報</option>
+                    <option value='surgery'>手術記録</option>
+                    <option value='summary'>臨床サマリ</option>
+                    <option value='injection'>注射記録</option>
+                    <option value='vitalSign'>バイタルサイン</option>
                 </select>
             </p>
             <div class="w3-half">
@@ -53,7 +79,7 @@
             <h4>APIを使用するメリット</h4>
             <uL>
                 <li>MMLを直接サポートする場合に比べ、開発の時間が大幅に短縮されます。</li>
-                <li>千年カルテに固有なデータ設定が隠蔽されているため、医療情報そのものに集中できます。</li>
+                <li>千年カルテに固有なデータ設定が隠蔽されているため、医療情報自体に集中できます。</li>
                 <li>MML/openEHR の理解に役立ちます。</li>
             </ul>
             <h4>千年ビルダーの特長</h4>
@@ -66,7 +92,7 @@
             <uL>
                 <li>APIのスタイルはREST、データ形式はJSONです。</li>
                 <li>プロジェクトに参加するとこれと同等のサーバーが SaaS で提供されます。</li>
-                <li><a href="https://github.com/mbot-dev/1000_builder/wiki/simple">Wiki</a> に仕様及びガイドがあります。</li>
+                <li><a href="https://github.com/mbot-dev/1000_builder/wiki/home">Wiki</a> に仕様及びガイドがあります。</li>
                 <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
                 <li>MML インスタンスの<a href="https://1000-validator.au-syd.mybluemix.net/">バリデーション・チェックはこちら</a>で行うことができます。</li>
             </ul>
