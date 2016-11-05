@@ -44,10 +44,7 @@ var postVitalSign = function (callback) {
 
     // POST
     post('vitalsign', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleVitalSign, null);
-        } else {
-            callback(null, simpleVitalSign, mml);
-        }
+        // コールバック
+        callback(err, simpleVitalSign, mml);
     });
 };

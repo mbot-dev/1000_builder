@@ -51,30 +51,35 @@ var showAPI = function (moduleName, apiName, apiData) {
 
 // コールバックされたMMLを表示する
 var showMML = function (mml) {
-    // 結果はMML(XML) なので 'pretty print する
+    // 結果はMML(XML) なので pretty print する
     document.getElementById('mml_box').innerHTML = prettyXml(mml);
 };
 
 // APIを起動する
 var invokeAPI = function (contentType) {
 
+    // contentTypeから名称とAPIデータ形式を得る
     var spec = apiSpec[contentType];
+
+    // simplePrescription => postPrescription 等の関数名に変更する
     var funcName = 'post' + spec[1].substring('simple'.length);
 
-    window[funcName](
-        function(err, simple, mml) {
-            if (err) {
-                alert(err);
-            } else {
-                showAPI(spec[0], spec[1], simple);
-                showMML(mml);
-            }
+    // Applyする
+    window[funcName](function (err, simple, mml) {
+        if (err) {
+            alert(err);
+        } else {
+            // APIデータ形式を表示する
+            showAPI(spec[0], spec[1], simple);
+            // 生成されたMMLを表示する
+            showMML(mml);
         }
-    );
+    });
 };
 
 // selectionが変更された
 var changeModule = function (selection) {
+    // 選択されたAPIを起動する
     invokeAPI(selection.value);
 };
 
@@ -82,8 +87,9 @@ var changeModule = function (selection) {
 var startApp = function () {
     // Access Tokenを取得し処方せんサンプルをpostする
     getAccessToken(function(err) {
-        if (!err) {
-            // saveToken(token);
+        if (err) {
+            alert(err);
+        } else {
             invokeAPI('prescription');
         }
     });

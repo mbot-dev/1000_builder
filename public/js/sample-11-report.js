@@ -88,10 +88,7 @@ var postReport = function (callback) {
 
     // POST
     post('report', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleReport, null);
-        } else {
-            callback(null, simpleReport, mml);
-        }
+        // コールバック
+        callback(err, simpleReport, mml);
     });
 };

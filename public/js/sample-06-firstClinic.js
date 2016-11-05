@@ -93,10 +93,7 @@ var postFirstClinic = function (callback){                              // 初�
 
     // POST
     post('firstClinic', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleFirstClinic, null);
-        } else {
-            callback(null, simpleFirstClinic, mml);
-        }
+        // コールバック
+        callback(err, simpleFirstClinic, mml);
     });
 };

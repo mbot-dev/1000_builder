@@ -4,8 +4,7 @@
 var appCtx = {
     access_token: '',           // アクセストークン
     expires_in: 0,              // トークンの有効期間（秒）このデモでは使用しない
-    test_results: [],           // デモ固有で検査結果を格納する配列
-    queue: []                   // 送信できなかったSimpleCompositonを保存するQueue
+    test_results: []            // デモ固有で検査結果を格納する配列
 };
 
 //------------------------------------------------------------------
@@ -24,7 +23,7 @@ var saveToken = function (token) {
 //------------------------------------------------------------------
 var getAccessToken = function (callback) {
 
-    // HTTPクライアント
+    // JavaScript HTTPクライアント
     var xhr = new XMLHttpRequest();
 
     // プロジェクトから支給された consumer key（デモ用）
@@ -40,6 +39,7 @@ var getAccessToken = function (callback) {
     xhr.open('POST', '/mml/api/v1/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする
+    // 'Basic' + 半角スペース + base64 で連結する
     xhr.setRequestHeader('Authorization', 'Basic ' + base64);
 
     // Content type は application/x-www-form-urlencoded
@@ -55,18 +55,18 @@ var getAccessToken = function (callback) {
 
             // レスポンスを調べる
             if (xhr.status === 200 ) {
-                // HTTP Status が 200 で正常取得できた場合
+                // HTTP Status が 200 => 正常取得できた場合
                 // レスポンステキストをパースしてJSONに変換する
-                // 結果は {token_type: 'bearer', access_token: 'token', expires_in: ''有効期間秒''}
+                // 結果は {token_type: 'bearer', access_token: 発行されたトークン, expires_in: '有効期間秒}
                 var parsed = JSON.parse(xhr.responseText);
+                // token_type が 'bearer' であることを確認
                 if (parsed.token_type === 'bearer' && parsed.hasOwnProperty('access_token')) {
-                    // token_type が 'bearer' であることを確認
-                    // tokenを保存してコールバック
+                    // tokenを保存
                     saveToken(parsed);
+                    // コールバック null = No error
                     callback(null);
                 } else {
                     var e = new Error('Unexpected server response');
-                    // alert(e);
                     callback(e);
                 }
             } else {
@@ -89,16 +89,17 @@ var getAccessToken = function (callback) {
 //------------------------------------------------------------------
 var post = function (contentType, simpleComposition, callback) {
 
-    // HTTPクライアント
+    // JavaScript HTTPクライアント
     var xhr = new XMLHttpRequest();
 
     // ポスト先 /mml/api/v1/contentType
     xhr.open('POST', '/mml/api/v1/' + contentType, true);
 
     // Authorizationヘッダーを Bearer access_token にセットする
+    // 'Bearer' + 半角スペース + アクセストークン で連結する
     xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
 
-    // contentType = json
+    // contentType = application/json
     xhr.setRequestHeader('Content-type', 'application/json');
 
     // Event listener XMLHttpRequest固有
@@ -110,6 +111,7 @@ var post = function (contentType, simpleComposition, callback) {
             if (xhr.status > 199 && xhr.status < 300) {
                 // response = 200, responseからJSONを生成する
                 var parsed = JSON.parse(xhr.responseText);
+                // 生成されたMMLをコールバックする
                 callback(null, parsed.mml);
 
             } else if (xhr.status > 399 && xhr.status < 500) {
@@ -118,14 +120,17 @@ var post = function (contentType, simpleComposition, callback) {
                 // Authorization に Bearer token がセットされていない
                 // Tokenを再取得する
                 getAccessToken(function (err) {
-                    if (!err) {
-                        // 再帰する
+                    if (err) {
+                        // トークンの取得に失敗
+                        callback(err, null);
+                    } else {
+                        // 再帰する => 再度ポスト
                         post(contentType, simpleComposition, callback);
                     }
                 });
             } else {
                 // simpleCompositionに誤りがある
-                // alert(new Error(xhr.status));
+                // status = 500
                 callback(new Error(xhr.status), null);
             }
         }
@@ -147,8 +152,6 @@ var simplePatient = {
 var simpleCreator = {
     id: '201605',                                      // 医師のID
     kanjiName: '青山 慶二',                             // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
-    prefix: 'Professor',                               // 肩書き等（オプション）
-    degree: 'MD/PhD',                                  // 学位（オプション）
     facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設ID プロジェクトから指定される
     facilityName: 'シルク内科',                          // 施設名
     facilityZipCode: '231-0023',                       // 施設郵便番号

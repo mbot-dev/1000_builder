@@ -115,10 +115,7 @@ var postSurgery = function (callback) {                     // 手術記録情�
 
     // POST
     post('surgery', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleSurgery, null);
-        } else {
-            callback(null, simpleSurgery, mml);
-        }
+        // コールバック
+        callback(err, simpleSurgery, mml);
     });
 };

@@ -62,10 +62,7 @@ var postPrescription = function (callback) {
 
     // POST
     post('prescription', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simplePrescription, null);
-        } else {
-            callback(null, simplePrescription, mml);
-        }
+        // コールバック
+        callback(err, simplePrescription, mml);
     });
 };

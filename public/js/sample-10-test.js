@@ -118,11 +118,8 @@ var postTest = function (callback) {
 
         // POST
         post('test', simpleComposition, function (err, mml) {
-            if (err) {
-                callback(err, simpleTest, null);
-            } else {
-                callback(null, simpleTest, mml);
-            }
+            // コールバック
+            callback(err, simpleTest, mml);
         });
     });
 };

@@ -77,10 +77,7 @@ var postInjection = function (callback) {
 
     // POST
     post('injection', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleInjection, null);
-        } else {
-            callback(null, simpleInjection, mml);
-        }
+        // コールバック
+        callback(err, simpleInjection, mml);
     });
 };

@@ -158,10 +158,7 @@ var postSummary = function (callback) {                        // 臨床経過�
 
     // POST
     post('summary', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleSummary, null);
-        } else {
-            callback(null, simpleSummary, mml);
-        }
+        // コールバック
+        callback(err, simpleSummary, mml);
     });
 };

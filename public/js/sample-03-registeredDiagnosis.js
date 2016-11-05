@@ -35,10 +35,7 @@ var postRegisteredDiagnosis = function (callback) {
 
     // POST
     post('registeredDiagnosis', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleRegisteredDignosis, null);
-        } else {
-            callback(null, simpleRegisteredDignosis, mml);
-        }
+        // コールバック
+        callback(err, simpleRegisteredDignosis, mml);
     });
 };

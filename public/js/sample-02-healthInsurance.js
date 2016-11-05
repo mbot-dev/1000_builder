@@ -48,10 +48,7 @@ var postHealthInsurance = function (callback) {
 
     // POST
     post('healthInsurance', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleHealthInsurance, null);
-        } else {
-            callback(null, simpleHealthInsurance, mml);
-        }
+        // コールバック
+        callback(err, simpleHealthInsurance, mml);
     });
 };

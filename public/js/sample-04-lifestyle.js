@@ -25,10 +25,7 @@ var postLifestyle = function (callback) {
 
     // POST
     post('lifestyle', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleLifestyle, null);
-        } else {
-            callback(null, simpleLifestyle, mml);
-        }
+        // コールバック
+        callback(err, simpleLifestyle, mml);
     });
 };

@@ -34,10 +34,7 @@ var postPatientInfo = function (callback) {
 
     // POST
     post('patientInfo', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simplePatientInfo, null);
-        } else {
-            callback(null, simplePatientInfo, mml);
-        }
+        // コールバック
+        callback(err, simplePatientInfo, mml);
     });
 };

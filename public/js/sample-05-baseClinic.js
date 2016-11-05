@@ -39,10 +39,7 @@ var postBaseClinic = function (callback) {
 
     // POST
     post('baseClinic', simpleComposition, function (err, mml) {
-        if (err) {
-            callback(err, simpleBaseClinic, null);
-        } else {
-            callback(null, simpleBaseClinic, mml);
-        }
+        // コールバック
+        callback(err, simpleBaseClinic, mml);
     });
 };

@@ -46,13 +46,13 @@ module.exports = {
                 href: src.href
             }
         };
-        if (src.hasOwnProperty('contentType')) {
+        if (utils.propertyIsNotNull(src, 'contentType')) {
             copyExt.attr.contentType = src.contentType;
         }
-        if (src.hasOwnProperty('medicalRole')) {
+        if (utils.propertyIsNotNull(src, 'medicalRole')) {
             copyExt.attr.medicalRole = src.medicalRole;
         }
-        if (src.hasOwnProperty('title')) {
+        if (utils.propertyIsNotNull(src, 'title')) {
             copyExt.attr.title = src.title;
         }
         return copyExt;
@@ -73,17 +73,17 @@ module.exports = {
                 href: e.href
             }
         };
-        if (e.hasOwnProperty('contentType')) {
+        if (utils.propertyIsNotNull(e, 'contentType')) {
             ref.attr.contentType = e.contentType;
         }
-        if (e.hasOwnProperty('medicalRole')) {
+        if (utils.propertyIsNotNull(e, 'medicalRole')) {
             ref.attr.medicalRole = e.medicalRole;
         }
-        if (e.hasOwnProperty('title')) {
+        if (utils.propertyIsNotNull(e, 'title')) {
             ref.attr.title = e.title;
         }
         // base64 ここは中間オブジェクト
-        if (e.hasOwnProperty('base64')) {
+        if (utils.propertyIsNotNull(e, 'base64')) {
             ref.attr.base64 = e.base64;
         }
         return ref;
@@ -225,25 +225,25 @@ module.exports = {
 
         // 作成者氏名
         var creatorNames = [];
-        if (person.hasOwnProperty('kanjiName')) {
+        if (utils.propertyIsNotNull(person, 'kanjiName')) {
             creatorNames.push(this.buildPersonNameWithKanji(person.kanjiName));
         }
-        if (person.hasOwnProperty('kanaName')) {
+        if (utils.propertyIsNotNull(person, 'kanaName')) {
             creatorNames.push(this.buildPersonNameWithKana(person.kanaName));
         }
-        if (person.hasOwnProperty('romanName')) {
+        if (utils.propertyIsNotNull(person, 'romanName')) {
             creatorNames.push(this.buildPersonNameWithRoman(person.romanName));
         }
 
         // 肩書きなど
-        if (person.hasOwnProperty('prefix')) {
+        if (utils.propertyIsNotNull(person, 'prefix')) {
             creatorNames.forEach((entry) => {
                 entry.prefix = person.prefix;
             });
         }
 
         // 学位
-        if (person.hasOwnProperty('degree')) {
+        if (utils.propertyIsNotNull(person, 'degree')) {
             creatorNames.forEach((entry) => {
                 entry.degree = person.degree;
             });
@@ -268,13 +268,13 @@ module.exports = {
         };
 
         // 診療科情報
-        if (person.hasOwnProperty('departmentId')) {
+        if (utils.propertyIsNotNull(person, 'departmentId')) {
             var department = this.buildDepartment(person.departmentId, person.departmentName);
             personalizedInfo.Department = department;
         }
 
         // 電子メールもセット可能
-        if (person.hasOwnProperty('email')) {
+        if (utils.propertyIsNotNull(person, 'email')) {
             personalizedInfo.emailAddresses = [person.email];
         }
 
@@ -461,7 +461,7 @@ module.exports = {
         var docUUID = arr.join('_');
 
         // title
-        var title = metaInfo.hasOwnProperty('title') ? metaInfo.title : metaInfo.contentModuleType;
+        var title = utils.propertyIsNotNull(metaInfo, 'title') ? metaInfo.title : metaInfo.contentModuleType;
 
         // 対象
         var docInfo = {
@@ -495,7 +495,7 @@ module.exports = {
         };
 
         // groupId
-        if (metaInfo.hasOwnProperty('groupId')) {
+        if (utils.propertyIsNotNull(metaInfo, 'groupId')) {
             var group = {
                 value: metaInfo.groupId,
                 attr: {
@@ -507,8 +507,8 @@ module.exports = {
 
         // 修正版かどうか -> parentUUID && parentConfirmDate
         // 千年では使用しない
-        if (metaInfo.hasOwnProperty('parentUUID') &&
-            metaInfo.hasOwnProperty('parentConfirmDate')) {
+        if (utils.propertyIsNotNull(metaInfo, 'parentUUID') &&
+            utils.propertyIsNotNull(metaInfo, 'parentConfirmDate')) {
 
             var parentId = {
                 value: metaInfo.parentUUID,                    // 元の版のUUID
@@ -570,49 +570,48 @@ module.exports = {
         };
 
         // 漢字氏名
-        if (simplePatient.hasOwnProperty('kanjiName')) {
+        if (utils.propertyIsNotNull(simplePatient, 'kanjiName')) {
             patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.kanjiName));
         }
         // かな/カナ氏名
-        if (simplePatient.hasOwnProperty('kanaName')) {
+        if (utils.propertyIsNotNull(simplePatient, 'kanaName')) {
             patientModule.personName.push(this.buildPersonNameWithKana(simplePatient.kanaName));
         }
         // ローマ字氏名
-        if (simplePatient.hasOwnProperty('romanName')) {
+        if (utils.propertyIsNotNull(simplePatient, 'romanName')) {
             patientModule.personName.push(this.buildPersonNameWithRoman(simplePatient.romanName));
         }
 
         // 国籍
-        if (simplePatient.hasOwnProperty('nationality')) {
+        if (utils.propertyIsNotNull(simplePatient, 'nationality')) {
             patientModule.nationality = {value: simplePatient.nationality};
         }
 
         // 婚姻状況
-        if (simplePatient.hasOwnProperty('maritalStatus')) {
+        if (utils.propertyIsNotNull(simplePatient, 'maritalStatus')) {
             patientModule.maritalStatus = simplePatient.maritalStatus;
         }
 
         // 患者住所
-        if (simplePatient.hasOwnProperty('address')) {
+        if (utils.propertyIsNotNull(simplePatient, 'address')) {
             patientModule.addresses = [];
             patientModule.addresses.push(this.buildHomeAddress(simplePatient.postalCode, simplePatient.address));
         }
 
         // 患者電子メールアドレス
-        if (simplePatient.hasOwnProperty('email')) {
+        if (utils.propertyIsNotNull(simplePatient, 'email')) {
             patientModule.emailAddresses = [simplePatient.email];
         }
 
         // 患者電話自宅番号
-        if (simplePatient.hasOwnProperty('telephone') ||
-        simplePatient.hasOwnProperty('mobile')) {
+        if (utils.propertyIsNotNull(simplePatient, 'telephone') || utils.propertyIsNotNull(simplePatient, 'mobile')) {
 
             patientModule.phones = [];
 
-            if (simplePatient.hasOwnProperty('telephone')) {
+            if (utils.propertyIsNotNull(simplePatient, 'telephone')) {
                 patientModule.phones.push(this.buildTelephone(simplePatient.telephone));
             }
-            if (simplePatient.hasOwnProperty('mobile')) {
+            if (utils.propertyIsNotNull(simplePatient, 'mobile')) {
                 patientModule.phones.push(this.buildMobile(simplePatient.mobile));
             }
         }
@@ -714,7 +713,7 @@ module.exports = {
         var result = {};
 
         // countryType
-        var countryType = (simpleHealthInsurance.hasOwnProperty('countryType'))
+        var countryType = (utils.propertyIsNotNull(simpleHealthInsurance, 'countryType'))
             ? simpleHealthInsurance.countryType
             : 'JPN';
         result.attr = {
@@ -749,17 +748,17 @@ module.exports = {
         result.expiredDate = simpleHealthInsurance.expiredDate;
 
         // paymentInRatio
-        if (simpleHealthInsurance.hasOwnProperty('paymentInRatio')) {
+        if (utils.propertyIsNotNull(simpleHealthInsurance, 'paymentInRatio')) {
             result.paymentInRatio = simpleHealthInsurance.paymentInRatio;
         }
 
         // paymentOutRatio
-        if (simpleHealthInsurance.hasOwnProperty('paymentOutRatio')) {
+        if (utils.propertyIsNotNull(simpleHealthInsurance, 'paymentOutRatio')) {
             result.paymentOutRatio = simpleHealthInsurance.paymentOutRatio;
         }
 
         // publicInsurance
-        if (simpleHealthInsurance.hasOwnProperty('publicInsurance')) {
+        if (utils.propertyIsNotNull(simpleHealthInsurance, 'publicInsurance')) {
             result.publicInsurance = [];
             simpleHealthInsurance.publicInsurance.forEach((entry) => {
                 var it = {
@@ -772,10 +771,10 @@ module.exports = {
                     expiredDate: entry.expiredDate
                 };
 
-                if (entry.hasOwnProperty('providerName')) {
+                if (utils.propertyIsNotNull(entry, 'providerName')) {
                     it.providerName = entry.providerName;
                 }
-                if (entry.hasOwnProperty('paymentRatio') && entry.hasOwnProperty('paymentRatioType')) {
+                if (utils.propertyIsNotNull(entry, 'paymentRatio') && utils.propertyIsNotNull(entry, 'paymentRatioType')) {
                     it.paymentRatio = {
                         value: entry.paymentRatio,                  // 負担率または負担金
                         attr: {
@@ -820,7 +819,7 @@ module.exports = {
         };
 
         // カテゴリー
-        if (simpleDiagnosis.hasOwnProperty('category')) {
+        if (utils.propertyIsNotNull(simpleDiagnosis, 'category')) {
             registeredDiagnosisModule.categories = [{
                 value: simpleDiagnosis.category,
                 attr: {
@@ -831,17 +830,17 @@ module.exports = {
         }
 
         // 開始日
-        if (simpleDiagnosis.hasOwnProperty('dateOfOnset')) {
+        if (utils.propertyIsNotNull(simpleDiagnosis, 'dateOfOnset')) {
             registeredDiagnosisModule.startDate = simpleDiagnosis.dateOfOnset;
         }
 
         // 終了日
-        if (simpleDiagnosis.hasOwnProperty('dateOfRemission')) {
+        if (utils.propertyIsNotNull(simpleDiagnosis, 'dateOfRemission')) {
             registeredDiagnosisModule.endDate = simpleDiagnosis.dateOfRemission;
         }
 
         // 転帰
-        if (simpleDiagnosis.hasOwnProperty('outcome')) {
+        if (utils.propertyIsNotNull(simpleDiagnosis, 'outcome')) {
             registeredDiagnosisModule.outcome = simpleDiagnosis.outcome;
         }
 
@@ -962,7 +961,7 @@ module.exports = {
         var result = {};
 
         // familyHistory
-        if (simpleFirstClinic.hasOwnProperty('familyHistory')) {
+        if (utils.propertyIsNotNull(simpleFirstClinic, 'familyHistory')) {
             result.familyHistory = [];
             simpleFirstClinic.familyHistory.forEach((entry) => {
                 var fhItem = {
@@ -970,10 +969,10 @@ module.exports = {
                 };
                 fhItem.RegisteredDiagnosisModule = this.registeredDiagnosis(docInfo, entry.simpleDiagnosis);
                 // logger.info(JSON.stringify(fhItem, null, 4));
-                if (entry.hasOwnProperty('age')) {
+                if (utils.propertyIsNotNull(entry, 'age')) {
                     fhItem.age = entry.age;
                 }
-                if (entry.hasOwnProperty('memo')) {
+                if (utils.propertyIsNotNull(entry, 'memo')) {
                     fhItem.memo = entry.memo;
                 }
                 // logger.info(JSON.stringify(fhItem, null, 4));
@@ -982,23 +981,23 @@ module.exports = {
         }
 
         //childhood
-        if (simpleFirstClinic.hasOwnProperty('childhood')) {
+        if (utils.propertyIsNotNull(simpleFirstClinic, 'childhood')) {
             var src = simpleFirstClinic.childhood;
             var dest = {};
             result.childhood = dest;
-            if (src.hasOwnProperty('birthInfo')) {
+            if (utils.propertyIsNotNull(src, 'birthInfo')) {
                 dest.birthInfo = {};
-                if (src.birthInfo.hasOwnProperty('facilityId') && src.birthInfo.hasOwnProperty('facilityName')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'facilityId') && utils.propertyIsNotNull(src.birthInfo, 'facilityName')) {
                     // 共通形式の Facility
                     dest.birthInfo.Facility = this.buildFacility(src.birthInfo.facilityId, src.birthInfo.facilityName);
                 }
-                if (src.birthInfo.hasOwnProperty('deliveryWeeks')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'deliveryWeeks')) {
                     dest.birthInfo.deliveryWeeks = src.birthInfo.deliveryWeeks;
                 }
-                if (src.birthInfo.hasOwnProperty('deliveryMethod')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'deliveryMethod')) {
                     dest.birthInfo.deliveryMethod = src.birthInfo.deliveryMethod;
                 }
-                if (src.birthInfo.hasOwnProperty('bodyWeight')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'bodyWeight')) {
                     dest.birthInfo.bodyWeight = {
                         value: src.birthInfo.bodyWeight,
                         attr: {
@@ -1006,7 +1005,7 @@ module.exports = {
                         }
                     };
                 }
-                if (src.birthInfo.hasOwnProperty('bodyHeight')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'bodyHeight')) {
                     dest.birthInfo.bodyHeight = {
                         value: src.birthInfo.bodyHeight,
                         attr: {
@@ -1014,7 +1013,7 @@ module.exports = {
                         }
                     };
                 }
-                if (src.birthInfo.hasOwnProperty('chestCircumference')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'chestCircumference')) {
                     dest.birthInfo.chestCircumference = {
                         value: src.birthInfo.chestCircumference,
                         attr: {
@@ -1022,7 +1021,7 @@ module.exports = {
                         }
                     };
                 }
-                if (src.birthInfo.hasOwnProperty('headCircumference')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'headCircumference')) {
                     dest.birthInfo.headCircumference = {
                         value: src.birthInfo.headCircumference,
                         attr: {
@@ -1030,21 +1029,21 @@ module.exports = {
                         }
                     };
                 }
-                if (src.birthInfo.hasOwnProperty('memo')) {
+                if (utils.propertyIsNotNull(src.birthInfo, 'memo')) {
                     dest.birthInfo.memo = src.birthInfo.deliveryMethod;
                 }
             }
-            if (src.hasOwnProperty('vaccination')) {
+            if (utils.propertyIsNotNull(src, 'vaccination')) {
                 dest.vaccination = [];
                 src.vaccination.forEach((entry) => {
                     var it = {
                         vaccine: entry.vaccine,
                         injected: entry.injected
                     };
-                    if (entry.hasOwnProperty('age')) {
+                    if (utils.propertyIsNotNull(entry, 'age')) {
                         it.age = entry.age;
                     }
-                    if (entry.hasOwnProperty('memo')) {
+                    if (utils.propertyIsNotNull(entry, 'memo')) {
                         it.memo = entry.memo;
                     }
                     dest.vaccination.push(it);
@@ -1053,13 +1052,13 @@ module.exports = {
         }
 
         // 既往歴 freeNotes
-        if (simpleFirstClinic.hasOwnProperty('pastHistory') &&
-                simpleFirstClinic.pastHistory.hasOwnProperty('freeNotes')) {
+        if (utils.propertyIsNotNull(simpleFirstClinic, 'pastHistory') &&
+                utils.propertyIsNotNull(simpleFirstClinic.pastHistory, 'freeNotes')) {
             result.pastHistory = {
                 freeNotes: simpleFirstClinic.pastHistory.freeNotes
             };
-        } else if (simpleFirstClinic.hasOwnProperty('pastHistory') &&
-                simpleFirstClinic.pastHistory.hasOwnProperty('pastHistoryItem')) {
+        } else if (utils.propertyIsNotNull(simpleFirstClinic, 'pastHistory') &&
+                utils.propertyIsNotNull(simpleFirstClinic.pastHistory, 'pastHistoryItem')) {
             result.pastHistory = {
                 pastHistoryItem: []
             };
@@ -1074,12 +1073,12 @@ module.exports = {
         }
 
         // chiefComplaints
-        if (simpleFirstClinic.hasOwnProperty('chiefComplaints')) {
+        if (utils.propertyIsNotNull(simpleFirstClinic, 'chiefComplaints')) {
             result.chiefComplaints = simpleFirstClinic.chiefComplaints;
         }
 
         // presentIllnessNotes
-        if (simpleFirstClinic.hasOwnProperty('presentIllnessNotes')) {
+        if (utils.propertyIsNotNull(simpleFirstClinic, 'presentIllnessNotes')) {
             result.presentIllnessNotes = simpleFirstClinic.presentIllnessNotes;
         }
 
@@ -1099,7 +1098,7 @@ module.exports = {
         var result = {
             freeExpression: simpleProgressCource.freeExpression
         };
-        if (simpleProgressCource.hasOwnProperty('extRef')) {
+        if (utils.propertyIsNotNull(simpleProgressCource, 'extRef')) {
 
             result.extRef = [];
             var index = 0;
@@ -1189,22 +1188,22 @@ module.exports = {
         };
 
         // surgicalInfo
-        if (simpleSurgery.context.hasOwnProperty('type')) {
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'type')) {
             result.surgicalInfo.attr = {
                 type: simpleSurgery.context.type
             };
         }
-        if (simpleSurgery.context.hasOwnProperty('startTime')) {
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'startTime')) {
             result.surgicalInfo.startTime = simpleSurgery.context.startTime;
         }
-        if (simpleSurgery.context.hasOwnProperty('duration')) {
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'duration')) {
             result.surgicalInfo.duration = simpleSurgery.context.duration;
         }
-        if (simpleSurgery.context.hasOwnProperty('surgicalDepartmentId') && simpleSurgery.context.hasOwnProperty('surgicalDepartmentName') ) {
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentName') ) {
             var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, simpleSurgery.context.surgicalDepartmentName);
             result.surgicalInfo.surgicalDepartment = [sdp];
         }
-        if (simpleSurgery.context.hasOwnProperty('patientDepartmentId') && simpleSurgery.context.hasOwnProperty('patientDepartmentName') ) {
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentName') ) {
             var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, simpleSurgery.context.patientDepartmentName);
             result.surgicalInfo.patientDepartment = [pdp];
         }
@@ -1226,22 +1225,22 @@ module.exports = {
                 }
             };
             result.surgicalProcedure.push(procedureItem);
-            if (entry.hasOwnProperty('code') || entry.hasOwnProperty('system')) {
+            if (utils.propertyIsNotNull(entry, 'code') || utils.propertyIsNotNull(entry, 'system')) {
                 procedureItem.operation.attr = {};
-                if (entry.hasOwnProperty('code')) {
+                if (utils.propertyIsNotNull(entry, 'code')) {
                     procedureItem.operation.attr.code = entry.code;
                 }
-                if (entry.hasOwnProperty('system')) {
+                if (utils.propertyIsNotNull(entry, 'system')) {
                     procedureItem.operation.attr.system = entry.system;
                 }
             }
-            if (entry.hasOwnProperty('procedureMemo')) {
+            if (utils.propertyIsNotNull(entry, 'procedureMemo')) {
                 procedureItem.procedureMemo = entry.procedureMemo;
             }
         });
 
         // surgicalStaffs
-        if (simpleSurgery.hasOwnProperty('surgicalStaffs')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'surgicalStaffs')) {
             result.surgicalStaffs = [];
             simpleSurgery.surgicalStaffs.forEach((entry) => {
                 // entry = simpleCreator + attributes
@@ -1250,12 +1249,12 @@ module.exports = {
                     staffInfo: []
                 };
                 result.surgicalStaffs.push(staff);
-                if (entry.hasOwnProperty('superiority') || entry.hasOwnProperty('staffClass')) {
+                if (utils.propertyIsNotNull(entry, 'superiority') || utils.propertyIsNotNull(entry, 'staffClass')) {
                     staff.attr = {};
-                    if (entry.hasOwnProperty('superiority')) {
+                    if (utils.propertyIsNotNull(entry, 'superiority')) {
                         staff.attr.superiority = entry.superiority;
                     }
-                    if (entry.hasOwnProperty('staffClass')) {
+                    if (utils.propertyIsNotNull(entry, 'staffClass')) {
                         staff.attr.superiority = entry.staffClass;
                     }
                 }
@@ -1267,19 +1266,19 @@ module.exports = {
         // logger.info(JSON.stringify(result, null,4));
 
         // anesthesiaProcedure
-        if (simpleSurgery.hasOwnProperty('anesthesiaProcedure')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'anesthesiaProcedure')) {
             result.anesthesiaProcedure = [];
             simpleSurgery.anesthesiaProcedure.forEach((entry) => {
                 var title = {
                     value: entry.title
                 };
                 result.anesthesiaProcedure.push(title);
-                if (entry.hasOwnProperty('code') || entry.hasOwnProperty('system')) {
+                if (utils.propertyIsNotNull(entry, 'code') || utils.propertyIsNotNull(entry, 'system')) {
                     title.attr = {};
-                    if (entry.hasOwnProperty('code')) {
+                    if (utils.propertyIsNotNull(entry, 'code')) {
                         title.attr.code = entry.code;
                     }
-                    if (entry.hasOwnProperty('system')) {
+                    if (utils.propertyIsNotNull(entry, 'system')) {
                         title.attr.system = entry.system;
                     }
                 }
@@ -1287,7 +1286,7 @@ module.exports = {
         }
 
         // anesthesiologists
-        if (simpleSurgery.hasOwnProperty('anesthesiologists')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'anesthesiologists')) {
             result.anesthesiologists = [];
             simpleSurgery.anesthesiologists.forEach((entry) => {
                 // entry = simpleCreator + attributes
@@ -1295,12 +1294,12 @@ module.exports = {
                     staffInfo: []
                 };
                 result.anesthesiologists.push(staff);
-                if (entry.hasOwnProperty('superiority') || entry.hasOwnProperty('staffClass')) {
+                if (utils.propertyIsNotNull(entry, 'superiority') || utils.propertyIsNotNull(entry, 'staffClass')) {
                     staff.attr = {};
-                    if (entry.hasOwnProperty('superiority')) {
+                    if (utils.propertyIsNotNull(entry, 'superiority')) {
                         staff.attr.superiority = entry.superiority;
                     }
-                    if (entry.hasOwnProperty('staffClass')) {
+                    if (utils.propertyIsNotNull(entry, 'staffClass')) {
                         staff.attr.superiority = entry.staffClass;
                     }
                 }
@@ -1309,19 +1308,19 @@ module.exports = {
         }
 
         // anesthesiaDuration
-        if (simpleSurgery.hasOwnProperty('anesthesiaDuration')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'anesthesiaDuration')) {
             result.anesthesiaDuration = simpleSurgery.anesthesiaDuration;
         }
 
         // operativeNotes
-        if (simpleSurgery.hasOwnProperty('operativeNotes')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'operativeNotes')) {
             result.operativeNotes = simpleSurgery.operativeNotes;
         }
 
         // referenceInfo
         // 解説では [extRef]
         // logger.info('before referenceInfo');
-        if (simpleSurgery.hasOwnProperty('referenceInfo')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'referenceInfo')) {
             // logger.info(JSON.stringify(simpleSurgery.referenceInfo, null, 4));
             // e.href
             var newHREF = this.createHREF(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
@@ -1337,7 +1336,7 @@ module.exports = {
         // logger.info('after referenceInfo');
 
         // memo
-        if (simpleSurgery.hasOwnProperty('memo')) {
+        if (utils.propertyIsNotNull(simpleSurgery, 'memo')) {
             result.memo = simpleSurgery.memo;
         }
 
@@ -1498,7 +1497,7 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // outPatient
-        if (simpleSummary.context.hasOwnProperty('outPatient')) {
+        if (utils.propertyIsNotNull(simpleSummary.context, 'outPatient')) {
             result.serviceHistory.outPatient = [];
             simpleSummary.context.outPatient.forEach((entry) => {
                 // date
@@ -1507,7 +1506,7 @@ module.exports = {
                 };
                 result.serviceHistory.outPatient.push(outPatientItem);
                 // outPatientCondition
-                if (entry.hasOwnProperty('outPatientCondition')) {
+                if (utils.propertyIsNotNull(entry, 'outPatientCondition')) {
                     outPatientItem.outPatientCondition = {
                         value: entry.outPatientCondition,
                         attr: {
@@ -1517,7 +1516,7 @@ module.exports = {
                     };
                 }
                 // staffs
-                if (entry.hasOwnProperty('staffs')) {
+                if (utils.propertyIsNotNull(entry, 'staffs')) {
                     outPatientItem.staffs = [];
                     entry.staffs.forEach((e) => {
                         // e = simpleCreator
@@ -1529,7 +1528,7 @@ module.exports = {
         }
 
         // inPatient
-        if (simpleSummary.context.hasOwnProperty('inPatient')) {
+        if (utils.propertyIsNotNull(simpleSummary.context, 'inPatient')) {
             result.serviceHistory.inPatient = [];
             simpleSummary.context.inPatient.forEach((entry) => {
                 //logger.info(JSON.stringify(entry, null, 4));
@@ -1538,57 +1537,57 @@ module.exports = {
                 result.serviceHistory.inPatient.push(inPatientItem);
 
                 // admission 入院情報
-                if (entry.hasOwnProperty('admission')) {
+                if (utils.propertyIsNotNull(entry, 'admission')) {
                     // logger.info(JSON.stringify(entry.admission, null, 4));
                     inPatientItem.admission = {};
                     // date
                     inPatientItem.admission.date = entry.admission.date;
                     // admissionCondition
-                    if (entry.admission.hasOwnProperty('admissionCondition')) {
+                    if (utils.propertyIsNotNull(entry.admission, 'admissionCondition')) {
                         inPatientItem.admission.admissionCondition = {
                             value: entry.admission.admissionCondition
                         };
                     }
                     // emergency
-                    if (entry.admission.hasOwnProperty('emergency')) {
+                    if (utils.propertyIsNotNull(entry.admission, 'emergency')) {
                         inPatientItem.admission.admissionCondition.attr = {
                             emergency: entry.admission.emergency
                         };
                     }
                     // logger.info(JSON.stringify(inPatientItem.admission, null, 4));
                     // referFrom
-                    if (entry.admission.hasOwnProperty('referFrom')) {
+                    if (utils.propertyIsNotNull(entry.admission, 'referFrom')) {
                         inPatientItem.admission.referFrom = this.buildPersonalizedInfo(entry.admission.referFrom);
                     }
                     // logger.info(JSON.stringify(inPatientItem.admission, null, 4));
                 }
 
                 // discharge 退院情報
-                if (entry.hasOwnProperty('discharge')) {
+                if (utils.propertyIsNotNull(entry, 'discharge')) {
                     inPatientItem.discharge = {};
                     // date
                     inPatientItem.discharge.date = entry.discharge.date;
                     // dischargeCondition
-                    if (entry.discharge.hasOwnProperty('dischargeCondition')) {
+                    if (utils.propertyIsNotNull(entry.discharge, 'dischargeCondition')) {
                         inPatientItem.discharge.dischargeCondition = {
                             value: entry.discharge.dischargeCondition
                         };
                     }
                     // outcome
-                    if (entry.discharge.hasOwnProperty('outcome')) {
+                    if (utils.propertyIsNotNull(entry.discharge, 'outcome')) {
                         inPatientItem.discharge.dischargeCondition.attr = {
                             outcome: entry.discharge.outcome
                         };
                     }
                     // referFrom
-                    if (entry.discharge.hasOwnProperty('referTo')) {
+                    if (utils.propertyIsNotNull(entry.discharge, 'referTo')) {
                         inPatientItem.discharge.referTo = this.buildPersonalizedInfo(entry.discharge.referTo);
                     }
                     // logger.info(JSON.stringify(inPatientItem.discharge, null, 4));
                 }
 
                 // staffs
-                if (entry.hasOwnProperty('staffs')) {
+                if (utils.propertyIsNotNull(entry, 'staffs')) {
                     inPatientItem.staffs = [];
                     entry.staffs.forEach((e) => {
                         // e = simpleCreator
@@ -1601,28 +1600,28 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // RegisteredDiagnosisModule ?  != *
-        if (simpleSummary.hasOwnProperty('simpleDiagnosis')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'simpleDiagnosis')) {
             result.RegisteredDiagnosisModule = this.registeredDiagnosis(docInfo, simpleSummary.simpleDiagnosis);
         }
         // logger.info(JSON.stringify(result, null, 4));
 
         // deathInfo
-        if (simpleSummary.hasOwnProperty('deathInfo')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'deathInfo')) {
             result.deathInfo = {};
             result.deathInfo.value = simpleSummary.deathInfo.info;  // info
-            if (simpleSummary.deathInfo.hasOwnProperty('date') || simpleSummary.deathInfo.hasOwnProperty('autopsy')) {
+            if (utils.propertyIsNotNull(simpleSummary.deathInfo, 'date') || utils.propertyIsNotNull(simpleSummary.deathInfo, 'autopsy')) {
                 result.deathInfo.attr = {};
-                if (simpleSummary.deathInfo.hasOwnProperty('date')) {
+                if (utils.propertyIsNotNull(simpleSummary.deathInfo, 'date')) {
                     result.deathInfo.attr.date = simpleSummary.deathInfo.date;
                 }
-                if (simpleSummary.deathInfo.hasOwnProperty('autopsy')) {
+                if (utils.propertyIsNotNull(simpleSummary.deathInfo, 'autopsy')) {
                     result.deathInfo.attr.autopsy = simpleSummary.deathInfo.autopsy;
                 }
             }
         }
 
         // SurgeryModule
-        if (simpleSummary.hasOwnProperty('simpleSurgery')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'simpleSurgery')) {
             result.SurgeryModule = [];
             simpleSummary.simpleSurgery.forEach((entry) => {
                 result.SurgeryModule.push(this.surgery(docInfo, entry));
@@ -1630,27 +1629,27 @@ module.exports = {
         }
 
         // chiefComplaints
-        if (simpleSummary.hasOwnProperty('chiefComplaints')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'chiefComplaints')) {
             result.chiefComplaints = simpleSummary.chiefComplaints;
         }
 
         // patientProfile
-        if (simpleSummary.hasOwnProperty('patientProfile')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'patientProfile')) {
             result.patientProfile = simpleSummary.patientProfile;
         }
 
         // history
-        if (simpleSummary.hasOwnProperty('history')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'history')) {
             result.history = simpleSummary.history;
         }
         // logger.info(JSON.stringify(result, null, 4));
 
         // physicalExam  value:'' xs:any * extRef *
-        if (simpleSummary.hasOwnProperty('physicalExam')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'physicalExam')) {
             result.physicalExam = {
                 value: simpleSummary.physicalExam.value
             };
-            if (simpleSummary.physicalExam.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleSummary.physicalExam, 'extRef')) {
                 result.physicalExam.extRef = [];
                 simpleSummary.physicalExam.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
@@ -1663,7 +1662,7 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // clinicalCourse
-        if (simpleSummary.hasOwnProperty('clinicalCourse')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'clinicalCourse')) {
             result.clinicalCourse = [];
             simpleSummary.clinicalCourse.forEach((entry) => {
                 var clinicalRecord = {
@@ -1672,7 +1671,7 @@ module.exports = {
                     },
                     value: entry.record
                 };
-                if (entry.hasOwnProperty('relatedDoc')) {
+                if (utils.propertyIsNotNull(entry, 'relatedDoc')) {
                     clinicalRecord.relatedDoc = [];
                     entry.relatedDoc.forEach((e) => {
                         var relatedDoc = {
@@ -1684,7 +1683,7 @@ module.exports = {
                         clinicalRecord.relatedDoc.push(relatedDoc);
                     });
                 }
-                if (entry.hasOwnProperty('extRef')) {
+                if (utils.propertyIsNotNull(entry, 'extRef')) {
                     clinicalRecord.extRef = [];
                     entry.extRef.forEach((e) => {
                         newHREF = this.createHREF(docId, refIndex++, e.href);
@@ -1700,11 +1699,11 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // dischargeFindings value: '' xs:any extRef *
-        if (simpleSummary.hasOwnProperty('dischargeFindings')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'dischargeFindings')) {
             result.dischargeFindings = {
                 value: simpleSummary.dischargeFindings
             };
-            if (simpleSummary.dischargeFindings.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleSummary.dischargeFindings, 'extRef')) {
                 result.dischargeFindings.extRef = [];
                 simpleSummary.dischargeFindings.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
@@ -1717,17 +1716,17 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // medication: {                                           // 退院時処方 ? medication
-        if (simpleSummary.hasOwnProperty('medication')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'medication')) {
             // logger.info(JSON.stringify(simpleSummary.medication.simplePrescription, null, 4));
             result.medication = {
                 value: simpleSummary.medication.value
             };
-            if (simpleSummary.medication.hasOwnProperty('simplePrescription')) {
+            if (utils.propertyIsNotNull(simpleSummary.medication, 'simplePrescription')) {
                 // xsd 1 個だけ....
                 var preArr = this.prescription(docInfo, simpleSummary.medication.simplePrescription);
                 result.medication.PrescriptionModule = preArr[0];
             }
-            if (simpleSummary.medication.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleSummary.medication, 'extRef')) {
                 result.medication.extRef = [];
                 simpleSummary.medication.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
@@ -1741,7 +1740,7 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // testResults
-        if (simpleSummary.hasOwnProperty('testResults')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'testResults')) {
             result.testResults = [];
             simpleSummary.testResults.forEach((entry) => {
                 var tr = {                                          // 個々の検査結果
@@ -1752,7 +1751,7 @@ module.exports = {
                 };
                 result.testResults.push(tr);
 
-                if (entry.hasOwnProperty('relatedDoc')) {
+                if (utils.propertyIsNotNull(entry, 'relatedDoc')) {
                     tr.relatedDoc = [];
                     entry.relatedDoc.forEach((e) => {
                         var relatedDoc = {
@@ -1764,7 +1763,7 @@ module.exports = {
                         tr.relatedDoc.push(relatedDoc);
                     });
                 }
-                if (entry.hasOwnProperty('extRef')) {
+                if (utils.propertyIsNotNull(entry, 'extRef')) {
                     tr.extRef = [];
                     entry.extRef.forEach((e) => {
                         newHREF = this.createHREF(docId, refIndex++, e.href);
@@ -1779,11 +1778,11 @@ module.exports = {
         //logger.info(JSON.stringify(result, null, 4));
 
         // plan value: '' xs:any extRef *
-        if (simpleSummary.hasOwnProperty('plan')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'plan')) {
             result.plan = {
                 value: simpleSummary.plan.value
             };
-            if (simpleSummary.plan.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleSummary.plan, 'extRef')) {
                 result.plan.extRef = [];
                 simpleSummary.plan.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
@@ -1795,7 +1794,7 @@ module.exports = {
         }
 
         // remarks
-        if (simpleSummary.hasOwnProperty('remarks')) {
+        if (utils.propertyIsNotNull(simpleSummary, 'remarks')) {
             result.remarks = {
                 value: simpleSummary.remarks
             };
@@ -1858,8 +1857,8 @@ module.exports = {
         var itemMemo = {};                  // テスト項目のメモ
 
         // コード体系 千年でラボセンターコードを発番?
-        var facilityCodeId = context.hasOwnProperty('facilityIdType') ? context.facilityIdType : 'OID';
-        var centerCodeId = context.laboratory.hasOwnProperty('facilityIdType') ? context.laboratory.facilityIdType : 'OID';
+        var facilityCodeId = utils.propertyIsNotNull(context, 'facilityIdType') ? context.facilityIdType : 'OID';
+        var centerCodeId = utils.propertyIsNotNull(context.laboratory, 'facilityIdType') ? context.laboratory.facilityIdType : 'OID';
 
         var testModule = {
             information: {
@@ -1930,24 +1929,24 @@ module.exports = {
             currentLabTest.item.push(item);
 
             // numValue = (単位!=='');
-            numValue = (entry.hasOwnProperty('unit'));
+            numValue = (utils.propertyIsNotNull(entry, 'unit'));
 
             if (numValue) {
                 item.numValue = {
                     value: entry.value
                 };
-                if (entry.hasOwnProperty('lowerLimit') ||
-                entry.hasOwnProperty('upperLimit') ||
-                entry.hasOwnProperty('out')) {
+                if (utils.propertyIsNotNull(entry, 'lowerLimit') ||
+                utils.propertyIsNotNull(entry, 'upperLimit') ||
+                utils.propertyIsNotNull(entry, 'out')) {
 
                     item.numValue.attr = {};
-                    if (entry.hasOwnProperty('lowerLimit')) {
+                    if (utils.propertyIsNotNull(entry, 'lowerLimit')) {
                         item.numValue.attr.low = entry.lowerLimit;
                     }
-                    if (entry.hasOwnProperty('upperLimit')) {
+                    if (utils.propertyIsNotNull(entry, 'upperLimit')) {
                         item.numValue.attr.up = entry.upperLimit;
                     }
-                    if (entry.hasOwnProperty('out')) {
+                    if (utils.propertyIsNotNull(entry, 'out')) {
                         item.numValue.attr.out = entry.out;
                     }
                 }
@@ -1959,7 +1958,7 @@ module.exports = {
                 };
             }
 
-            if (entry.hasOwnProperty('memoCode') && entry.hasOwnProperty('memo')) {
+            if (utils.propertyIsNotNull(entry, 'memoCode') && utils.propertyIsNotNull(entry, 'memo')) {
                 item.itemMemo = [];
                 itemMemo = {
                     value: entry.memo,                               // 項目コメント値
@@ -2094,7 +2093,7 @@ module.exports = {
         };
 
         // testSubclass
-        if (context.hasOwnProperty('testSubclass')) {
+        if (utils.propertyIsNotNull(context, 'testSubclass')) {
             information.testSubclass = {                                         // 報告書詳細種別 ?
                 value: context.testSubclass.testSubclass,
                 attr: {
@@ -2106,16 +2105,16 @@ module.exports = {
         // logger.info(JSON.stringify(context, null, 4));
 
         // organ
-        if (context.hasOwnProperty('organ')) {
+        if (utils.propertyIsNotNull(context, 'organ')) {
             information.organ = context.organ;
         }
 
         // consultFrom
-        if (context.hasOwnProperty('consultFrom')) {
+        if (utils.propertyIsNotNull(context, 'consultFrom')) {
             var cFrom = context.consultFrom;
             information.consultFrom = {};
 
-            if (cFrom.hasOwnProperty('facility')) {
+            if (utils.propertyIsNotNull(cFrom, 'facility')) {
                 information.consultFrom.conFacility = {                 // 依頼施設 ?
                     value: cFrom.facility,
                     attr: {
@@ -2124,7 +2123,7 @@ module.exports = {
                     }
                 };
             }
-            if (cFrom.hasOwnProperty('department')) {
+            if (utils.propertyIsNotNull(cFrom, 'department')) {
                 information.consultFrom.conDepartment = {                 // 依頼施設 ?
                     value: cFrom.department,
                     attr: {
@@ -2133,7 +2132,7 @@ module.exports = {
                     }
                 };
             }
-            if (cFrom.hasOwnProperty('ward')) {
+            if (utils.propertyIsNotNull(cFrom, 'ward')) {
                 information.consultFrom.conWard = {                 // 依頼施設 ?
                     value: cFrom.ward,
                     attr: {
@@ -2142,7 +2141,7 @@ module.exports = {
                     }
                 };
             }
-            if (cFrom.hasOwnProperty('client')) {
+            if (utils.propertyIsNotNull(cFrom, 'client')) {
                 information.consultFrom.client = {                 // 依頼施設 ?
                     value: cFrom.client,
                     attr: {
@@ -2154,11 +2153,11 @@ module.exports = {
         }
 
         // perform
-        if (context.hasOwnProperty('perform')) {
+        if (utils.propertyIsNotNull(context, 'perform')) {
             var perform = context.perform;
             information.perform = {};
 
-            if (perform.hasOwnProperty('facility')) {
+            if (utils.propertyIsNotNull(perform, 'facility')) {
                 information.perform.pFacility = {                 // 依頼施設 ?
                     value: perform.facility,
                     attr: {
@@ -2167,7 +2166,7 @@ module.exports = {
                     }
                 };
             }
-            if (perform.hasOwnProperty('department')) {
+            if (utils.propertyIsNotNull(perform, 'department')) {
                 information.perform.pDepartment = {                 // 依頼施設 ?
                     value: perform.department,
                     attr: {
@@ -2176,7 +2175,7 @@ module.exports = {
                     }
                 };
             }
-            if (perform.hasOwnProperty('ward')) {
+            if (utils.propertyIsNotNull(perform, 'ward')) {
                 information.perform.pWard = {                 // 依頼施設 ?
                     value: perform.ward,
                     attr: {
@@ -2185,7 +2184,7 @@ module.exports = {
                     }
                 };
             }
-            if (perform.hasOwnProperty('performer')) {
+            if (utils.propertyIsNotNull(perform, 'performer')) {
                 information.perform.performer = {                 // 依頼施設 ?
                     value: perform.performer,
                     attr: {
@@ -2194,7 +2193,7 @@ module.exports = {
                     }
                 };
             }
-            if (perform.hasOwnProperty('supervisor')) {
+            if (utils.propertyIsNotNull(perform, 'supervisor')) {
                 information.perform.supervisor = {                 // 依頼施設 ?
                     value: perform.supervisor,
                     attr: {
@@ -2206,27 +2205,27 @@ module.exports = {
         }
 
         // chiefComplaints
-        if (body.hasOwnProperty('chiefComplaints')) {
+        if (utils.propertyIsNotNull(body, 'chiefComplaints')) {
             reportBody.chiefComplaints = body.chiefComplaints;
         }
 
         // testPurpose
-        if (body.hasOwnProperty('testPurpose')) {
+        if (utils.propertyIsNotNull(body, 'testPurpose')) {
             reportBody.testPurpose = body.testPurpose;
         }
 
         // testDx
-        if (body.hasOwnProperty('testDx')) {
+        if (utils.propertyIsNotNull(body, 'testDx')) {
             reportBody.testDx = body.testDx;
         }
 
         // testNotes
-        if (body.hasOwnProperty('testNotes')) {
+        if (utils.propertyIsNotNull(body, 'testNotes')) {
             reportBody.testNotes = {
                 value: body.testNotes.value
             };
             // extRef[]
-            if (body.testNotes.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(body.testNotes, 'extRef')) {
                 reportBody.testNotes.extRef = [];
                 var index = 0;
                 var docId = docInfo.docId.uid;
@@ -2249,22 +2248,22 @@ module.exports = {
         }
 
         // testMemo
-        if (body.hasOwnProperty('testMemo')) {
+        if (utils.propertyIsNotNull(body, 'testMemo')) {
             reportBody.testMemo = [];
             body.testMemo.forEach((entry) => {
                 var memo = {
                     value: entry.memo
                 };
                 reportBody.testMemo.push(memo);
-                if (entry.hasOwnProperty('memoCode') || entry.hasOwnProperty('memoCodeId') ) {
+                if (utils.propertyIsNotNull(entry, 'memoCode') || utils.propertyIsNotNull(entry, 'memoCodeId') ) {
                     memo.attr = {};
-                    if (entry.hasOwnProperty('memoCodeName')) {
+                    if (utils.propertyIsNotNull(entry, 'memoCodeName')) {
                         memo.attr.tmCodeName = entry.memoCodeName;
                     }
-                    if (entry.hasOwnProperty('memoCode')) {
+                    if (utils.propertyIsNotNull(entry, 'memoCode')) {
                         memo.attr.tmCode = entry.memoCode;
                     }
-                    if (entry.hasOwnProperty('memoCodeId')) {
+                    if (utils.propertyIsNotNull(entry, 'memoCodeId')) {
                         memo.attr.tmCodeId = entry.memoCodeId;
                     }
                 }
@@ -2272,7 +2271,7 @@ module.exports = {
         }
 
         // testMemoF
-        if (body.hasOwnProperty('testMemoF')) {
+        if (utils.propertyIsNotNull(body, 'testMemoF')) {
             reportBody.testMemoF = body.testMemoF;
         }
         // logger.info(JSON.stringify(result, null, 4));
@@ -2342,7 +2341,7 @@ module.exports = {
         result.PatientModule = this.patientInfo(docInfo, simpleReferral.patient);
 
         // occupation
-        if (simpleReferral.hasOwnProperty('occupation')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'occupation')) {
             result.occupation = simpleReferral.occupation;
         }
 
@@ -2353,7 +2352,7 @@ module.exports = {
         result.title = simpleReferral.title;
 
         // greeting
-        if (simpleReferral.hasOwnProperty('greeting')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'greeting')) {
             result.greeting = simpleReferral.greeting;
         }
 
@@ -2361,16 +2360,16 @@ module.exports = {
         result.title = simpleReferral.chiefComplaints;
 
         // clinicalDiagnosis
-        if (simpleReferral.hasOwnProperty('clinicalDiagnosis')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'clinicalDiagnosis')) {
             result.clinicalDiagnosis = simpleReferral.clinicalDiagnosis;
         }
 
         // pastHistory extRef
-        if (simpleReferral.hasOwnProperty('pastHistory')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'pastHistory')) {
             result.pastHistory = {
                 value: simpleReferral.pastHistory
             };
-            if (simpleReferral.pastHistory.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleReferral.pastHistory, 'extRef')) {
                 result.pastHistory.extRef = [];
 
                 simpleReferral.pastHistory.extRef.forEach((e) => {
@@ -2383,11 +2382,11 @@ module.exports = {
         }
 
         // familyHistory
-        if (simpleReferral.hasOwnProperty('familyHistory')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'familyHistory')) {
             result.familyHistory = {
                 value: simpleReferral.familyHistory
             };
-            if (simpleReferral.familyHistory.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleReferral.familyHistory, 'extRef')) {
                 result.familyHistory.extRef = [];
                 simpleReferral.familyHistory.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
@@ -2399,11 +2398,11 @@ module.exports = {
         }
 
         // presentIllness
-        if (simpleReferral.hasOwnProperty('presentIllness')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'presentIllness')) {
             result.presentIllness = {
                 value: simpleReferral.presentIllness
             };
-            if (simpleReferral.presentIllness.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleReferral.presentIllness, 'extRef')) {
                 result.presentIllness.extRef = [];
                 simpleReferral.presentIllness.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
@@ -2415,11 +2414,11 @@ module.exports = {
         }
 
         // testResults
-        if (simpleReferral.hasOwnProperty('testResults')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'testResults')) {
             result.testResults = {
                 value: simpleReferral.testResults
             };
-            if (simpleReferral.testResults.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleReferral.testResults, 'extRef')) {
                 result.testResults.extRef = [];
                 simpleReferral.testResults.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
@@ -2431,23 +2430,23 @@ module.exports = {
         }
 
         // clinicalCourse
-        if (simpleReferral.hasOwnProperty('clinicalCourse')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'clinicalCourse')) {
             result.clinicalCourse = simpleReferral.clinicalCourse;
         }
 
         // medication
-        if (simpleReferral.hasOwnProperty('medication')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'medication')) {
             result.medication = {};
-            if (simpleReferral.medication.hasOwnProperty('value')) {
+            if (utils.propertyIsNotNull(simpleReferral.medication, 'value')) {
                 result.medication.value = simpleReferral.medication.value;
             }
-            if (simpleReferral.medication.hasOwnProperty('simplePrescription')) {
+            if (utils.propertyIsNotNull(simpleReferral.medication, 'simplePrescription')) {
                 result.medication.PrescriptionModule = this.prescription(docInfo, simpleReferral.medication.simplePrescription);
             }
-            if (simpleReferral.medication.hasOwnProperty('simpleInjection')) {
+            if (utils.propertyIsNotNull(simpleReferral.medication, 'simpleInjection')) {
                 result.medication.InjectionModule = this.injection(docInfo, simpleReferral.medication.simpleInjection);
             }
-            if (simpleReferral.medication.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleReferral.medication, 'extRef')) {
                 result.medication.extRef = [];
                 simpleReferral.medication.extRef.forEach((entry) => {
                     result.medication.extRef(this.buildExtRef(entry));
@@ -2456,16 +2455,16 @@ module.exports = {
         }
 
         // referPurpose
-        if (simpleReferral.hasOwnProperty('referPurpose')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'referPurpose')) {
             result.referPurpose = simpleReferral.referPurpose;
         }
 
         // remarks
-        if (simpleReferral.hasOwnProperty('remarks')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'remarks')) {
             result.remarks = {
                 value: simpleReferral.remarks.value
             };
-            if (simpleReferral.remarks.hasOwnProperty('extRef')) {
+            if (utils.propertyIsNotNull(simpleReferral.remarks, 'extRef')) {
                 result.remarks.extRef = [];
                 simpleReferral.remarks.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
@@ -2477,23 +2476,23 @@ module.exports = {
         }
 
         // referToFacility
-        if (simpleReferral.hasOwnProperty('referToFacility')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'referToFacility')) {
             result.referToFacility = {};
-            if (simpleReferral.referToFacility.hasOwnProperty('facilityId') && simpleReferral.referToFacility.hasOwnProperty('facilityName')) {
+            if (utils.propertyIsNotNull(simpleReferral.referToFacility, 'facilityId') && utils.propertyIsNotNull(simpleReferral.referToFacility, 'facilityName')) {
                 result.referToFacility.Facility = this.buildFacility(simpleReferral.referToFacility.facilityId, simpleReferral.referToFacility.facilityName);
             }
-            if (simpleReferral.referToFacility.hasOwnProperty('departmentId') && simpleReferral.referToFacility.hasOwnProperty('departmentName')) {
+            if (utils.propertyIsNotNull(simpleReferral.referToFacility, 'departmentId') && utils.propertyIsNotNull(simpleReferral.referToFacility, 'departmentName')) {
                 result.referToFacility.Department = this.buildDepartment(simpleReferral.referToFacility.departmentId, simpleReferral.referToFacility.departmentName);
             }
         }
 
         // referToPerson
-        if (simpleReferral.hasOwnProperty('referToPerson')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'referToPerson')) {
             result.referToPerson = this.buildPersonalizedInfo(simpleReferral.referToPerson);
         }
 
         // referToUnknownName
-        if (simpleReferral.hasOwnProperty('referToUnknownName')) {
+        if (utils.propertyIsNotNull(simpleReferral, 'referToUnknownName')) {
             result.referToUnknownName = simpleReferral.referToUnknownName;
         }
 
@@ -2514,16 +2513,16 @@ module.exports = {
             var item = {
                 itemName: entry.itemName                // mmlVs01
             };
-            if (entry.hasOwnProperty('value')) {
+            if (utils.propertyIsNotNull(entry, 'value')) {
                 item.value = entry.value;
             }
-            if (entry.hasOwnProperty('numValue')) {
+            if (utils.propertyIsNotNull(entry, 'numValue')) {
                 item.numValue = entry.numValue;
             }
-            if (entry.hasOwnProperty('unit')) {
+            if (utils.propertyIsNotNull(entry, 'unit')) {
                 item.unit = entry.unit;                 // mmlVs02
             }
-            if (entry.hasOwnProperty('itemMemo')) {
+            if (utils.propertyIsNotNull(entry, 'itemMemo')) {
                 var arr = [];
                 entry.itemMemo.forEach((e) => {
                     arr.push(e);
@@ -2533,11 +2532,11 @@ module.exports = {
             vitalSign.item.push(item);
         });
         // Context
-        if (simpleVitalSign.hasOwnProperty('context')) {
+        if (utils.propertyIsNotNull(simpleVitalSign, 'context')) {
             var target =　simpleVitalSign.context;
             vitalSign.context = {};
             // facility
-            if (target.hasOwnProperty('facility')) {
+            if (utils.propertyIsNotNull(target, 'facility')) {
                 var facility = {
                     value: target.facility,
                     attr: {
@@ -2548,11 +2547,11 @@ module.exports = {
                 vitalSign.context.facility = facility;
             }
             // department
-            if (target.hasOwnProperty('department')) {
+            if (utils.propertyIsNotNull(target, 'department')) {
                 var department = {
                     value: target.department
                 };
-                if (target.hasOwnProperty('depCode')) {
+                if (utils.propertyIsNotNull(target, 'depCode')) {
                     department.attr = {
                         depCode: target.depCode,            // MML0028から選択
                         depCodeId: 'MML0028'                // 医科用診療科コード
@@ -2561,32 +2560,32 @@ module.exports = {
                 vitalSign.context.department = department;
             }
             // ward
-            if (target.hasOwnProperty('ward')) {
+            if (utils.propertyIsNotNull(target, 'ward')) {
                 var ward = {
                     value: target.ward
                 };
-                if (target.hasOwnProperty('wardCode') || target.hasOwnProperty('wardCodeId')) {
+                if (utils.propertyIsNotNull(target, 'wardCode') || utils.propertyIsNotNull(target, 'wardCodeId')) {
                     ward.attr = {};
-                    if (target.hasOwnProperty('wardCode')) {
+                    if (utils.propertyIsNotNull(target, 'wardCode')) {
                         ward.attr.wardCode = target.wardCode;
                     }
-                    if (target.hasOwnProperty('wardCodeId')) {
+                    if (utils.propertyIsNotNull(target, 'wardCodeId')) {
                         ward.attr.wardCodeId = target.wardCodeId;
                     }
                 }
                 vitalSign.context.ward = ward;
             }
             // observer
-            if (target.hasOwnProperty('observer')) {
+            if (utils.propertyIsNotNull(target, 'observer')) {
                 var observer = {
                     value: target.observer
                 };
-                if (target.hasOwnProperty('obsCode') || target.hasOwnProperty('obsCodeId')) {
+                if (utils.propertyIsNotNull(target, 'obsCode') || utils.propertyIsNotNull(target, 'obsCodeId')) {
                     observer.attr = {};
-                    if (target.hasOwnProperty('obsCode')) {
+                    if (utils.propertyIsNotNull(target, 'obsCode')) {
                         observer.attr.obsCode = target.obsCode;
                     }
-                    if (target.hasOwnProperty('obsCodeId')) {
+                    if (utils.propertyIsNotNull(target, 'obsCodeId')) {
                         observer.attr.obsCodeId = target.obsCodeId;
                     }
                 }
@@ -2594,22 +2593,22 @@ module.exports = {
             }
         }
         // protocol
-        if (simpleVitalSign.hasOwnProperty('protocol')) {
+        if (utils.propertyIsNotNull(simpleVitalSign, 'protocol')) {
             var target = simpleVitalSign.protocol;
             vitalSign.protocol = {};
-            if (target.hasOwnProperty('procedure')) {
+            if (utils.propertyIsNotNull(target, 'procedure')) {
                 vitalSign.protocol.procedure = target.procedure;
             }
-            if (target.hasOwnProperty('position')) {
+            if (utils.propertyIsNotNull(target, 'position')) {
                 vitalSign.protocol.position = target.position;      // mmlVs03
             }
-            if (target.hasOwnProperty('device')) {
+            if (utils.propertyIsNotNull(target, 'device')) {
                 vitalSign.protocol.device = target.device;
             }
-            if (target.hasOwnProperty('bodyLocation')) {
+            if (utils.propertyIsNotNull(target, 'bodyLocation')) {
                 vitalSign.protocol.bodyLocation = target.bodyLocation;
             }
-            if (target.hasOwnProperty('protMemo')) {
+            if (utils.propertyIsNotNull(target, 'protMemo')) {
                 vitalSign.protocol.protMemo = [];
                 target.protMemo.forEach((pm) => {
                     vitalSign.protocol.protMemo.push(pm);
@@ -2617,7 +2616,7 @@ module.exports = {
             }
         }
         // vsMemo
-        if (simpleVitalSign.hasOwnProperty('vsMemo')) {
+        if (utils.propertyIsNotNull(simpleVitalSign, 'vsMemo')) {
             vitalSign.vsMemo = simpleVitalSign.vsMemo;
         }
         // console.log(JSON.stringify(vitalSign, null, 4));
@@ -2700,7 +2699,7 @@ module.exports = {
         };
 
         // department
-        if (target.hasOwnProperty('department')) {
+        if (utils.propertyIsNotNull(target, 'department')) {
             context.department = {
                 value: target.department,
                 attr: {
@@ -2711,7 +2710,7 @@ module.exports = {
         }
 
         // ward
-        if (target.hasOwnProperty('ward')) {
+        if (utils.propertyIsNotNull(target, 'ward')) {
             context.ward = {
                 value: target.ward,
                 attr: {
@@ -2722,7 +2721,7 @@ module.exports = {
         }
 
         // observer
-        if (target.hasOwnProperty('observer')) {
+        if (utils.propertyIsNotNull(target, 'observer')) {
             context.observer = {
                 value: target.observer,
                 attr: {
@@ -2733,7 +2732,7 @@ module.exports = {
         }
 
         // vitalSign
-        if (simpleFlowSheet.hasOwnProperty('vitalSign')) {
+        if (utils.propertyIsNotNull(simpleFlowSheet, 'vitalSign')) {
             result.VitalSignModule = [];
             simpleFlowSheet.vitalSign.forEach((entry) => {
                 result.VitalSignModule.push(this.vitalSign(docInfo, entry));
@@ -2741,7 +2740,7 @@ module.exports = {
         }
 
         // intake
-        if (simpleFlowSheet.hasOwnProperty('intake')) {
+        if (utils.propertyIsNotNull(simpleFlowSheet, 'intake')) {
             result.intake = [];
             simpleFlowSheet.intake.forEach((entry) => {
                 result.intake.push(JSON.parse(JSON.stringify(entry)));
@@ -2749,7 +2748,7 @@ module.exports = {
         }
 
         // bodilyOutput
-        if (simpleFlowSheet.hasOwnProperty('bodilyOutput')) {
+        if (utils.propertyIsNotNull(simpleFlowSheet, 'bodilyOutput')) {
             result.bodilyOutput = [];
             simpleFlowSheet.bodilyOutput.forEach((entry) => {
                 result.bodilyOutput.push(JSON.parse(JSON.stringify(entry)));
@@ -2757,7 +2756,7 @@ module.exports = {
         }
 
         // fsMemo
-        if (simpleFlowSheet.hasOwnProperty('fsMemo')) {
+        if (utils.propertyIsNotNull(simpleFlowSheet, 'fsMemo')) {
             result.fsMemo = simpleFlowSheet.fsMemo;
         }
 
@@ -2808,7 +2807,7 @@ module.exports = {
             };
             // 以下オプションなのでテストしながら設定
             // 院内、院外
-            if (entry.hasOwnProperty('issuedTo')) {
+            if (utils.propertyIsNotNull(entry, 'issuedTo')) {
                 if (entry.issuedTo === 'external') {
                     external.medication.push(medication);
                 } else if (entry.issuedTo === 'internal') {
@@ -2818,39 +2817,39 @@ module.exports = {
                 inOrExt.medication.push(medication);
             }
             // 1日の内服回数
-            if (entry.hasOwnProperty('frequencyPerDay')) {
+            if (utils.propertyIsNotNull(entry, 'frequencyPerDay')) {
                 medication.frequencyPerDay = entry.frequencyPerDay;
             }
 
             // 服薬開始日
-            if (entry.hasOwnProperty('startDate')) {
+            if (utils.propertyIsNotNull(entry, 'startDate')) {
                 medication.startDate = entry.startDate;
             }
 
             // 服薬期間
-            if (entry.hasOwnProperty('duration')) {
+            if (utils.propertyIsNotNull(entry, 'duration')) {
                 medication.duration = entry.duration;
             }
 
             // 用法
-            if (entry.hasOwnProperty('instruction')) {
+            if (utils.propertyIsNotNull(entry, 'instruction')) {
                 medication.instruction = entry.instruction;
             }
 
             // 頓用
-            if (entry.hasOwnProperty('PRN')) {
+            if (utils.propertyIsNotNull(entry, 'PRN')) {
                 medication.PRN = entry.PRN;
             }
 
             // ジェネリック デフォルトは true
-            if (entry.hasOwnProperty('brandSubstitutionPermitted')) {
+            if (utils.propertyIsNotNull(entry, 'brandSubstitutionPermitted')) {
                 medication.brandSubstitutionPermitted = entry.brandSubstitutionPermitted;
             } else {
                 medication.brandSubstitutionPermitted = true;
             }
 
             // 長期処方
-            if (entry.hasOwnProperty('longTerm')) {
+            if (utils.propertyIsNotNull(entry, 'longTerm')) {
                 medication.longTerm = entry.longTerm;
             }
         });
@@ -2914,35 +2913,35 @@ module.exports = {
                 doseUnit: entry.doseUnit                // 単位
             };
             // 投与開始日時
-            if (entry.hasOwnProperty('startDateTime')) {
+            if (utils.propertyIsNotNull(entry, 'startDateTime')) {
                 medication.startDateTime = entry.startDateTime;
             }
             // 投与修了日時
-            if (entry.hasOwnProperty('endDateTime')) {
+            if (utils.propertyIsNotNull(entry, 'endDateTime')) {
                 medication.endDateTime = entry.endDateTime;
             }
             // 用法指示
-            if (entry.hasOwnProperty('instruction')) {
+            if (utils.propertyIsNotNull(entry, 'instruction')) {
                 medication.instruction = entry.instruction;
             }
             // 投与経路
-            if (entry.hasOwnProperty('route')) {
+            if (utils.propertyIsNotNull(entry, 'route')) {
                 medication.route = entry.route;
             }
             // 投与部位
-            if (entry.hasOwnProperty('site')) {
+            if (utils.propertyIsNotNull(entry, 'site')) {
                 medication.site = entry.site;
             }
             // 注射方法
-            if (entry.hasOwnProperty('deliveryMethod')) {
+            if (utils.propertyIsNotNull(entry, 'deliveryMethod')) {
                 medication.deliveryMethod = entry.deliveryMethod;
             }
             // 処方番号
-            if (entry.hasOwnProperty('batchNo')) {
+            if (utils.propertyIsNotNull(entry, 'batchNo')) {
                 medication.batchNo = entry.batchNo;
             }
             // 追加指示，コメント
-            if (entry.hasOwnProperty('additionalInstruction')) {
+            if (utils.propertyIsNotNull(entry, 'additionalInstruction')) {
                 medication.additionalInstruction = entry.additionalInstruction;
             }
             injection.medication.push(medication);
@@ -2986,7 +2985,7 @@ module.exports = {
         var patientModule = this.patientInfo(null, context.patient);
         // アクセス権
         var simpleAccessRight = {};
-        if (context.hasOwnProperty('accessRight')) {
+        if (utils.propertyIsNotNull(context, 'accessRight')) {
             simpleAccessRight = context.accessRight;
         } else {
             // デフォルトを設定
