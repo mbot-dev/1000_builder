@@ -6,7 +6,7 @@
 ### APIサポート
 千年カルテに参加するとプロジェクトから開発用のサーバーが提供されます。下記の情報を参考にそれぞれの処理系でAPIをサポートしてください。
 
- * [API情報](https://github.com/mbot-dev/1000_builder/wiki/simple)
+ * [API情報](https://github.com/mbot-dev/1000_builder/wiki)
 
 
 このリポジトリーにはAPIサーバーとサンプルプログラムが置いてありますが、独自に拡張される場合等を除き、インストール以降の手順は不要です。
