@@ -11,7 +11,7 @@ var simplePatient = {
     kanjiName: '宮田 奈々',                             // 漢字の氏名
     kanaName: 'ミヤタ ナナ',                             // カナの氏名 （名寄せのため 必須）
     gender: 'female',                                  // 性別 MML0010を使用 (女:female 男:male その他:other 不明:unknown)
-    dateOfBirth: '1994-11-26',                         // 生年月日 YYYY-MM-DD 形式
+    dateOfBirth: '1994-11-26'                          // 生年月日 YYYY-MM-DD 形式
 };
 
 //------------------------------------------------------------------
@@ -330,7 +330,7 @@ var rpc = function (simpleComposition, callback) {
                         callback(err, null);
                     } else {
                         // 再帰する => 再度ポスト
-                        rpc(contentType, simpleComposition, callback);
+                        rpc(simpleComposition, callback);
                     }
                 });
             } else {

@@ -61,7 +61,7 @@ var createTest = function (callback) {
     // simpleTest
     var simpleTest = {
         context: {
-            issuedId: uuid.v4(),                            // 検査依頼ID
+            issuedId: generateUUID(),                       // 検査依頼ID
             issuedTime: issuedTimestamp,                    // 受付日時 YYYY-MM-DDTHH:mm:ss 形式
             resultIssued: resultTimestamp,                  // 報告日時 YYYY-MM-DDTHH:mm:ss 形式
             resultStatus: '最終報告',                        // 報告状態 最終報告または検査中

@@ -4,7 +4,7 @@ var postBaseClinic = function (callback) {
     // simpleBaseClinic
     var simpleBaseClinic = {                                // 基礎的診療情報
         allergy: [],                                        // アレルギー情報 ? [allergyItem]
-        bloodtype: {},
+        bloodtype: {}
         // infection: []                                    // 感染性情報 ? [infectionItem]
     };
 

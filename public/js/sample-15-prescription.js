@@ -70,8 +70,8 @@ var postPrescription = function (callback) {
     contextに contentType = 'prescription' の属性を設定する
     simpleComposition.context.contentType = 'prescription';
 
-    rpc(simpleComposition, function (err, result)) {
-        callback(err, simplePrescription, mml);
+    rpc(simpleComposition, function (err, mml) {
+        callback(err, simpleComposition, mml);
     });
     ***********************************************************/
 

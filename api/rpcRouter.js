@@ -6,6 +6,7 @@ const utils = require('../lib/utils');
 const jweSimple = require('../api/jweSimple');
 const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
+const publisher = require('../api/publisher');
 
 var router = express.Router();
 
