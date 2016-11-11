@@ -3,10 +3,11 @@
 var postRegisteredDiagnosis = function (callback) {
 
     // デモ用の日時
+    // 疾患終了日を今としてその30日前を疾患開始日とする
     var now = new Date();
-    var dateOfRemission = toDateString(now);                // 疾患終了日
-    now.setDate(now.getDate() - 30);                        // 30日前を
-    var dateOfOnset = toDateString(now);                    // 疾患開始日
+    var dateOfRemission = dateAsString(now);                // 疾患終了日
+    now.setDate(now.getDate() - 30);
+    var dateOfOnset = dateAsString(now);                    // 疾患開始日
 
     // simpleRegisteredDignosis
     var simpleRegisteredDignosis = {
@@ -20,12 +21,10 @@ var postRegisteredDiagnosis = function (callback) {
     };
 
     // コンポジションを生成する
-    var confirmDate = nowAsDateTime();          // 確定日時　YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
         context: {                              // context: 病名確定時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -36,6 +35,6 @@ var postRegisteredDiagnosis = function (callback) {
     // POST
     post('registeredDiagnosis', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleRegisteredDignosis, mml);
+        callback(err, simpleComposition, mml);
     });
 };

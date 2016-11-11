@@ -10,6 +10,7 @@ const logger = require('./logger/logger');
 const indexRouter = require('./api/indexRouter');
 const authRouter = require('./api/authRouter');
 const simpleRouter = require('./api/simpleRouter');
+const rpcRouter = require('./api/rpcRouter');
 
 const app = express();
 (function (param) {
@@ -40,6 +41,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(indexRouter);
 app.use(config.path.oauth2, authRouter);
 app.use(config.path.simple, simpleRouter);
+app.use(config.path.rpc, rpcRouter);
 
 // Start Server
 const appEnv = cfenv.getAppEnv();

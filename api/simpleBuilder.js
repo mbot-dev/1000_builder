@@ -40,25 +40,7 @@ module.exports = {
         return arr.join('');
     },
 
-    buildExtRefWithoutBase64: function (src) {
-        var copyExt = {
-            attr: {
-                href: src.href
-            }
-        };
-        if (utils.propertyIsNotNull(src, 'contentType')) {
-            copyExt.attr.contentType = src.contentType;
-        }
-        if (utils.propertyIsNotNull(src, 'medicalRole')) {
-            copyExt.attr.medicalRole = src.medicalRole;
-        }
-        if (utils.propertyIsNotNull(src, 'title')) {
-            copyExt.attr.title = src.title;
-        }
-        return copyExt;
-    },
-
-    buildExtRef: function (e) {
+    buildExtRef: function (e, extArray) {
         /*********************
         var e = {
             href: '',                           // uri
@@ -68,25 +50,28 @@ module.exports = {
             base64: ''                          // PDF、画像等の base64
         };
         *********************/
-        var ref = {
+        var copyExt = {
             attr: {
                 href: e.href
             }
         };
         if (utils.propertyIsNotNull(e, 'contentType')) {
-            ref.attr.contentType = e.contentType;
+            copyExt.attr.contentType = e.contentType;
         }
         if (utils.propertyIsNotNull(e, 'medicalRole')) {
-            ref.attr.medicalRole = e.medicalRole;
+            copyExt.attr.medicalRole = e.medicalRole;
         }
         if (utils.propertyIsNotNull(e, 'title')) {
-            ref.attr.title = e.title;
+            copyExt.attr.title = e.title;
         }
-        // base64 ここは中間オブジェクト
-        if (utils.propertyIsNotNull(e, 'base64')) {
-            ref.attr.base64 = e.base64;
+        // base64 を配列に集める
+        if (extArray !== null && utils.propertyIsNotNull(e, 'base64')) {
+            extArray.push({
+                href: copyExt.attr.href,
+                base64: e.base64
+            });
         }
-        return ref;
+        return copyExt;
     },
 
     /**
@@ -529,7 +514,7 @@ module.exports = {
     /**
      * 1. PatientModule
      */
-    patientInfo: function (docInfo, simplePatient) {
+    patientInfo: function (docInfo, simplePatient, extArray) {
         /********************************************************************
         var simplePatient = {
             id: '',                                         // Id
@@ -622,7 +607,7 @@ module.exports = {
     /**
      * 2. HealthInsuranceModule
      */
-    healthInsurance: function (docInfo, simpleHealthInsurance) {
+    healthInsurance: function (docInfo, simpleHealthInsurance, extArray) {
         /*******************************************************************************
         // 保険種別
         insuranceClass;
@@ -792,7 +777,7 @@ module.exports = {
     /**
      * 3. RegisteredDiagnosisModule
      */
-    registeredDiagnosis: function (docInfo, simpleDiagnosis) {
+    registeredDiagnosis: function (docInfo, simpleDiagnosis, extArray) {
         /****************************************************
         var simpleDiagnosis = {
             diagnosis: '',
@@ -850,7 +835,7 @@ module.exports = {
     /**
      * 4. LifestyleModule
      */
-    lifestyle: function (docInfo, simpleLifestyle) {
+    lifestyle: function (docInfo, simpleLifestyle, extArray) {
         /******************************************
         var simpleLifestyle = {
             occupation: '',
@@ -865,7 +850,7 @@ module.exports = {
     /**
      * 5. BaseClinicModule
      */
-    baseClinic: function (docInfo, simpleBaseClinic) {
+    baseClinic: function (docInfo, simpleBaseClinic, extArray) {
         /*******************************************************************************
         var simpleBaseClinic = {                    // 基礎的診療情報
             allergy: [],                            // アレルギー情報 ? [allergyItem]
@@ -906,7 +891,7 @@ module.exports = {
     /**
      * 6. FirstClinicModule
      */
-    firstClinic: function (docInfo, simpleFirstClinic) {
+    firstClinic: function (docInfo, simpleFirstClinic, extArray) {
         /******************************************************************************
         var simpleFirstClinic = {                                   // 初診時特有情報
             familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
@@ -1088,7 +1073,7 @@ module.exports = {
     /**
      * 7. ProgressCourceModule
      */
-    progressCourse: function (docInfo, simpleProgressCource) {
+    progressCourse: function (docInfo, simpleProgressCource, extArray) {
         /*******************************************************
         var simpleProgressCource = {
             freeExpression: '',
@@ -1112,10 +1097,10 @@ module.exports = {
                 entry.href = newHREF;
 
                 // 1. base64 なし => resul.extRef へ
-                result.extRef.push(this.buildExtRefWithoutBase64(entry));
+                result.extRef.push(this.buildExtRef(entry, null));
 
                 // 2. base64あり => docInfo.extRefs にまとめる
-                docInfo.extRefs.push(this.buildExtRef(entry));
+                docInfo.extRefs.push(this.buildExtRef(entry, extArray));
             });
         }
         return result;
@@ -1124,7 +1109,7 @@ module.exports = {
     /**
      * 8. SurgeryModule
      */
-    buildSurgeryItem: function (docInfo, simpleSurgery) {
+    buildSurgeryItem: function (docInfo, simpleSurgery, extArray) {
         /*******************************************************************************
         var simpleSurgery = {                                   // 手術記録情報
             surgeryItem: []                                     // [surgeryItem]
@@ -1325,13 +1310,13 @@ module.exports = {
             // e.href
             var newHREF = this.createHREF(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
             simpleSurgery.referenceInfo.href = newHREF;
-            logger.info(newHREF);
+            // logger.info(newHREF);
 
             // No base64
-            result.referenceInfo = this.buildExtRefWithoutBase64(simpleSurgery.referenceInfo);
+            result.referenceInfo = this.buildExtRef(simpleSurgery.referenceInfo, null);
 
             // With base64
-            docInfo.extRefs.push(this.buildExtRef(simpleSurgery.referenceInfo));
+            docInfo.extRefs.push(this.buildExtRef(simpleSurgery.referenceInfo, extArray));
         }
         // logger.info('after referenceInfo');
 
@@ -1344,12 +1329,12 @@ module.exports = {
         return result;
     },
 
-    surgery: function (docInfo, simpleSurgery) {
+    surgery: function (docInfo, simpleSurgery, extArray) {
         var result = {
             surgeryItem: []
         };
         simpleSurgery.surgeryItem.forEach((entry) => {
-            result.surgeryItem.push(this.buildSurgeryItem(docInfo, entry));
+            result.surgeryItem.push(this.buildSurgeryItem(docInfo, entry, extArray));
         });
         return result;
     },
@@ -1357,7 +1342,7 @@ module.exports = {
     /**
      * 9. SummaryModule
      */
-    summary: function (docInfo, simpleSummary) {
+    summary: function (docInfo, simpleSummary, extArray) {
         /***********************************************************************
         var SummaryModule = {                                       // 臨床経過サマリー情報
             serviceHistory: {                                       // 期間情報
@@ -1654,8 +1639,8 @@ module.exports = {
                 simpleSummary.physicalExam.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.physicalExam.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.physicalExam.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -1688,8 +1673,8 @@ module.exports = {
                     entry.extRef.forEach((e) => {
                         newHREF = this.createHREF(docId, refIndex++, e.href);
                         e.href = newHREF;
-                        clinicalRecord.extRef.push(this.buildExtRefWithoutBase64(e));
-                        docInfo.extRefs.push(this.buildExtRef(e));
+                        clinicalRecord.extRef.push(this.buildExtRef(e, null));
+                        docInfo.extRefs.push(this.buildExtRef(e, extArray));
                     });
                 }
                 // logger.info(JSON.stringify(clinicalRecord, null, 4));
@@ -1708,8 +1693,8 @@ module.exports = {
                 simpleSummary.dischargeFindings.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.dischargeFindings.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.dischargeFindings.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -1731,8 +1716,8 @@ module.exports = {
                 simpleSummary.medication.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.medication.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.medication.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
             // logger.info(JSON.stringify(result.medication, null, 4));
@@ -1768,8 +1753,8 @@ module.exports = {
                     entry.extRef.forEach((e) => {
                         newHREF = this.createHREF(docId, refIndex++, e.href);
                         e.href = newHREF;
-                        tr.extRef.push(this.buildExtRefWithoutBase64(e));
-                        docInfo.extRefs.push(this.buildExtRef(e));
+                        tr.extRef.push(this.buildExtRef(e, null));
+                        docInfo.extRefs.push(this.buildExtRef(e, extArray));
                     });
                 }
                 // logger.info(JSON.stringify(tr, null, 4));
@@ -1787,8 +1772,8 @@ module.exports = {
                 simpleSummary.plan.extRef.forEach((e) => {
                     newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.plan.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.plan.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -1807,7 +1792,7 @@ module.exports = {
     /**
      * 10. TestModule
      */
-    test: function (docInfo, simpleTest) {
+    test: function (docInfo, simpleTest, extArray) {
         /***********************************
         var simpleTest = {
             context: {
@@ -1978,7 +1963,7 @@ module.exports = {
     /**
      * 11. ReportModule
      */
-    report: function (docInfo, simpleReport) {
+    report: function (docInfo, simpleReport, extArray) {
         /********************************************************************************
         var simpleReport = {
             context: {},                                      // 報告書ヘッダー情報
@@ -2237,10 +2222,10 @@ module.exports = {
                     // logger.info(newHREF);
 
                     // 1. base64 なし => resul.extRef へ
-                    reportBody.testNotes.extRef.push(this.buildExtRefWithoutBase64(entry));
+                    reportBody.testNotes.extRef.push(this.buildExtRef(entry, null));
 
                     // 2. base64あり => docInfo.extRefs にまとめる
-                    var tmp = this.buildExtRef(entry);
+                    var tmp = this.buildExtRef(entry, extArray);
                     // logger.info(JSON.stringify(tmp, null, 4));
                     docInfo.extRefs.push(tmp);
                 });
@@ -2281,7 +2266,7 @@ module.exports = {
     /**
      * 12. ReferralModule
      */
-    referral: function (docInfo, simpleReferral) {
+    referral: function (docInfo, simpleReferral, extArray) {
         /*******************************************************************************
         var simpleReferral = {
             patient: {},                                            // 患者情報
@@ -2375,8 +2360,8 @@ module.exports = {
                 simpleReferral.pastHistory.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.pastHistory.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.pastHistory.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -2391,8 +2376,8 @@ module.exports = {
                 simpleReferral.familyHistory.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.familyHistory.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.familyHistory.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -2407,8 +2392,8 @@ module.exports = {
                 simpleReferral.presentIllness.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.presentIllness.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.presentIllness.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -2423,8 +2408,8 @@ module.exports = {
                 simpleReferral.testResults.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.testResults.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.testResults.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -2449,7 +2434,7 @@ module.exports = {
             if (utils.propertyIsNotNull(simpleReferral.medication, 'extRef')) {
                 result.medication.extRef = [];
                 simpleReferral.medication.extRef.forEach((entry) => {
-                    result.medication.extRef(this.buildExtRef(entry));
+                    result.medication.extRef(this.buildExtRef(entry, extArray));
                 });
             }
         }
@@ -2469,8 +2454,8 @@ module.exports = {
                 simpleReferral.remarks.extRef.forEach((e) => {
                     newHREF = createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
-                    result.remarks.extRef.push(this.buildExtRefWithoutBase64(e));
-                    docInfo.extRefs.push(this.buildExtRef(e));
+                    result.remarks.extRef.push(this.buildExtRef(e, null));
+                    docInfo.extRefs.push(this.buildExtRef(e, extArray));
                 });
             }
         }
@@ -2502,7 +2487,7 @@ module.exports = {
     /**
      * 13. VitalSignModule
      */
-    vitalsign: function (docInfo, simpleVitalSign) {
+    vitalsign: function (docInfo, simpleVitalSign, extArray) {
         // 必須属性
         var vitalSign = {
             item: [],
@@ -2626,7 +2611,7 @@ module.exports = {
     /**
      * 14. FlowSheetModule
      */
-    flowsheet: function (docInfo, simpleFlowSheet) {
+    flowsheet: function (docInfo, simpleFlowSheet, extArray) {
         /*******************************************************************************
         var simpleFlowSheet = {
             context: {},
@@ -2766,7 +2751,7 @@ module.exports = {
     /**
      * 15. PrescriptionModule
      */
-    prescription: function (docInfo, simplePrescription) {
+    prescription: function (docInfo, simplePrescription, extArray) {
         /**********************************************************
         var simplePrescription = {
             medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
@@ -2871,7 +2856,7 @@ module.exports = {
     /**
      * 16. InjectionModule
      */
-    injection: function (docInfo, simpleInjection) {
+    injection: function (docInfo, simpleInjection, extArray) {
         /**********************************************************
         var simpleInjection = {
             medication: [],
@@ -2954,7 +2939,7 @@ module.exports = {
     /**
      * 17. HemoDialysysModule
      */
-    hemodialysis: function (docInfo, simpleHemoDialysys) {
+    hemodialysis: function (docInfo, simpleHemoDialysys, extArray) {
         return null;
     },
 
@@ -3028,6 +3013,7 @@ module.exports = {
         // MML のモジュール単位に付加される
         var docInfo = {};
         var content = {};
+        var extArray = [];
 
         simpleComposition.content.forEach((entry) => {
             if (contentType === 'prescription') {
@@ -3035,7 +3021,7 @@ module.exports = {
                 // metaInfo.contentModuleType = contentType;
                 // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
                 // ToDo ToDo
-                var arr = this.prescription(docInfo, entry);
+                var arr = this.prescription(docInfo, entry, extArray);
                 // 結果は配列で返る
                 arr.forEach((prescription) => {
                     // それに薬が入っていたらModuleItemへ加える
@@ -3049,12 +3035,8 @@ module.exports = {
                     }
                 });
             } else {
-                // 検体検査のcreatorは検査会社の代表
-                var creator = (contentType === 'test') ? this.buildCreatorInfo(entry.context.laboratory) : creatorInfo;
-                // metaInfo.contentModuleType = contentType;
-                // metaInfo.uuid = uuid.v4();
-                docInfo = this.buildDocInfo(metaInfo, creator, accessRight);
-                content = this[contentType].call(this, docInfo, entry);
+                docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                content = this[contentType].call(this, docInfo, entry, extArray);
                 result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
             }
         });
@@ -3067,8 +3049,13 @@ module.exports = {
         tmpArr.push(docInfo.docId.uid);
         var fileName = tmpArr.join('_');
 
+        // extArray.forEach((ex) => {
+            // logger.info(ex.href);
+        // });
+
         return {
             fileName: fileName,
+            extArray: extArray,
             json: result
         };
     }

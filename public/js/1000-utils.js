@@ -82,32 +82,3 @@ function addZero (x, n) {
     }
     return x;
 }
-
-// yyyy-MM-dd
-function toDateString (date) {
-    var yyyy = date.getFullYear();
-    var MM = addZero(date.getMonth() + 1, 2);
-    var dd = addZero(date.getDate(), 2);
-    var arr = [yyyy, '-', MM, '-', dd];
-    return arr.join('');
-}
-
-// yyyy-MM-ddTHH:mm:ss
-function toDateTimeString (date) {
-    var yyyy = date.getFullYear();
-    var MM = addZero(date.getMonth() + 1, 2);
-    var dd = addZero(date.getDate(), 2);
-    var HH = addZero(date.getHours(), 2);
-    var mm = addZero(date.getMinutes(), 2);
-    var ss = addZero(date.getSeconds(), 2);
-    var arr = [yyyy, '-', MM, '-', dd, 'T', HH, ':', mm, ':', ss];
-    return arr.join('');
-}
-
-function nowAsDateTime () {
-    return toDateTimeString(new Date());
-}
-
-function nowAsDate () {
-    return toDateString(new Date());
-}

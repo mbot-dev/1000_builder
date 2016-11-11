@@ -1,10 +1,141 @@
+//
+// サンプルプログラムで共通に使用するオブジェクト
+//
+
 //------------------------------------------------------------------
-// Global object app context
+// 患者
+//------------------------------------------------------------------
+var simplePatient = {
+    id: '0516',                                        // 患者ID
+    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設IDでプロジェクトから指定される
+    kanjiName: '宮田 奈々',                             // 漢字の氏名
+    kanaName: 'ミヤタ ナナ',                             // カナの氏名 （名寄せのため 必須）
+    gender: 'female',                                  // 性別 MML0010を使用 (女:female 男:male その他:other 不明:unknown)
+    dateOfBirth: '1994-11-26',                         // 生年月日 YYYY-MM-DD 形式
+};
+
+//------------------------------------------------------------------
+// 医師（主治医、担当医、責任医師）
+//------------------------------------------------------------------
+var simpleCreator = {
+    id: '201605',                                      // 医師のID
+    kanjiName: '青山 慶二',                             // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
+    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設ID プロジェクトから指定される
+    facilityName: 'シルク内科',                          // 施設名
+    facilityZipCode: '231-0023',                       // 施設郵便番号
+    facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
+    facilityPhone: '045-571-6572',                     // 施設電話番号
+    departmentId: '01',                                // 医科用の場合は MML0028、歯科用の場合は MML0030 から選ぶ（オプション）
+    departmentName: '第一内科',                         // 診療科名（オプション）
+    license: 'doctor'                                  // 医療資格 MML0026を使用（オプション）
+};
+
+//------------------------------------------------------------------
+// 報告書作成者 sampleReport で使用
+//------------------------------------------------------------------
+var simpleReporter = {
+    id: '301604',                                      // 医師のID
+    kanjiName: '大谷 誠也',                             // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
+    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設ID プロジェクトから指定される
+    facilityName: 'シルク内科',                          // 施設名
+    facilityZipCode: '231-0023',                       // 施設郵便番号
+    facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
+    facilityPhone: '045-571-6572',                     // 施設電話番号
+    departmentId: '01',                                // 医科用の場合は MML0028、歯科用の場合は MML0030 から選ぶ（オプション）
+    departmentName: '放射線科',                         // 診療科名（オプション）
+    license: 'doctor'                                  // 医療資格 MML0026を使用（オプション）
+};
+
+//------------------------------------------------------------------
+// 検体検査実施施設の代表 sampleTest で使用
+//------------------------------------------------------------------
+var simpleTester = {
+    id: '301604',                                      // 医師のID
+    kanjiName: '石山 由美子',                            // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
+    facilityId: '1.2.840.114319.5.1000.1.27.500',      // 医療連携用の施設ID プロジェクトから指定される
+    facilityName: 'ベイサイド・ラボ',                     // 施設名
+    facilityZipCode: '231-0000',                       // 施設郵便番号
+    facilityAddress: '横浜市日本大通り付近 1-5',           // 施設住所
+    facilityPhone: '045-571-6572',                     // 施設電話番号
+    license: 'lab'                                     // 医療資格 MML0026を使用（オプション）
+};
+
+//------------------------------------------------------------------
+// アクセス権　プロジェクトでは下記の設定を推奨
+//------------------------------------------------------------------
+var simpleRight = {
+    patient: 'read',                                   // 患者のアクセス権 参照可能
+    creator: 'all',                                    // 診察した病院（記載者施設と称す）のアクセス権 参照、修正、削除が可能
+    experience: 'read'                                 // 診療歴のある病院（患者がかかった事がある病院） 参照可能
+};
+
+//------------------------------------------------------------------
+// 時間関係のユーティリティ
+//------------------------------------------------------------------
+var padZero = function (x) {
+    if (x.toString().length < 2) {
+        x = '0' + x;
+    }
+    return x;
+};
+// YYYY-MM-DDTHH:mm:ss 形式の文字列にして返す
+var dateAsTimeStamp = function (date) {
+    var yyyy = date.getFullYear();
+    var MM = padZero(date.getMonth() + 1);
+    var DD = padZero(date.getDate());
+    var HH = padZero(date.getHours());
+    var mm = padZero(date.getMinutes());
+    var ss = padZero(date.getSeconds());
+    // 連結
+    var arr = [yyyy, '-', MM, '-', DD, 'T', HH, ':', mm, ':', ss];
+    return arr.join('');
+};
+// YYYY-MM-DD 形式の文字列にして返す
+var dateAsString = function (date) {
+    var yyyy = date.getFullYear();
+    var MM = padZero(date.getMonth() + 1);
+    var DD = padZero(date.getDate());
+    // 連結
+    var arr = [yyyy, '-', MM, '-', DD];
+    return arr.join('');
+};
+
+//------------------------------------------------------------------
+// 確定日
+//------------------------------------------------------------------
+var confirmDate = function () {
+    // 医学イベント（カルテ等）の確定日時を YYYY-MM-DDTHH:mm:ss の形式で返す
+    // サンプルコードでは現在時刻を使用する
+    return dateAsTimeStamp(new Date());
+};
+
+//------------------------------------------------------------------
+// uuid
+//------------------------------------------------------------------
+var generateUUID = function () {
+    // 各処理系でUUIDを生成する ex. 570818C7-E921-469E-802C-3EE03DDD3EAB
+    var aUUID = window.uuid.v4();
+    return aUUID;
+};
+
+//------------------------------------------------------------------
+// ファイルのコンテンツをBase64で返す
+//------------------------------------------------------------------
+var fileAsBase64 = function (path) {
+    // ファイルの内容をバイナリーデータとして読み込みBase64にエンコードして返す
+    // JavaScriptの例
+    // var binary = fs.readFileSync(path);
+    // return new Buffer(binary).toString('base64');
+    // サンプルではnullを返す
+    return null;
+};
+
+//------------------------------------------------------------------
+// Access Tokenを保存しておく変数
 //------------------------------------------------------------------
 var appCtx = {
     access_token: '',           // アクセストークン
-    expires_in: 0,              // トークンの有効期間（秒）このデモでは使用しない
-    test_results: []            // デモ固有で検査結果を格納する配列
+    expires_in: 0               // トークンの有効期間（秒）このデモでは使用しない
 };
 
 //------------------------------------------------------------------
@@ -111,8 +242,13 @@ var post = function (contentType, simpleComposition, callback) {
             if (xhr.status > 199 && xhr.status < 300) {
                 // response = 200, responseからJSONを生成する
                 var parsed = JSON.parse(xhr.responseText);
-                // 生成されたMMLをコールバックする
-                callback(null, parsed.mml);
+                if (parsed.error) {
+                    // エラー
+                    callback(parsed.error.message, null);
+                } else {
+                    // 生成されたMMLをコールバックする
+                    callback(null, parsed.result.mml);
+                }
 
             } else if (xhr.status > 399 && xhr.status < 500) {
                 // status = 400 | 401
@@ -138,33 +274,71 @@ var post = function (contentType, simpleComposition, callback) {
     xhr.send(JSON.stringify(simpleComposition));
 };
 
-// 患者
-var simplePatient = {
-    id: '0516',                                        // 患者ID
-    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設IDでプロジェクトから指定される
-    kanjiName: '宮田 奈々',                             // 漢字の氏名（氏名は漢字、カナ、ローマ字のどれか一つ必須）
-    kanaName: 'ミヤタ ナナ',                             // カナの氏名（同上）
-    gender: 'female',                                  // 性別 MML0010を使用 (女:female 男:male その他:other 不明:unknown)
-    dateOfBirth: '1994-11-26',                         // 生年月日 YYYY-MM-DD 形式
-};
 
-// 医師等
-var simpleCreator = {
-    id: '201605',                                      // 医師のID
-    kanjiName: '青山 慶二',                             // 医師名（kanjiName、kanaName、romanNameのどれか一つ必須）
-    facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携用の施設ID プロジェクトから指定される
-    facilityName: 'シルク内科',                          // 施設名
-    facilityZipCode: '231-0023',                       // 施設郵便番号
-    facilityAddress: '横浜市中区山下町1番地 8-9-01',      // 施設住所
-    facilityPhone: '045-571-6572',                     // 施設電話番号
-    departmentId: '01',                                // 医科用の場合は MML0028、歯科用の場合は MML0030 から選ぶ（オプション）
-    departmentName: '第一内科',                         // 診療科名（オプション）
-    license: 'doctor'                                  // 医療資格 MML0026を使用（オプション）
-};
+//------------------------------------------------------------------
+// RPC バージョン
+// jsonRpcオブジェクトを/mml/rpc/v1へPOSTする
+//------------------------------------------------------------------
+var rpc = function (simpleComposition, callback) {
 
-// アクセス権
-var simpleRight = {
-    patient: 'read',
-    creator: 'all',
-    experience: 'read'
+    // JSON-RPC 2.0
+    var jsonRpc = {
+        jsonrpc: '2.0',
+        method: 'build',
+        params: [simpleComposition],
+        id: simpleComposition.context.uuid
+    };
+
+    // JavaScript HTTPクライアント
+    var xhr = new XMLHttpRequest();
+
+    // ポスト先 /mml/rpc/v1
+    xhr.open('POST', '/mml/rpc/v1', true);
+
+    // Authorizationヘッダーを Bearer access_token にセットする
+    // 'Bearer' + 半角スペース + アクセストークン で連結する
+    xhr.setRequestHeader('Authorization', 'Bearer ' + appCtx.access_token);
+
+    // contentType = application/json
+    xhr.setRequestHeader('Content-type', 'application/json');
+
+    // Event listener XMLHttpRequest固有
+    xhr.onreadystatechange = function () {
+
+        if (xhr.readyState === 4) {
+
+            // レスポンスを調べる
+            if (xhr.status > 199 && xhr.status < 300) {
+                // response = 200, responseからJSONを生成する
+                var parsed = JSON.parse(xhr.responseText);
+                if (parsed.error) {
+                    // エラー
+                    callback(parsed.error.message, null);
+                } else {
+                    // 生成されたMMLをコールバックする
+                    callback(null, parsed.result.mml);
+                }
+
+            } else if (xhr.status > 399 && xhr.status < 500) {
+                // status = 400 | 401
+                // access tokenが失効しているか不正な場合
+                // Authorization に Bearer token がセットされていない
+                // Tokenを再取得する
+                getAccessToken(function (err) {
+                    if (err) {
+                        // トークンの取得に失敗
+                        callback(err, null);
+                    } else {
+                        // 再帰する => 再度ポスト
+                        rpc(contentType, simpleComposition, callback);
+                    }
+                });
+            } else {
+                // simpleCompositionに誤りがある
+                // status = 500
+                callback(new Error(xhr.status), null);
+            }
+        }
+    };
+    xhr.send(JSON.stringify(jsonRpc));
 };

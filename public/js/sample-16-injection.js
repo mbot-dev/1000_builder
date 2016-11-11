@@ -18,8 +18,8 @@ var postInjection = function (callback) {
         medicineCodeystem: 'YJ',                        // コード体系
         dose: '500',                                    // 用量
         doseUnit: 'ml',                                 // 単位
-        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss（オプション）
-        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        startDateTime: dateAsTimeStamp(start),          // 投与開始日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        endDateTime: dateAsTimeStamp(end),              // 投与終了日時 YYYY-MM-DDTHH:mm:ss（オプション）
         instruction: '2時間で投与する',                    // 用法指示（オプション）
         route: '右前腕静脈ルート',                         // 投与経路 投与する注射ルートを記載する。例：右前腕留置ルート，右鎖骨下中心静脈ルート（オプション）
         site: '右前腕',                                  // 投与部位 注射した部位を記載する。例：右上腕三角，腹部（オプション）
@@ -48,8 +48,8 @@ var postInjection = function (callback) {
         medicineCodeystem: 'YJ',                        // コード体系
         dose: '1',                                      // 用量
         doseUnit: 'V',                                  // 単位
-        startDateTime: toDateTimeString(start),         // 投与開始日時 YYYY-MM-DDTHH:mm:ss（オプション）
-        endDateTime: toDateTimeString(end),             // 投与終了日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        startDateTime: dateAsTimeStamp(start),          // 投与開始日時 YYYY-MM-DDTHH:mm:ss（オプション）
+        endDateTime: dateAsTimeStamp(end),              // 投与終了日時 YYYY-MM-DDTHH:mm:ss（オプション）
         instruction: '1時間で投与する',                    // 用法指示（オプション）
         route: '右前腕静脈ルート',                         // 投与経路 投与する注射ルートを記載する。例：右前腕留置ルート，右鎖骨下中心静脈ルート（オプション）
         site: '右前腕',                                  // 投与部位 注射した部位を記載する。例：右上腕三角，腹部（オプション）
@@ -62,12 +62,10 @@ var postInjection = function (callback) {
     simpleInjection.medication.push(med3);
 
     // コンポジションを生成する
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
         context: {                              // context: 注射された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -78,6 +76,6 @@ var postInjection = function (callback) {
     // POST
     post('injection', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleInjection, mml);
+        callback(err, simpleComposition, mml);
     });
 };

@@ -10,12 +10,10 @@ var postLifestyle = function (callback) {
     };
 
     // コンポジションを生成する
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
         context: {                              // context: 注射された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -26,6 +24,6 @@ var postLifestyle = function (callback) {
     // POST
     post('lifestyle', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleLifestyle, mml);
+        callback(err, simpleComposition, mml);
     });
 };

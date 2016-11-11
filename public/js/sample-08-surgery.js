@@ -95,17 +95,15 @@ var postSurgery = function (callback) {                     // 手術記録情�
         contentType: 'image/jpeg',
         medicalRole: 'surgicalFigure',
         title: 'Skin incision',
-        href: 'surgicalFigure001.jpg'
-        // base64: fileAsBase64('surgicalFigure001.jpg')    // 本運用では必ず添付
+        href: 'surgicalFigure001.jpg',
+        base64: fileAsBase64('surgicalFigure001.jpg')     // ファイルコンテンツのBase64
     };
 
     // コンポジション
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
-        context: {                              // context: 処方された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+        context: {                              // context: 手術時の文脈
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -116,6 +114,6 @@ var postSurgery = function (callback) {                     // 手術記録情�
     // POST
     post('surgery', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleSurgery, mml);
+        callback(err, simpleComposition, mml);
     });
 };

@@ -78,12 +78,10 @@ var postFirstClinic = function (callback){                              // 初�
     simpleFirstClinic.presentIllnessNotes = '2週間前より一日に数回側頭部から頭頂部にかけてのずきずきする痛みがあり。';
 
     // コンポジションを生成する
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
-        context: {                              // context: 注射された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+        context: {                              // context: 初診時の文脈
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -94,6 +92,6 @@ var postFirstClinic = function (callback){                              // 初�
     // POST
     post('firstClinic', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleFirstClinic, mml);
+        callback(err, simpleComposition, mml);
     });
 };

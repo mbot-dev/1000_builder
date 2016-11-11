@@ -7,9 +7,16 @@ var postReport = function (callback) {
         body: {}                                            // 報告書本文情報
     };
 
+    // サンプル: 報告日時は現在、１日前を実施日とする
+    var now = new Date();
+    var reportTime = dateAsTimeStamp(now);
+    now.setDate(now.getDate() - 1);
+    var performTime = dateAsTimeStamp(now);
+
+    // 報告書のコンテキスト
     simpleReport.context = {
-        performTime: '2008-08-23T00:00:00',                 // 検査実施日時 required
-        reportTime: '2008-08-23T00:00:00',                  // 報告日時 required
+        performTime: performTime,                           // 検査実施日時 required
+        reportTime: reportTime,                             // 報告日時 required
         reportStatus: '最終報告',                            // 報告状態
         statusCode: 'final',                                // mid 検査中 final 最終報告 required
         testClass: 'CT スキャン',                            // 報告書種別
@@ -25,7 +32,7 @@ var postReport = function (callback) {
         perform: {                                            // 実施者情報
             facility: '山下病院',                               // 実施施設
             facilityCode: '1.2.840.114319.5.1000.1.26.1',      // required
-            performer: '緒方 誠也',                             // 実施者
+            performer: '緒方 佳治',                             // 実施者
             performerCode: '51',
             performerCodeId: 'facility'                       // required
         }
@@ -60,27 +67,28 @@ var postReport = function (callback) {
         href: '0001.jpg',                                   // ファイル名
         contentType: 'imge/jpeg',                           // MIME type ?
         medicalRole: 'ctScan',                              // 医学的役割 ? MML0033 から
-        title: 'plain'                                      // タイトル ?
-        // base64: fileAsBase64('0001.jpg')                    // Base64 本稼働では添付すること
+        title: 'plain',                                     // タイトル ?
+        base64: fileAsBase64('0001.jpg')                    // ファイルコンテンツのBase64
     });
     // 参考画像2 オプション
     simpleReport.body.testNotes.extRef.push({
         href: '0002.jpg',                                   // ファイル名
         contentType: 'imge/jpeg',                           // MIME type ?
         medicalRole: 'ctScan',                              // 医学的役割 ? MML0033 から
-        title: 'plain'                                      // タイトル ?
-        // base64: fileAsBase64('0001.jpg')                    // Base64　本稼働では添付すること
+        title: 'plain',                                     // タイトル ?
+        base64: fileAsBase64('0001.jpg')                    // ファイルコンテンツのBase64
     });
 
-    // コンポジションを生成
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
+    //------------------------------------------------------------
+    // レポートの確定日時は報告日時に一致させる => reportTime
+    // レポートのcreatorは報告書の記載者である
+    //------------------------------------------------------------
     var simpleComposition = {                   // POSTする simpleComposition
-        context: {                              // context: 処方された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+        context: {                              // context 文脈
+            uuid: generateUUID(),               // UUID
+            confirmDate: reportTime,            // 確定日時 = 報告日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
-            creator: simpleCreator,             // 担当医師
+            creator: simpleReporter,            // 報告書の記載者
             accessRight: simpleRight            // アクセス権
         },
         content: [simpleReport]                 // content: 臨床データ=simpleReport
@@ -89,6 +97,6 @@ var postReport = function (callback) {
     // POST
     post('report', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleReport, mml);
+        callback(err, simpleComposition, mml);
     });
 };

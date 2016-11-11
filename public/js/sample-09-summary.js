@@ -71,8 +71,8 @@ var postSummary = function (callback) {                        // 臨床経過�
             contentType: 'image/jpeg',
             medicalRole: 'angioGraphy',
             title: 'Preoperative coronary angiography',
-            href: 'surgicalFigure003.jpg'
-            // base64: fileAsBase64('')                                  // 本運用では必ず添付
+            href: 'surgicalFigure003.jpg',
+            base64: fileAsBase64('surgicalFigure003.jpg')                 // ファイルコンテンツのBase64
         }]
         // relatedDoc: []                                                 // 関連文書 ? このバージョンではサポートしていない
     };
@@ -116,8 +116,8 @@ var postSummary = function (callback) {                        // 臨床経過�
             contentType: 'APPLICATION/HL72.3-HL7ER2.3',
             medicalRole: 'laboratoryTest',
             title: 'Blood chemistry data on discharge',
-            href: 'prescription004.HL7'
-            // base64: fieAsBase64('prescription004.HL7')       // 本運用では必ず添付
+            href: 'prescription004.HL7',
+            base64: fileAsBase64('prescription004.HL7')         // ファイルコンテンツのBase64
         }]
     };
     // 検査結果項目2
@@ -128,8 +128,8 @@ var postSummary = function (callback) {                        // 臨床経過�
             contentType: 'image/jpeg',
             medicalRole: 'ecg',
             title: 'ECG on discharge',
-            href: 'exam004.jpg'
-            // base64: fieAsBase64('exam004.jpg')               // 本運用では必ず添付
+            href: 'exam004.jpg',
+            base64: fileAsBase64('exam004.jpg')                // ファイルコンテンツのBase64
         }]
     };
     // 配列へ追加
@@ -143,12 +143,10 @@ var postSummary = function (callback) {                        // 臨床経過�
     };
 
     // コンポジション
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
-        context: {                              // context: 処方された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+        context: {                              // context: サマリ時文脈
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -159,6 +157,6 @@ var postSummary = function (callback) {                        // 臨床経過�
     // POST
     post('summary', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleSummary, mml);
+        callback(err, simpleComposition, mml);
     });
 };

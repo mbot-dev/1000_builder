@@ -1,4 +1,8 @@
 // 検査履歴情報
+
+// デモ固有で検査結果を格納する配列
+var test_results = [];
+
 // ファイルコンテンツ(test_result.csv)から検査項目リストを生成する
 var createTestItems = function (content) {
     var items = [];
@@ -47,34 +51,30 @@ var createTestItems = function (content) {
 // simpleTestを生成する
 var createTest = function (callback) {
 
+    // デモ設定 現在時刻を報告日時とする
+    var now = new Date();
+    var resultTimestamp = dateAsTimeStamp(now);
+    // ５時間前を受付時刻とする
+    now.setHours(now.getHours() -5);
+    var issuedTimestamp = dateAsTimeStamp(now);
+
     // simpleTest
     var simpleTest = {
         context: {
             issuedId: uuid.v4(),                            // 検査依頼ID
-            issuedTime: nowAsDateTime(),                    // 受付日時 YYYY-MM-DDTHH:mm:ss 形式
-            resultIssued: nowAsDateTime(),                  // 報告日時 YYYY-MM-DDTHH:mm:ss 形式
+            issuedTime: issuedTimestamp,                    // 受付日時 YYYY-MM-DDTHH:mm:ss 形式
+            resultIssued: resultTimestamp,                  // 報告日時 YYYY-MM-DDTHH:mm:ss 形式
             resultStatus: '最終報告',                        // 報告状態 最終報告または検査中
             resultStatusCode: 'final',                      // 報告状態コード  検査中:mid  最終報告:final
             codeSystem: 'YBS_2016',                         // 検査コード体系名
             facilityName: simpleCreator.facilityName,       // 検査依頼施設名称
             facilityId: simpleCreator.facilityId,           // 検査依頼施設ID
             facilityIdType: 'JMARI',                        // 検査依頼施設IDタイプ
-            laboratory: {                                    // 検査実施施設の情報
-                id: '303030',                                // 施設で発番している代表のID
-                idType: 'facility',                          // 施設で付番されているIDであることを示す
-                kanjiName: '石山 由美子',                      // 施設の代表（kanjiName、kanaName、romanNameのどれか一つは必須）代表とは?
-                facilityId: '1.2.3.4.5.6.7890.1.2',          // 施設のID プロジェクトから指定
-                facilityIdType: 'OID',                       // MML0027を使用 プロジェクトから指定
-                facilityName: 'ベイサイド・ラボ',               // 施設の名称
-                facilityZipCode: '231-0000',                 // 施設の郵便番号
-                facilityAddress: '横浜市中区スタジアム付近 1-5', // 施設の住所
-                facilityPhone: '045-000-0072',               // 施設の電話
-                license: 'lab'                               // MML0026を使用（オプション）
-            }
+            laboratory: simpleTester                        // 検査実施施設の代表（sample-commonで定義）
         }
     };
-    if (appCtx.test_results.length > 0) {
-        simpleTest.testResult = appCtx.test_results;
+    if (test_results.length > 0) {
+        simpleTest.testResult = test_results;
         callback(simpleTest);
     } else {
         // 検査結果ファイルを読み込んで
@@ -85,9 +85,9 @@ var createTest = function (callback) {
                 // 検査結果オブジェクトを生成する
                 var items = createTestItems(xhr.responseText);
                 items.forEach (function (entry) {
-                    appCtx.test_results.push(entry);
+                    test_results.push(entry);
                 });
-                simpleTest.testResult = appCtx.test_results;
+                simpleTest.testResult = test_results;
                 callback(simpleTest);
             }
         };
@@ -101,16 +101,18 @@ var postTest = function (callback) {
     // callback で受け取る
     createTest(function (simpleTest) {
 
-        // コンポジションを生成する
+        //-----------------------------------------------------------------------
         // 検体検査の場合、確定日は報告日 YYYY-MM-DDTHH:mm:ss に一致させる
-        var confirmDate = simpleTest.context.resultIssued;
-        var uuid = window.uuid.v4();                // MML文書の UUID
+        // creator は検査を実施した施設の代表者とする => simpleTest.context.laboratory => simpleTester
+        var testConfirmDate = simpleTest.context.resultIssued;
+        //-----------------------------------------------------------------------
+        // コンポジションを生成する
         var simpleComposition = {                   // POSTする simpleComposition
             context: {                              // context: 検査結果確定時の文脈
-                uuid: uuid,                         // UUID
-                confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+                uuid: generateUUID(),               // UUID
+                confirmDate: testConfirmDate,       // 確定日時 YYYY-MM-DDTHH:mm:ss
                 patient: simplePatient,             // 対象患者
-                creator: simpleCreator,             // 責任医師
+                creator: simpleTester,              // 検査実施施設の代表者
                 accessRight: simpleRight            // アクセス権
             },
             content: [simpleTest]                   // content: 臨床データ=検査結果
@@ -119,7 +121,7 @@ var postTest = function (callback) {
         // POST
         post('test', simpleComposition, function (err, mml) {
             // コールバック
-            callback(err, simpleTest, mml);
+            callback(err, simpleComposition, mml);
         });
     });
 };

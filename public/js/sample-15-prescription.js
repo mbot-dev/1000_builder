@@ -7,7 +7,7 @@ var postPrescription = function (callback) {
     };
 
     // 服薬開始日（デモなので現在時刻）
-    var startDate = nowAsDate();                        // YYYY-MM-DD形式
+    var startDate = dateAsString(new Date());           // YYYY-MM-DD形式
 
     // 処方1
     var med1 = {
@@ -47,12 +47,10 @@ var postPrescription = function (callback) {
     simplePrescription.medication.push(med2);
 
     // コンポジションを生成
-    var confirmDate = nowAsDateTime();          // このMMLの確定日時 YYYY-MM-DDTHH:mm:ss
-    var uuid = window.uuid.v4();                // MML文書の UUID
     var simpleComposition = {                   // POSTする simpleComposition
         context: {                              // context: 処方された時の文脈
-            uuid: uuid,                         // UUID
-            confirmDate: confirmDate,           // 確定日時 YYYY-MM-DDTHH:mm:ss
+            uuid: generateUUID(),               // UUID
+            confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
@@ -63,6 +61,18 @@ var postPrescription = function (callback) {
     // POST
     post('prescription', simpleComposition, function (err, mml) {
         // コールバック
+        callback(err, simpleComposition, mml);
+    });
+
+    /***********************************************************
+    リモートプロシジャーコール(JSON-RPC2.0)を使用する場合
+
+    contextに contentType = 'prescription' の属性を設定する
+    simpleComposition.context.contentType = 'prescription';
+
+    rpc(simpleComposition, function (err, result)) {
         callback(err, simplePrescription, mml);
     });
+    ***********************************************************/
+
 };

@@ -2,12 +2,12 @@
 
 const express = require('express');
 const config = require('config');
-const fs = require('fs');
 const utils = require('../lib/utils');
 const logger = require('../logger/logger');
 const jweSimple = require('../api/jweSimple');
 const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
+const publisher = require('../api/publisher');
 
 const router = express.Router();
 
@@ -17,12 +17,6 @@ router.use((req, res, next) => {
     res.header('Pragma', 'no-cache');
     next();
 });
-
-var sendError = function (status, err, req, res) {
-    res.status(status).json({
-        error: err
-    });
-};
 
 // JWE verification
 router.use((req, res, next) => {
@@ -39,64 +33,52 @@ router.use((req, res, next) => {
         // logger.info(JSON.stringify(payload));
         next();
     } catch (error) {
-        sendError(401, 'invalid_grant', req, res);
+        res.status(401).json({
+            error: 'invalid_grant'
+        });
     }
 });
 
-var generateXSDJson = function (req, res, next) {
+var build = function (req, res) {
+    // パラメータ
+    var contentType = req.params.contentType;
+    var simpleComposition = req.body;
+    var rpcId = simpleComposition.context.uuid;
+    var response = {
+        id: rpcId
+    };
     try {
-        var contentType = req.params.contentType;
-        var parsed = req.body;
-        // logger.info(JSON.stringify(parsed, null, 4));
-        var wrapper = simpleBuilder.build(parsed, contentType);
-        // logger.info(JSON.stringify(wrapper, null, 4));
-        req.mmlWrapper = wrapper;
-        next();
+        // 生成する
+        var wrapper = simpleBuilder.build(simpleComposition, contentType);
+        var mml = mmlBuilder.build(wrapper.json);
+        wrapper.mml = mml;
+        wrapper.json = null;
+
+        // Send message broker wrapper
+        if (config.appMode === 'prod') {
+            // 稼働環境の場合のみ
+    		publisher.publish(JSON.stringify(wrapper));
+    	}
+
+        // レスポンス
+        response.result = {
+            version: '4.0'
+        };
+        if (config.appMode !== 'prod') {
+            // 稼働環境以外の時は結果のMMLを返す => 稼働環境では結果のMMLを返さない
+            response.result.mml = mml;
+        }
+        res.status(200).json(response);
+
     } catch (err) {
-        sendError(500, err, req, res);
+        response.error = {
+            code: 500,
+            message: err
+        };
+        res.status(500).json(response);
     }
 };
 
-var generateMml = function (req, res, next) {
-    try {
-        // generate MML instance from json(XSD)
-        var mml = mmlBuilder.build(req.mmlWrapper.json);
-        // set json null
-        req.mmlWrapper.json = null;
-        // set mml generated one
-        req.mmlWrapper.instance = mml;
-        next();
-    } catch (err) {
-        sendError(500, err, req, res);
-    }
-};
-
-var publish = function (req, res, next) {
-    // publish
-    var pretty = utils.formatXml(req.mmlWrapper.instance);
-    var buf = new Buffer(pretty, 'utf8');
-    var arr = [];
-    arr.push(config.mmlOutput.path);
-    arr.push('/');
-    arr.push(req.mmlWrapper.fileName);
-    arr.push('.xml');
-    var path = arr.join('');
-    fs.writeFile(path, buf, (err) => {
-        // log
-        logger.warn(err);
-    });
-    next();
-};
-
-var respond = function (req, res) {
-    // respond
-    res.status(200).json({
-        result: 'success',
-        mml: req.mmlWrapper.instance
-    });
-};
-
-// router.post('/:contentType', [generateXSDJson, generateMml, publish, respond]);
-router.post('/:contentType', [generateXSDJson, generateMml, respond]);
+router.post('/:contentType', [build]);
 
 module.exports = router;
