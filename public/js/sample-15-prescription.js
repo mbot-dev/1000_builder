@@ -19,7 +19,7 @@ var postPrescription = function (callback) {
         doseUnit: 'g',                                  // 単位
         frequencyPerDay: 2,                             // 1日の内服回 数総量のみが記載される外用剤などの場合には省略可（オプション）
         startDate: startDate,                           // 服薬開始日 YYYY-MM-DD（オプション）
-        duration: 'P30D',                               // 30日分 P数値D で記述する（オプション）
+        duration: daysAsDuration(30),                   // 30日分 P数値D で記述する（オプション）
         instruction: '内服2回 朝夜食後に',                 // 用法（オプション）
         PRN: false,                                     // 頓用の時 true（オプション）
         brandSubstitutionPermitted: true,               // ジェネリック医薬品への代替可 可の時true、省略時は可とみなす（オプション）
@@ -36,7 +36,7 @@ var postPrescription = function (callback) {
         doseUnit: '錠',                                 // 単位
         frequencyPerDay: 2,                             // 1日の内服回数 数総量のみが記載される外用剤などの場合には省略可（オプション）
         startDate: startDate,                           // 服薬開始日 YYYY-MM-DD（オプション）
-        duration: 'P30D',                               // 30日分 P数値D で記述する（オプション）
+        duration: daysAsDuration(30),                   // 30日分 P数値D で記述する（オプション）
         instruction: '内服2回 朝夜食後に',                 // 用法（オプション）
         PRN: false,                                     // 頓用の時 true（オプション）
         brandSubstitutionPermitted: false,              // ジェネリック医薬品への代替可 可の時true、省略時は可とみなす（オプション）
@@ -57,6 +57,19 @@ var postPrescription = function (callback) {
         },
         content: [simplePrescription]           // content: 臨床データ=処方せん
     };
+
+    //------------------------------------------------------------------
+    // 処方箋のタイトルと生成目的を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.title = '処方箋';
+    simpleComposition.context.generationPurpose = 'prescription';  // MML007
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
 
     // POST
     post('prescription', simpleComposition, function (err, mml) {

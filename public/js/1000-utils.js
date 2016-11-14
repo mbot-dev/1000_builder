@@ -42,7 +42,6 @@ function prettyXml(xml) {
     return xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
 }
 
-
 function addQuote (value) {
     var arr =['\"', value, '\"'];
     return arr.join('');
@@ -73,7 +72,7 @@ function hasProperty (obj, property) {
 }
 
 function prettyJSON (json) {
-    return JSON.stringify(json, null, 4);
+    return JSON.stringify(json, null, 3);
 }
 
 function addZero (x, n) {

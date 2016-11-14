@@ -44,6 +44,13 @@ var postHealthInsurance = function (callback) {
         content: [simpleHealthInsurance]        // content: 臨床データ=simpleHealthInsuranceとする
     };
 
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
+
     // POST
     post('healthInsurance', simpleComposition, function (err, mml) {
         // コールバック

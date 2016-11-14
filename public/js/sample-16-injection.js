@@ -66,12 +66,25 @@ var postInjection = function (callback) {
         context: {                              // context: 注射された時の文脈
             uuid: generateUUID(),               // UUID
             confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 対象患者
+            patient: simpleOverseasPatient,     // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
         },
         content: [simpleInjection]              // content: 臨床データ=注射記録
     };
+
+    //------------------------------------------------------------------
+    // 注射記録のタイトルと生成目的を設定する
+    simpleComposition.context.title = '注射記録';
+    simpleComposition.context.generationPurpose = 'injection';  // MML007
+    //------------------------------------------------------------------
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
 
     // POST
     /*post('injection', simpleComposition, function (err, mml) {

@@ -46,6 +46,19 @@ var postVitalSign = function (callback) {
         content: [simpleVitalSign]              // content: 臨床データ=バイタルサイン
     };
 
+    //------------------------------------------------------------------
+    // vitalsignのタイトルと生成目的を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.title = 'バイタルサイン';
+    simpleComposition.context.generationPurpose = 'vitalsign';  // MML007
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
+
     // POST
     post('vitalsign', simpleComposition, function (err, mml) {
         // コールバック

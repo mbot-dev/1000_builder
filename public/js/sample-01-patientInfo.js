@@ -4,9 +4,8 @@ var postPatientInfo = function (callback) {
     // simplePatientInfo
     var simplePatientInfo = {
         id: '0516',                                        // 施設(病院)内で発番されている患者Id
-        facilityId: '1.2.840.114319.5.1000.1.26.1',        // 医療連携等のために施設に振られているId
-        kanjiName: '宮田 奈々',                             // 漢字の氏名
-        kanaName: 'ミヤタ ナナ',                             // カナ
+        fullName: '宮田 奈々',                              // 漢字の氏名
+        kana: 'ミヤタ ナナ',                                 // カナ
         gender: 'female',                                  // MML0010(女:female 男:male その他:other 不明:unknown)
         dateOfBirth: '1994-11-26',                         // 生年月日
         maritalStatus: 'single',                           // 婚姻状況 MML0011を使用 オプション
@@ -20,7 +19,7 @@ var postPatientInfo = function (callback) {
 
     // コンポジションを生成する
     var simpleComposition = {                   // POSTする simpleComposition
-        context: {                              // context: 注射された時の文脈
+        context: {                              // context: 文脈
             uuid: generateUUID(),               // UUID
             confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
             patient: simplePatient,             // 対象患者
@@ -29,6 +28,13 @@ var postPatientInfo = function (callback) {
         },
         content: [simplePatientInfo]            // content: 臨床データ=simplePatientInfoとする
     };
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
 
     // POST
     post('patientInfo', simpleComposition, function (err, mml) {

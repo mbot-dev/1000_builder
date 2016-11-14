@@ -70,7 +70,7 @@ var createTest = function (callback) {
             facilityName: simpleCreator.facilityName,       // 検査依頼施設名称
             facilityId: simpleCreator.facilityId,           // 検査依頼施設ID
             facilityIdType: 'JMARI',                        // 検査依頼施設IDタイプ
-            laboratory: simpleTester                        // 検査実施施設の代表（sample-commonで定義）
+            laboratory: simpleLabTester                     // 検査実施施設の代表（sample-commonで定義）
         }
     };
     if (test_results.length > 0) {
@@ -112,11 +112,28 @@ var postTest = function (callback) {
                 uuid: generateUUID(),               // UUID
                 confirmDate: testConfirmDate,       // 確定日時 YYYY-MM-DDTHH:mm:ss
                 patient: simplePatient,             // 対象患者
-                creator: simpleTester,              // 検査実施施設の代表者
+                creator: simpleLabTester,              // 検査実施施設の代表者
                 accessRight: simpleRight            // アクセス権
             },
             content: [simpleTest]                   // content: 臨床データ=検査結果
         };
+
+        //------------------------------------------------------------------
+        // 検体検査報告書のタイトルと生成目的を設定する
+        //------------------------------------------------------------------
+        // タイトルは運用例として検体検査のセット等が利用できる
+        simpleComposition.context.title = '生化学検査';
+        simpleComposition.context.generationPurpose = 'reportTest'; // MML007
+        //------------------------------------------------------------------
+
+        //------------------------------------------------------------------
+        // 患者に自施設の情報を設定する
+        //------------------------------------------------------------------
+        simpleComposition.context.patient.facilityId = simpleFacility.id;
+
+        // 注意! 検体検査の場合は creator　に検査施設の情報を設定する
+        simpleComposition.context.creator.facility = simpleLaboratory;
+        //------------------------------------------------------------------
 
         // POST
         post('test', simpleComposition, function (err, mml) {

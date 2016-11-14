@@ -36,14 +36,14 @@ var postSummary = function (callback) {                        // 臨床経過�
         date: '2015-8-27',                                      // 入院 (転入) 日 CCYY-MM-DD
         admissionCondition: 'Emergency admission by ambulancetrue', // 入院時状態 ?
         emergency: 'true',                                      // 緊急入院．true：緊急入院，false：通常
-        referFrom: simpleCreator                                // 紹介元情報 ?
+        // referFrom:                                           // 紹介元情報 ?
     };
     // 退院情報
     inPatientItem.discharge = {                                 // 退院
         date: '1999-08-31',                                     // 退院 (転出) 日 CCYY-MM-DD
         dischargeCondition: '4 P.O.D, the patient was transferred to the chronic hospital.', // 退院時状態 ?
         outcome: 'transferChronic',                             // 退院時転帰 MML0016
-        referTo: simpleCreator                                  // 紹介先情報 ?
+        // referTo:                                             // 紹介先情報 ?
     };
     // 入院暦項目をcontextの配列へ追加
     simpleSummary.context.inPatient.push(inPatientItem);
@@ -147,12 +147,19 @@ var postSummary = function (callback) {                        // 臨床経過�
         context: {                              // context: サマリ時文脈
             uuid: generateUUID(),               // UUID
             confirmDate: confirmDate(),         // 確定日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 対象患者
+            patient: simpleOverseasPatient,     // 対象患者
             creator: simpleCreator,             // 担当医師
             accessRight: simpleRight            // アクセス権
         },
         content: [simpleSummary]                // content: 臨床データ=simpleSummary
     };
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
 
     // POST
     post('summary', simpleComposition, function (err, mml) {

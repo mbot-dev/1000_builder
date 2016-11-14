@@ -35,6 +35,13 @@ var postBaseClinic = function (callback) {
         content: [simpleBaseClinic]             // content: 臨床データ=simpleBaseClinic
     };
 
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
+
     // POST
     post('baseClinic', simpleComposition, function (err, mml) {
         // コールバック

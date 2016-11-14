@@ -82,13 +82,12 @@ module.exports = {
      */
     buildPersonId: function (pid, facilityId) {
         // 千年カルテ仕様
-        var idType = 'facility';    // 施設固有
-        // idTypeが施設固有の場合(===facility) tableIdに施設Idを設定する
+        var idType = 'facility';            // 施設固有
         return {
             value: pid,                     // 付番されているId
             attr: {
                 type: idType,
-                tableId: (idType === 'facility') ? facilityId : 'MML0024'
+                tableId: facilityId         // idTypeが施設固有の場合(===facility) tableIdに施設Idを設定する
             }
         };
     },
@@ -166,7 +165,7 @@ module.exports = {
         var facilityId = {
             value: fId,                             // 施設に付番されているId type属性に発番元（体系）を記載する
             attr: {
-                type: idType,                       // MML0027 (認証局:ca 保険医療機関コード:insurance 文科省大学付属病院施設区分:monbusyo 日本医師会総合政策研究コード:JMARI)
+                type: idType,                       // MML0027 のOIDを使用する
                 tableId: 'MML0027'                  // MML0027
             }
         };
@@ -184,7 +183,7 @@ module.exports = {
         var deptId = {
             value: dId,                             // medicalの場合はMML0028 dentalの場合はMML0030を参照
             attr: {
-                type: idType,                       // MML0029 (医科診療科コード:medical 歯科診療科コード:dental 施設内ユーザー定義診療科コード:facility)
+                type: idType,                       // 施設内ユーザー定義診療科コード:facilityを使用する
                 tableId: 'MML0029'
             }
         };
@@ -206,18 +205,18 @@ module.exports = {
     // creator(医師等)個人情報
     buildPersonalizedInfo: function (person) {
         // 作成者(creator)Id
-        var creatorId = this.buildPersonId(person.id, person.facilityId);
+        // facilityは必須 千年では
+        var creatorId = this.buildPersonId(person.id, person.facility.id);
 
         // 作成者氏名
         var creatorNames = [];
-        if (utils.propertyIsNotNull(person, 'kanjiName')) {
-            creatorNames.push(this.buildPersonNameWithKanji(person.kanjiName));
+        // 漢字は必須
+        creatorNames.push(this.buildPersonNameWithKanji(person.fullName));
+        if (utils.propertyIsNotNull(person, 'kana')) {
+            creatorNames.push(this.buildPersonNameWithKana(person.kana));
         }
-        if (utils.propertyIsNotNull(person, 'kanaName')) {
-            creatorNames.push(this.buildPersonNameWithKana(person.kanaName));
-        }
-        if (utils.propertyIsNotNull(person, 'romanName')) {
-            creatorNames.push(this.buildPersonNameWithRoman(person.romanName));
+        if (utils.propertyIsNotNull(person, 'roman')) {
+            creatorNames.push(this.buildPersonNameWithRoman(person.roman));
         }
 
         // 肩書きなど
@@ -235,13 +234,13 @@ module.exports = {
         }
 
         // 施設情報
-        var facility = this.buildFacility(person.facilityId, person.facilityName);
+        var facility = this.buildFacility(person.facility.id, person.facility.name);
 
         // 医療機関住所
-        var facilityAddress = this.buildBusinessAddress(person.facilityZipCode, person.facilityAddress);
+        var facilityAddress = this.buildBusinessAddress(person.facility.zipCode, person.facility.address);
 
         // 医療機関電話番号
-        var facilityPhone = this.buildTelephone(person.facilityPhone);
+        var facilityPhone = this.buildTelephone(person.facility.telephone);
 
         // creator(医師)個人情報
         var personalizedInfo = {
@@ -253,8 +252,8 @@ module.exports = {
         };
 
         // 診療科情報
-        if (utils.propertyIsNotNull(person, 'departmentId')) {
-            var department = this.buildDepartment(person.departmentId, person.departmentName);
+        if (utils.propertyIsNotNull(person, 'department')) {
+            var department = this.buildDepartment(person.department.id, person.department.name);
             personalizedInfo.Department = department;
         }
 
@@ -285,26 +284,25 @@ module.exports = {
         /******************************************************
         var simpleCreator = {
             id: '',
-            idType: '',                                  // MML0024(全国統一:national 地域:local 施設固有:facility)
-            kanjiName: '',
-            kanaName: '',
-            romanName: '',                               // TPPで外国人医師
-            facilityId: '',
-            facilityIdType: '',                          // MML0027(ca|insurance|monbusho|JMARI|OID)
-            facilityName: '',                            // 漢字
-            facilityZipCode: '',
-            facilityAddress: '',                         // 漢字
-            facilityPhone: '',
-            departmentId: '',                            // 医科用:MML0028 歯科用:MML0030
-            departmentIdType: '',                        // MML0029を使用する(medical|dental|facility)
-            departmentName: '',
-            license: ''                                  // MML0026
+            fullName: '',
+            license: '',                             // MML0026
+            facility: {
+                id: '',
+                name: '',                            // 漢字
+                zipCode: '',
+                address: '',                         // 漢字
+                telephone: ''
+            },
+            department: {
+                id: '',
+                name: ''                             // 漢字
+            }
         };******************************************************/
 
         // creator(医師)個人情報
         var personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
 
-        // 医療資格
+        // 医療資格 必須
         var creatorLicense = this.buildCreatorLicense(simpleCreator.license);
 
         // 作成者情報
@@ -445,9 +443,6 @@ module.exports = {
         arr.push(metaInfo.uuid);
         var docUUID = arr.join('_');
 
-        // title
-        var title = utils.propertyIsNotNull(metaInfo, 'title') ? metaInfo.title : metaInfo.contentModuleType;
-
         // 対象
         var docInfo = {
             attr: {
@@ -456,9 +451,9 @@ module.exports = {
             },
             securityLevel: accessRight,                            // accessRight の配列
             title: {
-                value: title,                                      // 文書タイトル
+                value: metaInfo.title,                             // 文書タイトル
                 attr: {
-                    generationPurpose: 'record'                    // 文書詳細種別 MML0007を使用
+                    generationPurpose: metaInfo.generationPurpose  // 文書詳細種別 MML0007を使用
                 }
             },
             docId: {                                               // 文書 ID 情報
@@ -467,7 +462,7 @@ module.exports = {
                 // groupId: []                                     // グループ ID groupIdの配列
             },
             confirmDate: {
-                value: metaInfo.confirmDate                    // カルテ電子保存の確定日時
+                value: metaInfo.confirmDate                         // カルテ電子保存の確定日時
                 // attr: {
                 //   start: 'YYYY-MM-DDThh:mm:ss',                   // 時系列情報場合の開始日時
                 //   end: 'YYYY-MM-DDThh:mm:ss',                     // 時系列情報場合の終了日時
@@ -520,9 +515,9 @@ module.exports = {
             id: '',                                         // Id
             idType: ''                                      // MML0024(全国統一:national 地域:local 施設固有:facility)
             facilityId: '',                                 // 施設Id
-            kanjiName: '',
-            kanaName: '',
-            romanName: '',
+            fullName: '',
+            kana: '',
+            roman: '',
             gender: '',                                     // MML0010(femail male other unknown)
             dateOfBirth: '',
             maritalStatus: '',                              // MML0011
@@ -555,16 +550,16 @@ module.exports = {
         };
 
         // 漢字氏名
-        if (utils.propertyIsNotNull(simplePatient, 'kanjiName')) {
-            patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.kanjiName));
+        if (utils.propertyIsNotNull(simplePatient, 'fullName')) {
+            patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.fullName));
         }
         // かな/カナ氏名
-        if (utils.propertyIsNotNull(simplePatient, 'kanaName')) {
-            patientModule.personName.push(this.buildPersonNameWithKana(simplePatient.kanaName));
+        if (utils.propertyIsNotNull(simplePatient, 'kana')) {
+            patientModule.personName.push(this.buildPersonNameWithKana(simplePatient.kana));
         }
         // ローマ字氏名
-        if (utils.propertyIsNotNull(simplePatient, 'romanName')) {
-            patientModule.personName.push(this.buildPersonNameWithRoman(simplePatient.romanName));
+        if (utils.propertyIsNotNull(simplePatient, 'roman')) {
+            patientModule.personName.push(this.buildPersonNameWithRoman(simplePatient.roman));
         }
 
         // 国籍
@@ -1121,10 +1116,12 @@ module.exports = {
                 date: '',                                       // 手術施行日 CCYY-MM-DD
                 startTime: '',                                  // 手術開始時刻 ? hh:mm
                 duration: '',                                   // 手術時間 ? PTnHnM 5時間25分=PT5H25M
-                surgicalDepartmentId: '',                       // 手術実施診療科情報 ? [mmlDp:Department]
-                surgicalDepartmentName: '',                     // 手術実施診療科情報 ? [mmlDp:Department]
-                patientDepartmentId: '',
-                patientDepartmentName: ''                       // 手術時に患者の所属していた診療科 ? [mmlDp:Department]
+                // surgicalDepartmentId: '',                       // 手術実施診療科情報 ? [mmlDp:Department]
+                // surgicalDepartmentName: '',                     // 手術実施診療科情報 ? [mmlDp:Department]
+                // patientDepartmentId: '',
+                // patientDepartmentName: ''                       // 手術時に患者の所属していた診療科 ? [mmlDp:Department]
+                surgicalDepartment: simpleDept,
+                patientDepartment: simpleDept
             },
             surgicalDiagnosis: [],                              // 外科診断情報 simpleDiagnosis -> [mmlRd:RegisteredDiagnosisModule]
             surgicalProcedure: [],                              // 手術法情報 [procedureItem]
@@ -1160,7 +1157,7 @@ module.exports = {
         var staff = {
             superiority: '',                                    // 序列
             staffClass: ''                                      // 手術スタッフ区分 MML0022
-            staffInfo: {}                                       // スタッフ 情報 simpleCreator -> [mmlPsi:PersonalizedInfo]
+            staffInfo: {}                                       // スタッフ 情報 todo simpleCreator -> [mmlPsi:PersonalizedInfo]
         };
         *******************************************************************************/
 
@@ -1184,12 +1181,20 @@ module.exports = {
         if (utils.propertyIsNotNull(simpleSurgery.context, 'duration')) {
             result.surgicalInfo.duration = simpleSurgery.context.duration;
         }
-        if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentName') ) {
-            var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, simpleSurgery.context.surgicalDepartmentName);
+        // if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentName') ) {
+            // var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, simpleSurgery.context.surgicalDepartmentName);
+            // result.surgicalInfo.surgicalDepartment = [sdp];
+        // }
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartment')) {
+            var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartment.id, simpleSurgery.context.surgicalDepartment.name);
             result.surgicalInfo.surgicalDepartment = [sdp];
         }
-        if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentName') ) {
-            var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, simpleSurgery.context.patientDepartmentName);
+        // if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentName') ) {
+            // var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, simpleSurgery.context.patientDepartmentName);
+            // result.surgicalInfo.patientDepartment = [pdp];
+        // }
+        if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartment')) {
+            var pdp = this.buildDepartment(simpleSurgery.context.patientDepartment.id, simpleSurgery.context.patientDepartment.name);
             result.surgicalInfo.patientDepartment = [pdp];
         }
         // logger.info(JSON.stringify(result, null,4));
@@ -1240,7 +1245,7 @@ module.exports = {
                         staff.attr.superiority = entry.superiority;
                     }
                     if (utils.propertyIsNotNull(entry, 'staffClass')) {
-                        staff.attr.superiority = entry.staffClass;
+                        staff.attr.staffClass = entry.staffClass;
                     }
                 }
                 var pi = this.buildPersonalizedInfo(entry.staffInfo);
@@ -1285,7 +1290,7 @@ module.exports = {
                         staff.attr.superiority = entry.superiority;
                     }
                     if (utils.propertyIsNotNull(entry, 'staffClass')) {
-                        staff.attr.superiority = entry.staffClass;
+                        staff.attr.staffClass = entry.staffClass;
                     }
                 }
                 staff.staffInfo.push(this.buildPersonalizedInfo(entry.staffInfo));
@@ -1983,7 +1988,7 @@ module.exports = {
             testSubclassCode: '',
             testSubclassCodeId: '',
             organ: '',                                          // 臓器 ?
-            consultFrom: {
+            client: {
                 facility: '',                                   // 依頼者情報 ?
                 facilityCode: '',
                 facilityCodeId: '',                             // MML0027
@@ -1997,7 +2002,7 @@ module.exports = {
                 clientCode: '',
                 clientCodeId: ''
             },
-            perform: {                                          // 実施者情報
+            performer: {                                          // 実施者情報
                 facility: '',                                   // 実施施設
                 facilityCode: '',                               // required
                 facilityCodeId: '',                             // required
@@ -2094,30 +2099,31 @@ module.exports = {
             information.organ = context.organ;
         }
 
-        // consultFrom
-        if (utils.propertyIsNotNull(context, 'consultFrom')) {
-            var cFrom = context.consultFrom;
+        // consultFrom => client
+        if (utils.propertyIsNotNull(context, 'consulter')) {
+
+            var client = context.consulter;
             information.consultFrom = {};
 
-            if (utils.propertyIsNotNull(cFrom, 'facility')) {
+            if (utils.propertyIsNotNull(client, 'facility')) {
                 information.consultFrom.conFacility = {                 // 依頼施設 ?
-                    value: cFrom.facility,
+                    value: client.facility.name,
                     attr: {
-                        facilityCode: cFrom.facilityCode,
-                        facilityCodeId: 'MML0027'                          // MML0027
+                        facilityCode: client.facility.id,
+                        facilityCodeId: 'OID'                          // MML0027
                     }
                 };
             }
-            if (utils.propertyIsNotNull(cFrom, 'department')) {
+            if (utils.propertyIsNotNull(client, 'department')) {
                 information.consultFrom.conDepartment = {                 // 依頼施設 ?
-                    value: cFrom.department,
+                    value: client.department.name,
                     attr: {
-                        depCode: cFrom.departmentCode,
-                        depCodeId: cFrom.departmentCodeId
+                        depCode: client.department.id,
+                        depCodeId: 'facility'
                     }
                 };
             }
-            if (utils.propertyIsNotNull(cFrom, 'ward')) {
+            /*if (utils.propertyIsNotNull(cFrom, 'ward')) {
                 information.consultFrom.conWard = {                 // 依頼施設 ?
                     value: cFrom.ward,
                     attr: {
@@ -2125,42 +2131,42 @@ module.exports = {
                         wardCodeId: cFrom.wardCodeId
                     }
                 };
-            }
-            if (utils.propertyIsNotNull(cFrom, 'client')) {
+            }*/
+            // if (utils.propertyIsNotNull(cFrom, 'client')) {
                 information.consultFrom.client = {                 // 依頼施設 ?
-                    value: cFrom.client,
+                    value: client.fullName,
                     attr: {
-                        clientCode: cFrom.clientCode,
-                        clientCodeId: cFrom.clientCodeId
+                        clientCode: client.id,
+                        clientCodeId: client.facility.id
                     }
                 };
-            }
+            // }
         }
 
         // perform
-        if (utils.propertyIsNotNull(context, 'perform')) {
-            var perform = context.perform;
+        if (utils.propertyIsNotNull(context, 'performer')) {
+            var performer = context.performer;
             information.perform = {};
 
-            if (utils.propertyIsNotNull(perform, 'facility')) {
+            if (utils.propertyIsNotNull(performer, 'facility')) {
                 information.perform.pFacility = {                 // 依頼施設 ?
-                    value: perform.facility,
+                    value: performer.facility.name,
                     attr: {
-                        facilityCode: perform.facilityCode,
-                        facilityCodeId: 'MML0027'                          // MML0027
+                        facilityCode: performer.facility.id,
+                        facilityCodeId: 'OID'                          // MML0027
                     }
                 };
             }
-            if (utils.propertyIsNotNull(perform, 'department')) {
+            if (utils.propertyIsNotNull(performer, 'department')) {
                 information.perform.pDepartment = {                 // 依頼施設 ?
-                    value: perform.department,
+                    value: performer.department.name,
                     attr: {
-                        depCode: perform.departmentCode,
-                        depCodeId: perform.departmentCodeId
+                        depCode: performer.department.id,
+                        depCodeId: 'facility'
                     }
                 };
             }
-            if (utils.propertyIsNotNull(perform, 'ward')) {
+            /*if (utils.propertyIsNotNull(perform, 'ward')) {
                 information.perform.pWard = {                 // 依頼施設 ?
                     value: perform.ward,
                     attr: {
@@ -2168,17 +2174,17 @@ module.exports = {
                         wardCodeId: perform.wardCodeId
                     }
                 };
-            }
-            if (utils.propertyIsNotNull(perform, 'performer')) {
+            }*/
+            // if (utils.propertyIsNotNull(perform, 'performer')) {
                 information.perform.performer = {                 // 依頼施設 ?
-                    value: perform.performer,
+                    value: performer.fullName,
                     attr: {
-                        performerCode: perform.performerCode,
-                        performerCodeId: perform.performerCodeId
+                        performerCode: performer.id,
+                        performerCodeId: performer.facility.id
                     }
                 };
-            }
-            if (utils.propertyIsNotNull(perform, 'supervisor')) {
+            // }
+            /*if (utils.propertyIsNotNull(perform, 'supervisor')) {
                 information.perform.supervisor = {                 // 依頼施設 ?
                     value: perform.supervisor,
                     attr: {
@@ -2186,7 +2192,7 @@ module.exports = {
                         supervisorCodeId: perform.supervisorCodeId
                     }
                 };
-            }
+            }*/
         }
 
         // chiefComplaints
@@ -2959,7 +2965,7 @@ module.exports = {
                 creator: simpleCreator,
                 accessRight: simpleaccessRight
             },
-            content: [{simplePrescription} | {simpleInjection} | {simpleDiagnosis} | {simpleTest} | {simpleVitalSign}]
+            content: [{simpleXXX}]
         };
         ***************************************************/
         // このMMLの生成日
@@ -2980,7 +2986,7 @@ module.exports = {
                 experience: 'read'
             };
         }
-        var accessRight = this.buildAccessRight(context.patient.id, context.patient.kanjiName, simpleAccessRight);
+        var accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
 
         // このMMLのcreatorInfoを生成する
         var creatorInfo = this.buildCreatorInfo(context.creator);
@@ -3008,6 +3014,18 @@ module.exports = {
             uuid: context.uuid,                         // uuid
             confirmDate: context.confirmDate            // 確定日時はMMLの確定日時
         };
+        // タイトルと生成目的
+        if (utils.propertyIsNotNull(context, 'title')) {
+            metaInfo.title = context.title;
+        } else {
+            metaInfo.title = contentType;
+        }
+        if (utils.propertyIsNotNull(context, 'generationPurpose')) {
+            metaInfo.generationPurpose = context.generationPurpose;
+        } else {
+            metaInfo.generationPurpose = 'record';
+        }
+
         // logger.info(JSON.stringify(metaInfo, null, 4));
         // MML 規格のdocInfo でmetaInfoを基に生成される
         // MML のモジュール単位に付加される

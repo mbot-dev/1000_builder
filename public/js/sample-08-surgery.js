@@ -6,17 +6,26 @@ var postSurgery = function (callback) {                     // 手術記録情�
         surgeryItem: []                                     // [surgeryItem]
     };
 
+    // 手術日 昨日とする
+    var now = new Date();
+    now.setDate(now.getDate() - 1);
+    var opDate = dateAsString(now);
+
+    // 開始時刻
+    var startTime = '09:18';
+
+    // 手術時間 3時間20分 => P3H20M
+    var duration = timesAsDuration(3, 20);
+
     // 手術記録項目
     var surgeryItem = {
         context: {                                          // 手術ヘッダー情報 -> surgicalInfo
-            type: 'elective',                               // MML0021
-            date: '2015-09-05',                             // 手術施行日 CCYY-MM-DD
-            startTime: '09:18',                             // 手術開始時刻 ? hh:mm
-            duration: 'P3H20M',                             // 手術時間 ? PTnHnM 5時間25分=PT5H25M
-            surgicalDepartmentId: '16',                     // 手術実施診療科情報 ? [mmlDp:Department]
-            surgicalDepartmentName: 'Cardiovasucular surgery',　// 手術実施診療科情報 ? [mmlDp:Department]
-            patientDepartmentId: '01',
-            patientDepartmentName: 'Internal medicine'　　　　// 手術時に患者の所属していた診療科 ? [mmlDp:Department]
+            type: 'elective',                               // 手術区分 MML0021 待期手術
+            date: opDate,                                   // 手術施行日 CCYY-MM-DD
+            startTime: startTime,                           // 手術開始時刻 ? hh:mm
+            duration: duration                             // 手術時間 ? PTnHnM 5時間25分=PT5H25M
+            // surgicalDepartment: simpleSurgicalDept,         // 手術実施診療科情報 ?  XSD
+            // patientDepartment: simpleInternalDept           // 手術時に患者の所属していた診療科 ?  XSD
         },
         surgicalDiagnosis: [],                              // 外科診断情報 simpleDiagnosis -> [mmlRd:RegisteredDiagnosisModule]
         surgicalProcedure: [],                              // 手術法情報 [procedureItem]
@@ -49,11 +58,9 @@ var postSurgery = function (callback) {                     // 手術記録情�
     surgeryItem.surgicalProcedure.push(procedureItem1);
     surgeryItem.surgicalProcedure.push(procedureItem2);
 
-    // 手術スタッフ1
-    var staff = {
-        staffInfo: simpleCreator                            // スタッフ 情報 simpleCreator -> [mmlPsi:PersonalizedInfo]
-    };
-    surgeryItem.surgicalStaffs.push(staff);
+    // 執刀医 オプション sample-common で定義
+    var operator = asSurgicalStaff(simpleOperator, 'operator');
+    surgeryItem.surgicalStaffs.push(operator);
 
     // 麻酔法1
     var titleItem1 = {                                       // 分割された手術要素名
@@ -72,23 +79,9 @@ var postSurgery = function (callback) {                     // 手術記録情�
     surgeryItem.anesthesiaProcedure.push(titleItem2);
     surgeryItem.anesthesiaProcedure.push(titleItem3);
 
-    // 麻酔医
-    var simpleAnesthesiologist = {
-        id: '201607',                                      // 施設で付番されている医師のId
-        kanjiName: '鈴木 涼介',                             // 医師名
-        prefix: 'Professor',                               // 肩書き等 オプション
-        degree: 'MD/PhD',                                  // 学位 オプション
-        facilityId: '1.2.840.114319.5.1000.1.26.1',        // プロジェクトから発番された医療機関Id
-        facilityName: 'シルク内科',                          // 施設名
-        facilityZipCode: '231-0023',                       // 施設郵便番号
-        facilityAddress: '横浜市中区山下町1番地 8-9-01',       // 施設住所
-        facilityPhone: '045-571-6572',                     // 施設電話番号
-        license: 'doctor'                                  // 医療資格 MML0026から選ぶ
-    };
-    var staff2 = {
-        staffInfo: simpleAnesthesiologist                  // スタッフ 情報 simpleCreator -> [mmlPsi:PersonalizedInfo]
-    };
-    surgeryItem.anesthesiologists.push(staff2);
+    // 麻酔医 オプション sample-common で定義
+    var anesthesiologist = asSurgicalStaff(simpleAnesthesiologist, 'anesthesiologist');
+    surgeryItem.anesthesiologists.push(anesthesiologist);
 
     // 外部参照
     surgeryItem.referenceInfo = {
@@ -110,6 +103,13 @@ var postSurgery = function (callback) {                     // 手術記録情�
         },
         content: [simpleSurgery]                // content: 臨床データ=simpleSurgery
     };
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
 
     // POST
     post('surgery', simpleComposition, function (err, mml) {

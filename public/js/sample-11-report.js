@@ -7,9 +7,16 @@ var postReport = function (callback) {
         body: {}                                            // 報告書本文情報
     };
 
-    // サンプル: 報告日時は現在、１日前を実施日とする
+    // 依頼者 相談する側のスタッフ
+    var consulter = asConsulter(simpleCreator);
+
+    // 検査を実施するスタッフ
+    var performer = asPerformer(simpleReporter);
+
+    // 報告日時は現在とする
     var now = new Date();
     var reportTime = dateAsTimeStamp(now);
+    // １日前を実施日とする
     now.setDate(now.getDate() - 1);
     var performTime = dateAsTimeStamp(now);
 
@@ -22,20 +29,8 @@ var postReport = function (callback) {
         testClass: 'CT スキャン',                            // 報告書種別
         testClassCode: 'ctscan',                            // MML0033 required
         organ: '腹部',                                       // 臓器 ?
-        consultFrom: {
-            facility: '山下病院',                             // 依頼者情報 ?
-            facilityCode: '1.2.840.114319.5.1000.1.26.1',
-            client: '高松 愛海',                              // 依頼者 ?
-            clientCode: '12',
-            clientCodeId: 'facility'
-        },
-        perform: {                                            // 実施者情報
-            facility: '山下病院',                               // 実施施設
-            facilityCode: '1.2.840.114319.5.1000.1.26.1',      // required
-            performer: '緒方 佳治',                             // 実施者
-            performerCode: '51',
-            performerCodeId: 'facility'                       // required
-        }
+        consulter: consulter,                               // 依頼者 ?
+        performer: performer                                // 実施者情報
     };
 
     // 報告書本文情報
@@ -81,18 +76,34 @@ var postReport = function (callback) {
 
     //------------------------------------------------------------
     // レポートの確定日時は報告日時に一致させる => reportTime
-    // レポートのcreatorは報告書の記載者である
+    // レポートのcreatorは報告書の記載者である => simpleReporter
     //------------------------------------------------------------
     var simpleComposition = {                   // POSTする simpleComposition
         context: {                              // context 文脈
             uuid: generateUUID(),               // UUID
             confirmDate: reportTime,            // 確定日時 = 報告日時 YYYY-MM-DDTHH:mm:ss
-            patient: simplePatient,             // 対象患者
+            patient: simpleOverseasPatient,     // 対象患者
             creator: simpleReporter,            // 報告書の記載者
             accessRight: simpleRight            // アクセス権
         },
         content: [simpleReport]                 // content: 臨床データ=simpleReport
     };
+
+    //------------------------------------------------------------------
+    // 報告書のタイトルと生成目的を設定する
+    //------------------------------------------------------------------
+    // 運用として報告書のタイトルに記載されているものが利用できる
+    simpleComposition.context.title = simpleReport.context.testClass;
+    // MML007 reportRadiology reportPathology reportTest 等から選ぶ
+    simpleComposition.context.generationPurpose = 'reportRadiology';
+    //------------------------------------------------------------------
+
+    //------------------------------------------------------------------
+    // 共通設定 患者とcreatorに自施設の情報を設定する
+    //------------------------------------------------------------------
+    simpleComposition.context.patient.facilityId = simpleFacility.id;
+    simpleComposition.context.creator.facility = simpleFacility;
+    //------------------------------------------------------------------
 
     // POST
     post('report', simpleComposition, function (err, mml) {
