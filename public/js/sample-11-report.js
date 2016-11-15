@@ -8,10 +8,10 @@ var postReport = function (callback) {
     };
 
     // 依頼者 相談する側のスタッフ
-    var consulter = asConsulter(simpleCreator);
+    var consulter = asFacilityStaff(simpleCreator);
 
     // 検査を実施するスタッフ
-    var performer = asPerformer(simpleReporter);
+    var performer = asFacilityStaff(simpleReporter);
 
     // 報告日時は現在とする
     var now = new Date();
