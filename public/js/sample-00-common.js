@@ -121,7 +121,7 @@ var asSurgicalStaff = function (staff, role) {
     var staff = {
         staffClass: role,
         staffInfo: staffInfo
-    }
+    };
     return staff;
 };
 
@@ -210,7 +210,7 @@ var daysAsDuration = function (days) {
 // 時間を継続表現で返す => P + 時間 + H + 分 + D
 //------------------------------------------------------------------------------
 var timesAsDuration = function (hour, minuets) {
-    var arr = ['P'];
+    var arr = ['PT'];
     if (hour !== null) {
         arr.push(hour);
         arr.push('H');

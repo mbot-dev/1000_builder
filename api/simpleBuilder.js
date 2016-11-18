@@ -26,10 +26,14 @@ const moduleNames = {
 
 module.exports = {
 
+    // contentTypeから千年カルテに使用するモジュール名を返す
+    // 実際は名前空間
     getModuleName: function (contentType) {
         return moduleNames[contentType];
     },
 
+    // 外部参照ファイルの href を生成する
+    // docId_連番.拡張子  連番部は２桁
     createHREF: function (docId, index, href) {
         var arr = [];
         arr.push(docId);
@@ -40,6 +44,8 @@ module.exports = {
         return arr.join('');
     },
 
+    // 外部参照形式を生成する
+    // extArrayにbase64のデータを集める
     buildExtRef: function (e, extArray) {
         /*********************
         var e = {
@@ -75,27 +81,23 @@ module.exports = {
     },
 
     /**
-     * 患者、医師等の個人用Idを生成する
+     * 千年カルテ仕様の患者、医師等の個人用Idを生成する
      * @param {pid} - pid 個人に発番されているId
-     * @param {string} - idType MML0024(全国統一:national 地域:local 施設固有:facility)
      * @param {string} - facilityId 医療機関のId
      */
     buildPersonId: function (pid, facilityId) {
-        // 千年カルテ仕様
-        var idType = 'facility';            // 施設固有
         return {
             value: pid,                     // 付番されているId
             attr: {
-                type: idType,
-                tableId: facilityId         // idTypeが施設固有の場合(===facility) tableIdに施設Idを設定する
+                type: 'facility',           // 千年カルテ仕様　施設固有の体型を示す
+                tableId: facilityId         // idTypeが施設固有の場合tableIdに施設Idを設定する
             }
         };
     },
 
-    // 人名
+    // 千年カルテ仕様の人名を生成する
     buildPersonName: function (repCode, fullName) {
-        // 千年カルテ仕様
-        fullName = fullName.replace(' ', '　');            // 全角区切り
+        fullName = fullName.replace(' ', '　');            // 全角区切りにする
         return {
             attr: {
                 repCode: repCode,                          // 表記法 (漢字:I カナ:P ローマ字:A)
@@ -151,8 +153,6 @@ module.exports = {
 
     // 施設情報 MMLで病院は施設で表現 漢字のみ
     buildFacility: function(fId, fName) {
-        // 千年カルテ仕様
-        var idType = 'OID';                         // OID
         // 施設名称 漢字
         var facilityName = {
             value: fName,
@@ -165,7 +165,7 @@ module.exports = {
         var facilityId = {
             value: fId,                             // 施設に付番されているId type属性に発番元（体系）を記載する
             attr: {
-                type: idType,                       // MML0027 のOIDを使用する
+                type: 'OID',                        // MML0027 のOIDを使用する 千年カルテ仕様
                 tableId: 'MML0027'                  // MML0027
             }
         };
@@ -177,13 +177,11 @@ module.exports = {
 
     // 診療科情報
     buildDepartment: function(dId, dName) {
-        // 千年カルテ仕様
-        var idType = 'facility';                    // idType=facility, 施設固有
         // 診療科Id
         var deptId = {
-            value: dId,                             // medicalの場合はMML0028 dentalの場合はMML0030を参照
+            value: dId,                             // 診療科ID 施設固有
             attr: {
-                type: idType,                       // 施設内ユーザー定義診療科コード:facilityを使用する
+                type: 'facility',                   // 施設内ユーザー定義診療科コード:facilityを使用する 千年カルテ仕様
                 tableId: 'MML0029'
             }
         };
@@ -203,9 +201,9 @@ module.exports = {
     },
 
     // creator(医師等)個人情報
+    // 千年ではfacilityは必須
     buildPersonalizedInfo: function (person) {
         // 作成者(creator)Id
-        // facilityは必須 千年では
         var creatorId = this.buildPersonId(person.id, person.facility.id);
 
         // 作成者氏名
@@ -233,13 +231,13 @@ module.exports = {
             });
         }
 
-        // 施設情報
+        // 施設情報 person.facility => 必須
         var facility = this.buildFacility(person.facility.id, person.facility.name);
 
-        // 医療機関住所
+        // 医療機関住所 => 必須
         var facilityAddress = this.buildBusinessAddress(person.facility.zipCode, person.facility.address);
 
-        // 医療機関電話番号
+        // 医療機関電話番号 => 必須
         var facilityPhone = this.buildTelephone(person.facility.telephone);
 
         // creator(医師)個人情報
@@ -251,13 +249,13 @@ module.exports = {
             phones: [facilityPhone]                      // 電話番号
         };
 
-        // 診療科情報
+        // 診療科情報 => オプション
         if (utils.propertyIsNotNull(person, 'department')) {
             var department = this.buildDepartment(person.department.id, person.department.name);
             personalizedInfo.Department = department;
         }
 
-        // 電子メールもセット可能
+        // 電子メールもセット可能  => オプション
         if (utils.propertyIsNotNull(person, 'email')) {
             personalizedInfo.emailAddresses = [person.email];
         }
@@ -302,7 +300,7 @@ module.exports = {
         // creator(医師)個人情報
         var personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
 
-        // 医療資格 必須
+        // 医療資格  => 必須
         var creatorLicense = this.buildCreatorLicense(simpleCreator.license);
 
         // 作成者情報
@@ -360,6 +358,7 @@ module.exports = {
         return [accessRightForCreatorFacility, accessRightForPatientAnExperienceFacility];
     },
 
+    // アクセス権を生成する
     buildAccessRight: function (patientId, patientName, simpleAccessRight) {
         // 記載者施設
         var accessRightForCreator = {
@@ -418,20 +417,14 @@ module.exports = {
      */
     buildDocInfo: function (metaInfo, creatorInfo, accessRight) {
         /*********************************************************************:
-        var simpleDocInfo = {
-            contentModuleType: '',
-            uuid: '',
-            confirmDate: '',
-            title: '',
-            parentUUID: '',
-            parentConfirmDate: '',
-        };
         var metaInfo = {
             contentModuleType: contentType,             // コンテントタイプ
             facilityId: context.patient.facilityId,     // 医療機関ID
             patientId: context.patient.id,              // 患者ID
-            uuid: context.uuid                          // uuid
-            confirmDate: context.confirmDate            // 確定日時はMMLの確定日時
+            uuid: context.uuid,                          // uuid
+            confirmDate: context.confirmDate,            // 確定日時はMMLの確定日時
+            title: '',
+            generationPurpose: ''
         };
         ***********************************************************************/
 
@@ -446,7 +439,7 @@ module.exports = {
         // 対象
         var docInfo = {
             attr: {
-                contentModuleType: metaInfo.contentModuleType  // 文書の種類コード MML0005を使用
+                contentModuleType: metaInfo.contentModuleType      // 文書の種類コード MML0005を使用
                 // moduleVersion: ''                               // 使用モジュールのDTDのURIを記載
             },
             securityLevel: accessRight,                            // accessRight の配列
@@ -1116,12 +1109,8 @@ module.exports = {
                 date: '',                                       // 手術施行日 CCYY-MM-DD
                 startTime: '',                                  // 手術開始時刻 ? hh:mm
                 duration: '',                                   // 手術時間 ? PTnHnM 5時間25分=PT5H25M
-                // surgicalDepartmentId: '',                       // 手術実施診療科情報 ? [mmlDp:Department]
-                // surgicalDepartmentName: '',                     // 手術実施診療科情報 ? [mmlDp:Department]
-                // patientDepartmentId: '',
-                // patientDepartmentName: ''                       // 手術時に患者の所属していた診療科 ? [mmlDp:Department]
-                surgicalDepartment: simpleDept,
-                patientDepartment: simpleDept
+                surgicalDepartment: simpleDept,                 // 手術実施診療科情報 ? [mmlDp:Department]
+                patientDepartment: simpleDept                   // 手術時に患者の所属していた診療科 ? [mmlDp:Department]
             },
             surgicalDiagnosis: [],                              // 外科診断情報 simpleDiagnosis -> [mmlRd:RegisteredDiagnosisModule]
             surgicalProcedure: [],                              // 手術法情報 [procedureItem]
@@ -1181,18 +1170,10 @@ module.exports = {
         if (utils.propertyIsNotNull(simpleSurgery.context, 'duration')) {
             result.surgicalInfo.duration = simpleSurgery.context.duration;
         }
-        // if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartmentName') ) {
-            // var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartmentId, simpleSurgery.context.surgicalDepartmentName);
-            // result.surgicalInfo.surgicalDepartment = [sdp];
-        // }
         if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartment')) {
             var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartment.id, simpleSurgery.context.surgicalDepartment.name);
             result.surgicalInfo.surgicalDepartment = [sdp];
         }
-        // if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentId') && utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartmentName') ) {
-            // var pdp = this.buildDepartment(simpleSurgery.context.patientDepartmentId, simpleSurgery.context.patientDepartmentName);
-            // result.surgicalInfo.patientDepartment = [pdp];
-        // }
         if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartment')) {
             var pdp = this.buildDepartment(simpleSurgery.context.patientDepartment.id, simpleSurgery.context.patientDepartment.name);
             result.surgicalInfo.patientDepartment = [pdp];

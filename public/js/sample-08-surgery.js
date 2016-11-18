@@ -11,8 +11,8 @@ var postSurgery = function (callback) {                     // 手術記録情�
     now.setDate(now.getDate() - 1);
     var opDate = dateAsString(now);
 
-    // 開始時刻
-    var startTime = '09:18';
+    // 開始時刻 xs:time => T09:00:00
+    var startTime = '09:18:00';
 
     // 手術時間 3時間20分 => P3H20M
     var duration = timesAsDuration(3, 20);
@@ -24,8 +24,8 @@ var postSurgery = function (callback) {                     // 手術記録情�
             date: opDate,                                   // 手術施行日 CCYY-MM-DD
             startTime: startTime,                           // 手術開始時刻 ? hh:mm
             duration: duration                             // 手術時間 ? PTnHnM 5時間25分=PT5H25M
-            // surgicalDepartment: simpleSurgicalDept,         // 手術実施診療科情報 ?  XSD
-            // patientDepartment: simpleInternalDept           // 手術時に患者の所属していた診療科 ?  XSD
+            // surgicalDepartment: simpleSurgicalDept,         // 手術実施診療科情報 ?  due to on xsd
+            // patientDepartment: simpleInternalDept           // 手術時に患者の所属していた診療科 ?  xsd
         },
         surgicalDiagnosis: [],                              // 外科診断情報 simpleDiagnosis -> [mmlRd:RegisteredDiagnosisModule]
         surgicalProcedure: [],                              // 手術法情報 [procedureItem]
