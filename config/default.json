@@ -1,5 +1,4 @@
 {
-  "appMode": "demo",
   "path": {
       "oauth2": "/mml/api/v1/oauth2/token",
       "simple": "/mml/api/v1",
@@ -9,9 +8,5 @@
       "token_type": "bearer",
       "secret_demo": "96d108bec049b22f88f990d2e16cd27591c53e5856dc404d9e65ac301d68a14a",
       "expires": 7200
-  },
-  "topic": {
-    "base": "mml",
-    "shareName": "mml"
   }
 }

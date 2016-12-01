@@ -69,7 +69,6 @@ var createTest = function (callback) {
             codeSystem: 'YBS_2016',                         // 検査コード体系名
             facilityName: simpleCreator.facilityName,       // 検査依頼施設名称
             facilityId: simpleCreator.facilityId,           // 検査依頼施設ID
-            facilityIdType: 'JMARI',                        // 検査依頼施設IDタイプ
             laboratory: simpleLabTester                     // 検査実施施設の代表（sample-commonで定義）
         }
     };

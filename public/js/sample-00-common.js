@@ -308,7 +308,7 @@ var getAccessToken = function (callback) {
         if (xhr.readyState === 4) {
 
             // レスポンスを調べる
-            if (xhr.status === 200 ) {
+            if (xhr.status === 200) {
                 // HTTP Status が 200 => 正常取得できた場合
                 // レスポンステキストをパースしてJSONに変換する
                 // 結果は {token_type: 'bearer', access_token: 発行されたトークン, expires_in: '有効期間秒}
@@ -320,18 +320,25 @@ var getAccessToken = function (callback) {
                     // コールバック null = No error
                     callback(null);
                 } else {
-                    var e = new Error('Unexpected server response');
-                    callback(e);
+                    callback(new Error('Unexpected server response'));
                 }
-            } else {
-                // status !== 200 原因
-                // consumerKey または secretの誤り
-                // Authorization ヘッダーの誤り
+            } else if (xhr.status === 400 || xhr.status === 401) {
+                // 400: invalid request
+                // Authorization ヘッダーの設定誤り
                 // Content-typeの誤り
-                // grant_type=client_credentials がセットされていない
-                // 戻り値 {error: invalid_request(400) | invalid_client(401)}
-                var err = JSON.parse(xhr.responseText);
-                callback(err);
+                // ボディにgrant_type=client_credentials がセットされていない
+                // 上記がURLエンコードされていない
+                // 401: invalid client
+                // consumerKey または secretの誤り
+                var parsed = JSON.parse(xhr.responseText);
+                var cbError = new Error(parsed.error);
+                cbError.status = xhr.status;
+                callback(cbError);
+            } else {
+                // Internal Server error 等
+                var e = new Error('Unexpected server response');
+                e.status = xhr.status;
+                callback(e);
             }
         }
     };
@@ -365,15 +372,10 @@ var post = function (contentType, simpleComposition, callback) {
             if (xhr.status > 199 && xhr.status < 300) {
                 // response = 200, responseからJSONを生成する
                 var parsed = JSON.parse(xhr.responseText);
-                if (parsed.error) {
-                    // エラー
-                    callback(parsed.error.message, null);
-                } else {
-                    // 生成されたMMLをコールバックする
-                    callback(null, parsed.result.mml);
-                }
+                callback(null, parsed.result.mml);
+                // callback(null, parsed.result);
 
-            } else if (xhr.status > 399 && xhr.status < 500) {
+            } else if (xhr.status === 400 || xhr.status === 401) {
                 // status = 400 | 401
                 // access tokenが失効しているか不正な場合
                 // Authorization に Bearer token がセットされていない
@@ -388,9 +390,19 @@ var post = function (contentType, simpleComposition, callback) {
                     }
                 });
             } else {
+                // status = 500 etc.
                 // simpleCompositionに誤りがある
-                // status = 500
-                callback(new Error(xhr.status), null);
+                // POST パラメータの設定間違い
+                var errMsg = null;
+                try {
+                    var ret = JSON.parse(xhr.responseText);
+                    errMsg = ret.error;
+                } catch (e) {
+                    errMsg = e.message;
+                }
+                var cbError = new Error(errMsg);
+                cbError.status = xhr.status;
+                callback(cbError, null);
             }
         }
     };
@@ -435,14 +447,14 @@ var rpc = function (simpleComposition, callback) {
                 // response = 200, responseからJSONを生成する
                 var parsed = JSON.parse(xhr.responseText);
                 if (parsed.error) {
-                    // エラー
+                    // エラー RPC の場合
                     callback(parsed.error.message, null);
                 } else {
                     // 生成されたMMLをコールバックする
                     callback(null, parsed.result.mml);
                 }
 
-            } else if (xhr.status > 399 && xhr.status < 500) {
+            } else if (xhr.status === 400 || xhr.status === 401) {
                 // status = 400 | 401
                 // access tokenが失効しているか不正な場合
                 // Authorization に Bearer token がセットされていない

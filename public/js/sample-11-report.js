@@ -22,12 +22,12 @@ var postReport = function (callback) {
 
     // 報告書のコンテキスト
     simpleReport.context = {
-        performTime: performTime,                           // 検査実施日時 required
-        reportTime: reportTime,                             // 報告日時 required
-        reportStatus: '最終報告',                            // 報告状態
-        statusCode: 'final',                                // mid 検査中 final 最終報告 required
-        testClass: 'CT スキャン',                            // 報告書種別
-        testClassCode: 'ctscan',                            // MML0033 required
+        performTime: performTime,                           // 検査実施日時 YYYY-MM-DDThh:mm:ss
+        reportTime: reportTime,                             // 報告日時 YYYY-MM-DDThh:mm:ss
+        reportStatus: '最終報告',                            // 報告状態 報告状態 検査中または最終報告を入力
+        statusCode: 'final',                                // 検査中=mid  最終報告=final
+        testClass: 'CT スキャン',                            // 報告書種別 MML0033 のdescription
+        testClassCode: 'ctscan',                            // 種別コード MML0033を使用
         organ: '腹部',                                       // 臓器 ?
         consulter: consulter,                               // 依頼者 ?
         performer: performer                                // 実施者情報

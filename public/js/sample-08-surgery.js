@@ -22,7 +22,7 @@ var postSurgery = function (callback) {                     // 手術記録情�
         context: {                                          // 手術ヘッダー情報 -> surgicalInfo
             type: 'elective',                               // 手術区分 MML0021 待期手術
             date: opDate,                                   // 手術施行日 CCYY-MM-DD
-            startTime: startTime,                           // 手術開始時刻 ? hh:mm
+            startTime: startTime,                           // 手術開始時刻 ? hh:mm:ss
             duration: duration                             // 手術時間 ? PTnHnM 5時間25分=PT5H25M
             // surgicalDepartment: simpleSurgicalDept,         // 手術実施診療科情報 ?  due to on xsd
             // patientDepartment: simpleInternalDept           // 手術時に患者の所属していた診療科 ?  xsd

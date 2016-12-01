@@ -10,8 +10,8 @@ var postHealthInsurance = function (callback) {
         clientGroup: '宮市みへし',                        // 被保険者記号
         clientNumber: '421',                            // 被保険者番号
         familyClass: 'false',                           // 本人家族区分．true：本人，false：家族
-        startDate: '2016-02-20',                        // 開始日 (交付年月日) CCYY-MM-DD
-        expiredDate: '2017-02-28',                      // 有効期限
+        startDate: '2016-02-20',                        // 開始日 (交付年月日) YYYY-MM-DD
+        expiredDate: '2017-02-28',                      // 有効期限 YYYY-MM-DD
         paymentInRatio: '0.3',                          // 入院時の負担率 ?
         paymentOutRatio: '0.3',                         // 外来時の負担率 ?
         publicInsurance: []                             // 公費負担医療情報 [publicInsuranceItem]  ?
@@ -23,10 +23,10 @@ var postHealthInsurance = function (callback) {
         providerName: '公費',                             // 公費負担名称 ?
         provider: '15450034',                            // 負担者番号
         recipient: '0009043',                            // 受給者番号
-        startDate: '1997-09-30',                         // 開始日
-        expiredDate: '1999-09-30',                       // 有効期限
-        paymentRatio: '10000',                           // ?
-        ratioType: 'fix'                                 // MML0032
+        startDate: '1997-09-30',                         // 開始日 YYYY-MM-DD
+        expiredDate: '1999-09-30',                       // 有効期限 YYYY-MM-DD
+        paymentRatio: '10000',                           // 負担率または負担金 ?
+        ratioType: 'fix'                                 // paymentRatioのタイプ paymentRatioがある時は必須 MML0032
     };
 
     // 主保険へ追加

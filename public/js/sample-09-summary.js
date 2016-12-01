@@ -12,7 +12,7 @@ var postSummary = function (callback) {                        // 臨床経過�
         patientProfile: '',                                     // 患者プロフィール ?
         history: '',                                            // 入院までの経過 ?
         physicalExam: {},                                       // 入院時理学所見 ?
-        clinicalCourse: [],                                     // 経過および治療 ? [clinicalRecord]
+        clinicalCourse: [],                                     // 経過および治療 * [clinicalRecord]
         dischargeFindings: {},                                  // 退院時所見 ?
         medication: {},                                         // 退院時処方 ?
         testResults: [],                                        // 退院時検査結果 ? [testResult]
@@ -85,7 +85,7 @@ var postSummary = function (callback) {                        // 臨床経過�
 
     // 退院時所見
     simpleSummary.dischargeFindings = {
-        value: 'Symptoms free, no wound infection.'                      // mixed=true extRef *
+        value: 'Symptoms free, no wound infection.'                      // 説明
         // extRef: []                                                    // 外部参照 ? 必要なら追加
     };
 

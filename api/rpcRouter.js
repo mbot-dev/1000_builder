@@ -1,12 +1,12 @@
 'use strict';
 
 const express = require('express');
+const assert = require('assert');
 const config = require('config');
 const utils = require('../lib/utils');
 const jweSimple = require('../api/jweSimple');
 const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
-const publisher = require('../api/publisher');
 
 var router = express.Router();
 
@@ -40,7 +40,7 @@ router.use((req, res, next) => {
 
 // Returns error object
 var buildError = (code, message, id) => {
-    return {
+    var err = {
         jsonrpc: '2.0',
         error: {
             code: code,
@@ -48,36 +48,28 @@ var buildError = (code, message, id) => {
         },
         id: id
     };
+    return JSON.stringify(err);
 };
 
 var build = function (req, res) {
+    // {jsonrpc: '2.0', method: 'build', params: [simpleComposition], id: 'uuid'}
+    var jsonrpc = req.body.jsonrpc;
+    var method = req.body.method;
+    var params = req.body.params;
+    var rpcId = req.body.id;
+
     try {
-        // {jsonrpc: '2.0', method: 'build', params: [simpleComposition], id: 'uuid'}
-        var jsonrpc = req.body.jsonrpc;
-        var method = req.body.method;
-        var params = req.body.params;
-        var rpcId = req.body.id;
-        var response = {
-            jsonrpc: '2.0',
-            id: rpcId
-        };
+        assert.strictEqual(jsonrpc, '2.0', buildError(-32600, 'Invalid Request', rpcId));
+        assert.strictEqual(method, 'build', buildError(-32601, 'Method not found', rpcId));
+        assert.ok(Array.isArray(params), buildError(-32600, 'Invalid Request', rpcId));
+    } catch (err) {
+        res.send(err.message);
+        return;
+    }
 
-        if (utils.isUndefined(jsonrpc) || jsonrpc !== '2.0') {
-            throw buildError(-32600, 'Invalid Request', rpcId);
-        }
-        if (utils.isUndefined(method) || method !== 'build') {
-            throw buildError(-32601, 'Method not found', rpcId);
-        }
-        if (utils.isUndefined(params)) {
-            throw buildError(-32600, 'Invalid Request', rpcId);
-        }
-        if (!Array.isArray(params)) {
-            throw buildError(-32600, 'Invalid Request', rpcId);
-        }
-
+    try {
         // Notificationでない時応答
         if (utils.isDefined(rpcId)) {
-
             // パラメータ
             var simpleComposition = params[0];
             var contentType = simpleComposition.context.contentType;    // RPC固有で必須
@@ -88,23 +80,20 @@ var build = function (req, res) {
             wrapper.mml = mml;
             wrapper.json = null;
 
-            // Send message broker wrapper
-            if (config.appMode === 'prod') {
-                // 稼働環境の場合のみ
-        		publisher.publish(JSON.stringify(wrapper));
-        	}
-
             // レスポンス
-            response.result = {
-                version: '4.0',
-                mml: mml
+            var response = {
+                jsonrpc: '2.0',
+                id: rpcId,
+                result: {
+                    mml: mml
+                }
             };
             res.send(response);
         }
 
-    } catch (err) {
-        console.log(err);
-        res.send(err);
+    } catch (err2) {
+        console.log(err2);
+        res.send(buildError(-1, err2.message, rpcId));
     }
 };
 
