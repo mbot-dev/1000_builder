@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 経過記録情報 -->
-<!-- ProgressCourseModule XSD Version 4.0 -->
+<!-- ProgressCourseModule XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/ProgressCourse/1.0" 
   xmlns:mmlPc="http://www.medxml.net/MML/v4/ContentModule/ProgressCourse/1.0"
@@ -148,7 +148,7 @@
     <xs:complexType mixed="true">
       <xs:sequence>
         <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
-      </xs:sequence>             
+      </xs:sequence>       
     </xs:complexType>
   </xs:element>
   
@@ -220,6 +220,7 @@
     <xs:complexType mixed="true">
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -250,9 +251,4 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  
-  
-  
-  
-  
 </xs:schema>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
   xmlns:mmlPs="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0"
   targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0">
   <xs:element name="PrescriptionModule">
@@ -69,7 +71,7 @@
  
   <xs:element name="dose" type="xs:decimal"/>
   <xs:element name="doseUnit" type="xs:string"/>
-  <xs:element name="frequencyPerDay" type="xs:string"/>
+  <xs:element name="frequencyPerDay" type="xs:integer"/>
   <xs:element name="startDate" type="xs:date"/>
   <xs:element name="duration" type="xs:duration"/>
   <xs:element name="instruction" type="xs:string"/>

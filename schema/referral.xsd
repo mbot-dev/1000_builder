@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 紹介状情報 -->
-<!-- ReferralModule XSD Version 4.0 -->
+<!-- ReferralModule XSD Version 4.1 -->
 <!-- *************************************************** -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Referral/1.0" 
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Referral/1.0" 
   xmlns:mmlRe="http://www.medxml.net/MML/v4/ContentModule/Referral/1.0"
   xmlns:mmlPi="http://www.medxml.net/MML/v4/ContentModule/PatientInfo/1.0"
   xmlns:mmlSm="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0"
@@ -48,7 +51,14 @@
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="occupation" type="xs:string"/>
+  <xs:element name="occupation">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
   <xs:element name="referFrom">
     <xs:complexType>
@@ -60,15 +70,37 @@
   
   <xs:element name="title" type="xs:string"/>
   
-  <xs:element name="greeting" type="xs:string"/>
+  <xs:element name="greeting">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
-  <xs:element name="chiefComplaints" type="xs:string"/>
+  <xs:element name="chiefComplaints">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
-  <xs:element name="clinicalDiagnosis" type="xs:string"/>
+  <xs:element name="clinicalDiagnosis">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
   <xs:element name="pastHistory" >
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>
@@ -77,6 +109,7 @@
   <xs:element name="familyHistory">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>
@@ -85,6 +118,7 @@
   <xs:element name="presentIllness">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>
@@ -93,6 +127,7 @@
   <xs:element name="testResults">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>    
@@ -101,6 +136,7 @@
   <xs:element name="medication">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="mmlPs:PrescriptionModule"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="mmlInj:InjectionModule"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
@@ -108,11 +144,19 @@
     </xs:complexType>        
   </xs:element>
   
-  <xs:element name="referPurpose" type="xs:string"/>
+  <xs:element name="referPurpose">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
   <xs:element name="remarks">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>    

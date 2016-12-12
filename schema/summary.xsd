@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 臨床サマリー情報 -->
-<!-- SummaryModule XSD Version 4.0 -->
+<!-- SummaryModule XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0" 
   xmlns:mmlSm="http://www.medxml.net/MML/v4/ContentModule/Summary/1.0"
@@ -12,6 +12,11 @@
   xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
   xmlns:mmlPs="http://www.medxml.net/MML/v4/ContentModule/Prescription/1.0">
   
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" schemaLocation="name.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0" schemaLocation="address.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0" schemaLocation="phone.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0" schemaLocation="department.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd"/>
   <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0" schemaLocation="registereddiagnosis.xsd" />
   <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/Surgery/1.0" schemaLocation="surgery.xsd" />
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/PersonalizedInfo/1.0" schemaLocation="personalizedinfo.xsd" />
@@ -207,11 +212,31 @@
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="chiefComplaints" type="xs:string"/>
+  <xs:element name="chiefComplaints">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>    
   
-  <xs:element name="patientProfile" type="xs:string"/>
+  <xs:element name="patientProfile">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
-  <xs:element name="history" type="xs:string"/>
+  <xs:element name="history">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
   <xs:element name="physicalExam">
     <xs:complexType mixed="true">
@@ -253,6 +278,7 @@
     <xs:complexType mixed="true">
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="1" ref="mmlPs:PrescriptionModule"/>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>
@@ -269,6 +295,7 @@
   <xs:element name="testResult">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlSm:relatedDoc"/>
       </xs:sequence>
@@ -300,7 +327,6 @@
           <xs:attribute name="relation" use="optional" type="xs:string" form="qualified"/>          
         </xs:extension>
       </xs:simpleContent>
-      <xs:attributeGroup ref="mmlSm:attlist.relatedDoc"/>
     </xs:complexType>
   </xs:element> 
 </xs:schema>

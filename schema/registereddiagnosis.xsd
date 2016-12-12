@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 診断履歴情報 -->
-<!-- RegisteredDiagnosisModule XSD Version 1.0 -->
+<!-- RegisteredDiagnosisModule XSD Version 4.1 -->
 <!-- *************************************************** -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0" xmlns:mmlRd="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0">
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0"
+  xmlns:mmlRd="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0">
   <xs:element name="RegisteredDiagnosisModule">
     <xs:complexType>
       <xs:sequence>
@@ -69,7 +73,11 @@
 
   <xs:element name="category">
     <xs:complexType>
-      <xs:attributeGroup ref="mmlRd:attlist.mmlRd.category"/>
+      <xs:simpleContent>
+	<xs:extension base="xs:string">
+	  <xs:attributeGroup ref="mmlRd:attlist.mmlRd.category"/>
+	</xs:extension>
+      </xs:simpleContent>
     </xs:complexType>
   </xs:element>
  
@@ -89,7 +97,7 @@
   <xs:element name="startDate" type="xs:date"/>
   <xs:element name="endDate" type="xs:date"/>
   <xs:element name="outcome" type="xs:string"/>
-  <xs:element name="firstEncounterDate" type="xs:string"/>
+  <xs:element name="firstEncounterDate" type="xs:date"/>
   <xs:element name="relatedHealthInsurance">
     <xs:complexType>
       <xs:simpleContent>

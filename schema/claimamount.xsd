@@ -3,7 +3,10 @@
 <!-- 点数金額モジュール -->
 <!-- ClaimAmountModule XSD Version 2.1 -->
 <!-- *************************************************** -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/claim/claimAmountModule/2.1" 
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/claim/claimAmountModule/2.1" 
   xmlns:claimA="http://www.medxml.net/claim/claimAmountModule/2.1"
   xmlns:mmlHi="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1"
   xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0">

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 住所表現形式 -->
-<!-- Address XSD Version 4.0 -->
+<!-- Address XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified"
   targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0"
   xmlns:mmlAd="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0">
+
   <xs:element name="Address">
     <xs:complexType>
       <xs:sequence>

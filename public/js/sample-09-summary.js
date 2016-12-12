@@ -33,7 +33,7 @@ var postSummary = function (callback) {                        // 臨床経過�
     };
     // 入院情報
     inPatientItem.admission = {                                 // 入院
-        date: '2015-8-27',                                      // 入院 (転入) 日 CCYY-MM-DD
+        date: '2015-08-27',                                     // 入院 (転入) 日 CCYY-MM-DD
         admissionCondition: 'Emergency admission by ambulancetrue', // 入院時状態 ?
         emergency: 'true',                                      // 緊急入院．true：緊急入院，false：通常
         // referFrom:                                           // 紹介元情報 ?
@@ -65,7 +65,7 @@ var postSummary = function (callback) {                        // 臨床経過�
 
     // 経過および治療項目
     var clinicalRecord = {
-        date: '1999-08-27',                                               // イベント発生日時
+        date: '1999-08-27T00:00:00',                                               // イベント発生日時
         recode: 'Emergency coronary angiography was carried out. Three vessels (LAD, #9, #12) were involved.',
         extRef: [{                                                         // 外部参照 ?
             contentType: 'image/jpeg',
@@ -110,7 +110,7 @@ var postSummary = function (callback) {                        // 臨床経過�
 
     // 検査結果項目1
     var testResult1 = {                                         // 個々の検査結果
-        date: '1999-08-31',
+        date: '1999-08-31T00:00:00',
         testResult: 'Labo findings on discharge',
         extRef: [{                                              // 外部参照 ?
             contentType: 'APPLICATION/HL72.3-HL7ER2.3',
@@ -122,7 +122,7 @@ var postSummary = function (callback) {                        // 臨床経過�
     };
     // 検査結果項目2
     var testResult2 = {                                          // 個々の検査結果
-        date: '1999-08-31',
+        date: '1999-08-31T00:00:00',
         testResult: 'ECG on discharge. No ST change and new Q wave was observed.',
         extRef: [{                                              // 外部参照 ?
             contentType: 'image/jpeg',

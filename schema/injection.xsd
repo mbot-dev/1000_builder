@@ -64,4 +64,4 @@
   <xs:element name="additionalInstruction" type="xs:string"/>
   <xs:element name="narcoticPrescriptionLicenseNumber" type="xs:string"/>
   <xs:element name="comment" type="xs:string"/>
-  </xs:schema>
+</xs:schema>

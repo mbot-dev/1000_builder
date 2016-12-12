@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 人名表現形式 -->
-<!-- Name XSD Version 4.0 -->
+<!-- Name XSD Version 4.1 -->
 <!-- *************************************************** -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0">
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0"
+  xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0">
+
   <xs:element name="Name">
     <xs:complexType>
       <xs:sequence>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 初診時特有情報 -->
-<!-- FirstClinicModule XSD Version 4.0 -->
+<!-- FirstClinicModule XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/FirstClinic/1.0" 
   xmlns:mmlFcl="http://www.medxml.net/MML/v4/ContentModule/FirstClinic/1.0"
@@ -11,7 +11,8 @@
   
   <xs:import namespace="http://www.medxml.net/MML/v4/ContentModule/RegisteredDiagnosis/1.0" schemaLocation="registereddiagnosis.xsd" />
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd" />
-  
+  <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-transitional.xsd"/>
+
   <xs:element name="FirstClinicModule">
     <xs:complexType>
       <xs:sequence>
@@ -47,7 +48,13 @@
   
   <xs:element name="age" type="xs:duration"/>
   
-  <xs:element name="memo" type="xs:string"/>
+  <xs:element name="memo">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   
   <xs:element name="childhood">
     <xs:complexType>
@@ -160,11 +167,36 @@
   
   <xs:element name="timeExpression" type="xs:string"/>
   
-  <xs:element name="eventExpression" type="xs:string"/>
+  <xs:element name="eventExpression">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   
-  <xs:element name="chiefComplaints" type="xs:string"/>
+  <xs:element name="chiefComplaints">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="presentIllnessNotes">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
-  <xs:element name="presentIllnessNotes" type="xs:string"/>
-  
-  <xs:element name="freeNotes" type="xs:string"/>
+  <xs:element name="freeNotes">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

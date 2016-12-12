@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 施設情報形式 -->
-<!-- Facility XSD Version 4.0 -->
+<!-- Facility XSD Version 4.1 -->
 <!-- *************************************************** -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
   targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0"
-  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0"
-  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0">
 
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd"/>
 

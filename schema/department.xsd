@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 診療科情報形式 -->
-<!-- Department XSD Version 4.0 -->
+<!-- Department XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema
   xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
   targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0"
-  xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0"
-  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
-  
+  xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0"
+  xmlns:mmlDp="http://www.medxml.net/MML/v4/SharedComponent/Department/1.0">
+
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd"/>
   
   <xs:element name="Department">
@@ -21,22 +21,21 @@
   </xs:element>
   
   <xs:element name="name">
-    <xs:complexType mixed="true">
-      <xs:attributeGroup ref="mmlDp:attlist.name"/>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="repCode" use="required" form="qualified">
+            <xs:simpleType>
+              <xs:restriction base="xs:token">
+                <xs:enumeration value="I"/>
+                <xs:enumeration value="A"/>
+                <xs:enumeration value="P"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="tableId" default="MML0025" form="qualified" type="xs:string"/>
+        </xs:extension>
+      </xs:simpleContent>
     </xs:complexType>
   </xs:element>
-  
-  <xs:attributeGroup name="attlist.name">
-    <xs:attribute name="repCode" use="required" form="qualified">
-      <xs:simpleType>
-        <xs:restriction base="xs:token">
-          <xs:enumeration value="I"/>
-          <xs:enumeration value="A"/>
-          <xs:enumeration value="P"/>
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="tableId" default="MML0025" form="qualified" type="xs:string"/>
-  </xs:attributeGroup>
-  
 </xs:schema>

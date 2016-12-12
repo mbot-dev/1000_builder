@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- Id形式，外部参照形式およびEmail -->
-<!-- MML Common XSD Version 4.0 -->
+<!-- MML Common XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified"
@@ -9,13 +9,17 @@
   xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
 
   <xs:element name="Id">
-    <xs:complexType mixed="true">
-      <xs:attributeGroup ref="mmlCm:attlist.Id"/>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attributeGroup ref="mmlCm:attlist.Id"/>          
+        </xs:extension>
+      </xs:simpleContent>
     </xs:complexType>
   </xs:element>
   
   <xs:attributeGroup name="attlist.Id">
-    <xs:attribute name="type" use="required" form="qualified"/>
+    <xs:attribute name="type" type="xs:string" use="required" form="qualified"/>
     <xs:attribute name="checkDigitSchema" form="qualified">
       <xs:simpleType>
         <xs:restriction base="xs:token">
@@ -24,8 +28,8 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="checkDigit" form="qualified"/>
-    <xs:attribute name="tableId" use="required" form="qualified"/>
+    <xs:attribute name="checkDigit" type="xs:string" form="qualified"/>
+    <xs:attribute name="tableId" type="xs:string" use="required" form="qualified"/>
   </xs:attributeGroup>
   
   <xs:element name="extRef">
@@ -69,8 +73,9 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="title" form="qualified"/>
-    <xs:attribute name="href" use="required" form="qualified"/>
+    <xs:attribute name="title" type="xs:string" form="qualified"/>
+    <xs:attribute name="href" type="xs:string" use="required" form="qualified"/>
   </xs:attributeGroup>
+  
   <xs:element name="email" type="xs:string"/>
 </xs:schema>

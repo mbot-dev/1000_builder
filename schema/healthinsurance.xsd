@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 健康保険情報（日本版） -->
-<!-- HealthInsuranceModule XSD Version 4.0 -->
+<!-- HealthInsuranceModule XSD Version 4.1 -->
 <!-- *************************************************** -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1" 
-  xmlns:mmlHi="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1"
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	   elementFormDefault="qualified"
+	   targetNamespace="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1" 
   xmlns:mmlNm="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0"
   xmlns:mmlAd="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0"
   xmlns:mmlPh="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0"
-  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0">
+  xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0"
+  xmlns:mmlHi="http://www.medxml.net/MML/v4/ContentModule/HealthInsurance/1.1">
   
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0" schemaLocation="common.xsd" />
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Name/1.0" schemaLocation="name.xsd" />
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Address/1.0" schemaLocation="address.xsd" />
   <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Phone/1.0" schemaLocation="phone.xsd" />
-  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd" />
+  <xs:import namespace="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0" schemaLocation="facility.xsd"/>
   
   <xs:element name="HealthInsuranceModule">
     <xs:complexType>

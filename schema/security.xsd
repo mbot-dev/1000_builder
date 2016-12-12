@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
-<!-- Security XSD Version 4.0 -->
+<!-- Security XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Security/1.0" xmlns:mmlSc="http://www.medxml.net/MML/v4/SharedComponent/Security/1.0">
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/SharedComponent/Security/1.0"
+  xmlns:mmlSc="http://www.medxml.net/MML/v4/SharedComponent/Security/1.0">
   
   <xs:element name="securityLevel">
     <xs:complexType>
@@ -66,7 +68,7 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="tableId" default="MML0035">
+    <xs:attribute name="tableId" default="MML0035" form="qualified">
       <xs:simpleType>
         <xs:restriction base="xs:string">
           <xs:enumeration value="MML0035"/>
@@ -74,7 +76,7 @@
       </xs:simpleType>
     </xs:attribute>
     <xs:attribute name="facilityId" form="qualified"/>
-    <xs:attribute name="facilityIdType">
+    <xs:attribute name="facilityIdType" form="qualified">
       <xs:simpleType>
         <xs:restriction base="xs:token">
           <xs:enumeration value="ca"/>
@@ -111,7 +113,7 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="tableId">
+    <xs:attribute name="tableId" form="qualified">
       <xs:simpleType>
         <xs:restriction base="xs:string">
           <xs:enumeration value="MML0036"/>

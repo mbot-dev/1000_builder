@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- *************************************************** -->
 <!-- 報告書情報 -->
-<!-- ReportModule XSD Version 4.0 -->
+<!-- ReportModule XSD Version 4.1 -->
 <!-- *************************************************** -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified"
   targetNamespace="http://www.medxml.net/MML/v4/ContentModule/report/1.0"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
   xmlns:mmlRp="http://www.medxml.net/MML/v4/ContentModule/report/1.0"
   xmlns:mmlCm="http://www.medxml.net/MML/v4/SharedComponent/Common/1.0">
 
@@ -205,15 +206,35 @@
     </xs:complexType>
   </xs:element>
  
-  <xs:element name="chiefComplaints" type="xs:string"/>
+  <xs:element name="chiefComplaints">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="testPurpose">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   
-  <xs:element name="testPurpose" type="xs:string"/>
-  
-  <xs:element name="testDx" type="xs:string"/>
+  <xs:element name="testDx">
+      <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   
   <xs:element name = "testNotes">
     <xs:complexType mixed="true">
       <xs:sequence>
+        <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>
