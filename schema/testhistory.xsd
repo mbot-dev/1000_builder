@@ -75,6 +75,7 @@
                 <xs:enumeration value="insurance"/>
                 <xs:enumeration value="monbusho"/>
                 <xs:enumeration value="JMARI"/>
+                <xs:enumeration value="OID"/>
               </xs:restriction>
             </xs:simpleType>
           </xs:attribute>
