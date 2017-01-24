@@ -23,13 +23,11 @@ router.use((req, res, next) => {
     try {
         var bearer = 'Bearer ';
         var auth = req.get('Authorization');
-        console.log(auth);
         assert.ok(auth.startsWith(bearer), 'invalid_request');
         var len = bearer.length;
         var token = auth.substring(len);
-        var key = new Buffer(config.jwt.secret_demo, 'hex');
+        var key = new Buffer(config.jwt.secret, 'hex');
         var payload = jweSimple.verify(token, key);
-        console.log(payload);
         assert.ok(payload !== null, 'invalid_client');
         next();
     } catch (error) {
@@ -51,7 +49,7 @@ var build = function (req, res) {
         // 生成する
         var wrapper = simpleBuilder.build(simpleComposition, contentType);
         var mml = mmlBuilder.build(wrapper.json);
-        // logger.info(utils.formatXml(mml));
+        logger.info(utils.formatXml(mml));
         wrapper.mml = mml;
         wrapper.json = null;
 

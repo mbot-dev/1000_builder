@@ -1061,39 +1061,39 @@ module.exports = {
     /**
      * 7. ProgressCourceModule
      */
-     progressCourse: function (docInfo, simpleProgressCource, extArray) {
-         /*******************************************************
-         var simpleProgressCource = {
-             freeExpression: '',
-             extRef: []
-         };
-         *******************************************************/
-         var result = {
-             freeExpression: simpleProgressCource.freeExpression
-         };
-         // console.log(result.freeExpression);
-         if (utils.propertyIsNotNull(simpleProgressCource, 'extRef')) {
+    progressCourse: function (docInfo, simpleProgressCource, extArray) {
+        /*******************************************************
+        var simpleProgressCource = {
+            freeExpression: '',
+            extRef: []
+        };
+        *******************************************************/
+        var result = {
+            freeExpression: simpleProgressCource.freeExpression
+        };
+        // console.log(result.freeExpression);
+        if (utils.propertyIsNotNull(simpleProgressCource, 'extRef')) {
 
-             result.extRef = [];
-             var index = 0;
-             var docId = docInfo.docId.uid;
-             var newHREF = null;
+            result.extRef = [];
+            var index = 0;
+            var docId = docInfo.docId.uid;
+            var newHREF = null;
 
-             simpleProgressCource.extRef.forEach((entry) => {
+            simpleProgressCource.extRef.forEach((entry) => {
 
-                 // entry.href = docId_index.file's ext
-                 newHREF = this.createHREF(docId, index++, entry.href);
-                 entry.href = newHREF;
+                // entry.href = docId_index.file's ext
+                newHREF = this.createHREF(docId, index++, entry.href);
+                entry.href = newHREF;
 
-                 // 1. base64 なし => resul.extRef へ
-                 result.extRef.push(this.buildExtRef(entry, null));
+                // 1. base64 なし => resul.extRef へ
+                result.extRef.push(this.buildExtRef(entry, null));
 
-                 // 2. base64あり => docInfo.extRefs にまとめる
-                 docInfo.extRefs.push(this.buildExtRef(entry, extArray));
-             });
-         }
-         return result;
-     },
+                // 2. base64あり => docInfo.extRefs にまとめる
+                docInfo.extRefs.push(this.buildExtRef(entry, extArray));
+            });
+        }
+        return result;
+    },
 
     /**
      * 8. SurgeryModule
@@ -2257,51 +2257,70 @@ module.exports = {
     referral: function (docInfo, simpleReferral, extArray) {
         /*******************************************************************************
         var simpleReferral = {
-            patient: {},                                            // 患者情報
-            occupation: '',                                         // 職業 ?
-            referFrom: {},                                          // 紹介者情報を入れる親エレメント mmlPsi:PersonalizedInfo
-            title: '',                                              // タイトル
-            greeting: '',                                           // 挨拶文 ?
-            chiefComplaints: '',                                    // 主訴
-            clinicalDiagnosis: '',                                  // 病名 ?
-            pastHistory: {                                          // 既往歴 ?
-                value: '',                                          // 既往歴
-                extRef: []                                          // extRef * [extRef]
-            },
-            familyHistory:  {                                       // 家族歴 ?
-                value: '',                                          // 家族歴
-                extRef: []                                          // extRef * [extRef]
-            },
-            presentIllness: {                                       // 現病歴 ?
-                value: '',                                          // 現病歴
-                extRef: []                                          // extRef * [extRef]
-            },
-            testResults: {                                          // 検査結果 ?
-                value: '',                                          // 検査結果
-                extRef: []                                          // extRef * [extRef]
-            }
-            clinicalCourse: '',                                     // 治療経過 ?
-            medication: {},                                         // 現在の処方 ?
-            referPurpose: '',                                       // 紹介目的
-            remarks: {                                              // 備考 ?
-                value: '',                                          // 備考
-                extRef: []                                          // extRef * [extRef]
-            },
-            referToFacility: {                                      // 紹介先医療機関名
-                facilityId: '',                                     // 施設ID   -> Facility
-                facilityName: '',                                   // 施設名称  -> Facility
-                departmentId: '',                                   // 診療科ID ?  -> Department
-                departmentName: ''                                  // 診療科名称 ?
-            },
-            referToPerson: {},                                      // 紹介先医師 ? mmlPsi:PersonalizedInfo
-            referToUnknownName: ''                                  // 医師名を指定しない相手 ?
+            patient: {},                                // 患者情報 simplePatientInfo
+            occupation: '',                             // 職業 ?
+            referFrom: {},                              // 紹介者情報を入れる親エレメント simpleCreator
+            title: '',                                  // タイトル
+            greeting: '',                               // 挨拶文 ?
+            chiefComplaints: '',                        // 主訴
+            clinicalDiagnosis: '',                      // 病名 ?
+            pastHistory: {},                            // 既往歴 ?
+            familyHistory: {},                          // 家族歴 ?
+            presentIllness: {},                         // 現病歴
+            testResults: {},                            // 検査結果 ?
+            clinicalCourse: '',                         // 治療経過 ?
+            medication: {},                             // 現在の処方 ?
+            referPurpose: '',                           // 紹介目的
+            remarks: {},                                // 備考 ?
+            referToFacility: {},                        // 紹介先医療機関名
+            referToPerson: {},                          // 紹介先医師 ? simpleCreator
+            referToUnknownName: ''                      // 医師名を指定しない相手 ?
         };
 
+        // 既往歴
+        var pastHistory = {
+            value: '',                                  // 既往歴
+            extRef: []                                  // 外部参照図 * [extRef]
+        };
+
+        // 家族歴歴
+        var familyHistory = {
+            value: '',                                  // 家族歴歴
+            extRef: []                                  // 外部参照図 * [extRef]
+        };
+
+        // 現病歴
+        var presentIllness = {
+            value: '',                                  // 現病歴
+            extRef: []                                  // 外部参照図 * [extRef]
+        };
+
+        // 検査結果
+        var testResults = {
+            value: '',                                  // 検査結果
+            extRef: []                                  // 外部参照図 * [extRef]
+        };
+
+        // 現在の処方
         var medication = {
-            value: '',                                              // テキストとmmlCm:extRefの混在可
-            simplePrescription: {},                                 // simplePrescription
-            simpleInjection: {},                                    // simpleInjection
-            extRef: []                                              // extRef * [extRef]
+            value: '',                                  // 説明
+            simplePrescription: {},                     // simplePrescription
+            simpleInjection: {},                        // simpleInjection
+            extRef: []                                  // 外部参照 * [extRef]
+        };
+
+        // 備考
+        var remarks: {
+            value: ''                                   // 備考
+            extRef: []                                  // 外部参照図 * [extRef]
+        },
+
+        // 紹介先医療機関名
+        var referToFacility = {
+            facilityId: '',                             // 施設ID プロジェクトから指定
+            facilityName: '',                           // 施設名称
+            departmentId: '',                           // 診療科ID ?
+            departmentName: ''                          // 診療科名称 ?
         };
         *******************************************************************************/
 
@@ -2340,7 +2359,7 @@ module.exports = {
         // pastHistory extRef
         if (utils.propertyIsNotNull(simpleReferral, 'pastHistory')) {
             result.pastHistory = {
-                value: simpleReferral.pastHistory
+                value: simpleReferral.pastHistory.value
             };
             if (utils.propertyIsNotNull(simpleReferral.pastHistory, 'extRef')) {
                 result.pastHistory.extRef = [];
@@ -2357,7 +2376,7 @@ module.exports = {
         // familyHistory
         if (utils.propertyIsNotNull(simpleReferral, 'familyHistory')) {
             result.familyHistory = {
-                value: simpleReferral.familyHistory
+                value: simpleReferral.familyHistory.value
             };
             if (utils.propertyIsNotNull(simpleReferral.familyHistory, 'extRef')) {
                 result.familyHistory.extRef = [];
@@ -2373,7 +2392,7 @@ module.exports = {
         // presentIllness
         if (utils.propertyIsNotNull(simpleReferral, 'presentIllness')) {
             result.presentIllness = {
-                value: simpleReferral.presentIllness
+                value: simpleReferral.presentIllness.value
             };
             if (utils.propertyIsNotNull(simpleReferral.presentIllness, 'extRef')) {
                 result.presentIllness.extRef = [];
@@ -2389,7 +2408,7 @@ module.exports = {
         // testResults
         if (utils.propertyIsNotNull(simpleReferral, 'testResults')) {
             result.testResults = {
-                value: simpleReferral.testResults
+                value: simpleReferral.testResults.value
             };
             if (utils.propertyIsNotNull(simpleReferral.testResults, 'extRef')) {
                 result.testResults.extRef = [];

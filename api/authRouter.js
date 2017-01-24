@@ -8,6 +8,13 @@ const logger = require('../logger/logger');
 const jweSimple = require('../api/jweSimple');
 const utils = require('../lib/utils');
 
+const dev_keys = [
+    {
+        consumer: '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e',
+        secret: '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141'
+    }
+];
+
 const router = express.Router();
 
 router.use((req, res, next) => {
@@ -19,7 +26,6 @@ router.use((req, res, next) => {
 
 const checkBody = function (req, res, next) {
     try {
-        logger.info(req.body.grant_type);
         assert.strictEqual(req.body.grant_type, 'client_credentials');
         next();
     } catch (err) {
@@ -35,11 +41,22 @@ const checkCredential = function (req, res, next) {
         var auth = req.get('Authorization');
         var len = basic.length;
         var decoded = new Buffer(auth.substring(len), 'base64').toString();
-        logger.info(decoded);
         var arr = decoded.split(':');
-        assert.strictEqual(arr[0], '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e', 'invalid_client');
-        assert.strictEqual(arr[1], '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141', 'invalid_client');
-        next();
+        logger.info(arr[0]);
+        logger.info(arr[1]);
+        var match = false;
+        for (var i=0; i<dev_keys.length; i++) {
+            var key = dev_keys[i];
+            if (arr[0] === key.consumer && arr[1] === key.secret) {
+                match = true;
+                break;
+            }
+        }
+        if (match) {
+            next();
+        } else {
+            assert.strictEqual('abc', 'edf', 'invalid_client');
+        }
     } catch (err) {
         var status = (err.message === 'invalid_client') ? 401 : 400;
         res.status(status).json({
@@ -56,7 +73,7 @@ const generateToken = function (req, res, next) {
         iat: now,
         exp: expires
     };
-    var key = new Buffer(config.jwt.secret_demo, 'hex');
+    var key = new Buffer(config.jwt.secret, 'hex');
     req.token = jweSimple.compact(claim, key);
     next();
 };
