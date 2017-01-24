@@ -44,7 +44,7 @@
 ### クレジット等
  * [千年カルテプロジェクト](https://www.facebook.com/gEHR-398609153661839/)
  * [MML4.0](http://www.medxml.net/MML40j/mml4.html)
- * [APIサーバー紹介サイト](https://1000-builder.au-syd.mybluemix.net)
+ * [API稼働サンプル](https://1000-builder.cfapps.io/)
 
 
 ### ライセンス

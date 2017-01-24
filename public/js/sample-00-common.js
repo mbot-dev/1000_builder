@@ -290,6 +290,7 @@ var getAccessToken = function (callback) {
     var base64 = btoa(consumerKey + ':'　+　secret);
 
     // ポスト先は /mml/api/v1/oauth2/token
+    // xhr.open('POST', '/mml/api/v1/oauth2/token', true);
     xhr.open('POST', '/mml/api/v1/oauth2/token', true);
 
     // 認証用の HTTP Header をセットする

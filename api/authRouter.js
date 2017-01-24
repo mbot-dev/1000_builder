@@ -19,6 +19,7 @@ router.use((req, res, next) => {
 
 const checkBody = function (req, res, next) {
     try {
+        logger.info(req.body.grant_type);
         assert.strictEqual(req.body.grant_type, 'client_credentials');
         next();
     } catch (err) {
@@ -34,6 +35,7 @@ const checkCredential = function (req, res, next) {
         var auth = req.get('Authorization');
         var len = basic.length;
         var decoded = new Buffer(auth.substring(len), 'base64').toString();
+        logger.info(decoded);
         var arr = decoded.split(':');
         assert.strictEqual(arr[0], '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e', 'invalid_client');
         assert.strictEqual(arr[1], '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141', 'invalid_client');

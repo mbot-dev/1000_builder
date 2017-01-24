@@ -23,11 +23,13 @@ router.use((req, res, next) => {
     try {
         var bearer = 'Bearer ';
         var auth = req.get('Authorization');
+        console.log(auth);
         assert.ok(auth.startsWith(bearer), 'invalid_request');
         var len = bearer.length;
         var token = auth.substring(len);
         var key = new Buffer(config.jwt.secret_demo, 'hex');
         var payload = jweSimple.verify(token, key);
+        console.log(payload);
         assert.ok(payload !== null, 'invalid_client');
         next();
     } catch (error) {
