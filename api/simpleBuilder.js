@@ -1061,38 +1061,39 @@ module.exports = {
     /**
      * 7. ProgressCourceModule
      */
-    progressCourse: function (docInfo, simpleProgressCource, extArray) {
-        /*******************************************************
-        var simpleProgressCource = {
-            freeExpression: '',
-            extRef: []
-        };
-        *******************************************************/
-        var result = {
-            freeExpression: simpleProgressCource.freeExpression
-        };
-        if (utils.propertyIsNotNull(simpleProgressCource, 'extRef')) {
+     progressCourse: function (docInfo, simpleProgressCource, extArray) {
+         /*******************************************************
+         var simpleProgressCource = {
+             freeExpression: '',
+             extRef: []
+         };
+         *******************************************************/
+         var result = {
+             freeExpression: simpleProgressCource.freeExpression
+         };
+         // console.log(result.freeExpression);
+         if (utils.propertyIsNotNull(simpleProgressCource, 'extRef')) {
 
-            result.extRef = [];
-            var index = 0;
-            var docId = docInfo.docId.uid;
-            var newHREF = null;
+             result.extRef = [];
+             var index = 0;
+             var docId = docInfo.docId.uid;
+             var newHREF = null;
 
-            simpleProgressCource.extRef.forEach((entry) => {
+             simpleProgressCource.extRef.forEach((entry) => {
 
-                // entry.href = docId_index.file's ext
-                newHREF = this.createHREF(docId, index++, entry.href);
-                entry.href = newHREF;
+                 // entry.href = docId_index.file's ext
+                 newHREF = this.createHREF(docId, index++, entry.href);
+                 entry.href = newHREF;
 
-                // 1. base64 なし => resul.extRef へ
-                result.extRef.push(this.buildExtRef(entry, null));
+                 // 1. base64 なし => resul.extRef へ
+                 result.extRef.push(this.buildExtRef(entry, null));
 
-                // 2. base64あり => docInfo.extRefs にまとめる
-                docInfo.extRefs.push(this.buildExtRef(entry, extArray));
-            });
-        }
-        return result;
-    },
+                 // 2. base64あり => docInfo.extRefs にまとめる
+                 docInfo.extRefs.push(this.buildExtRef(entry, extArray));
+             });
+         }
+         return result;
+     },
 
     /**
      * 8. SurgeryModule
@@ -2345,7 +2346,7 @@ module.exports = {
                 result.pastHistory.extRef = [];
 
                 simpleReferral.pastHistory.extRef.forEach((e) => {
-                    newHREF = createHREF(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
                     result.pastHistory.extRef.push(this.buildExtRef(e, null));
                     docInfo.extRefs.push(this.buildExtRef(e, extArray));
@@ -2361,7 +2362,7 @@ module.exports = {
             if (utils.propertyIsNotNull(simpleReferral.familyHistory, 'extRef')) {
                 result.familyHistory.extRef = [];
                 simpleReferral.familyHistory.extRef.forEach((e) => {
-                    newHREF = createHREF(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
                     result.familyHistory.extRef.push(this.buildExtRef(e, null));
                     docInfo.extRefs.push(this.buildExtRef(e, extArray));
@@ -2377,7 +2378,7 @@ module.exports = {
             if (utils.propertyIsNotNull(simpleReferral.presentIllness, 'extRef')) {
                 result.presentIllness.extRef = [];
                 simpleReferral.presentIllness.extRef.forEach((e) => {
-                    newHREF = createHREF(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
                     result.presentIllness.extRef.push(this.buildExtRef(e, null));
                     docInfo.extRefs.push(this.buildExtRef(e, extArray));
@@ -2393,7 +2394,7 @@ module.exports = {
             if (utils.propertyIsNotNull(simpleReferral.testResults, 'extRef')) {
                 result.testResults.extRef = [];
                 simpleReferral.testResults.extRef.forEach((e) => {
-                    newHREF = createHREF(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
                     result.testResults.extRef.push(this.buildExtRef(e, null));
                     docInfo.extRefs.push(this.buildExtRef(e, extArray));
@@ -2439,7 +2440,7 @@ module.exports = {
             if (utils.propertyIsNotNull(simpleReferral.remarks, 'extRef')) {
                 result.remarks.extRef = [];
                 simpleReferral.remarks.extRef.forEach((e) => {
-                    newHREF = createHREF(docId, refIndex++, e.href);
+                    newHREF = this.createHREF(docId, refIndex++, e.href);
                     e.href = newHREF;
                     result.remarks.extRef.push(this.buildExtRef(e, null));
                     docInfo.extRefs.push(this.buildExtRef(e, extArray));
