@@ -4,14 +4,15 @@ var postProgressCourse = function (callback) {
     var simpleProgressCourse = {
         freeExpression: ''
     };
+
+    // 改行サンプル  <xhtml:br/> を挿入
     var arr = [];
     arr.push('検尿　糖(-)蛋白(1)潜血(2)');
     arr.push('心音呼吸音正常（usually piping rales)');
     arr.push('118/86');
     arr.push('貧血はHb10程度らしい。鉄剤終了後に再検されるだろう。');
     arr.push('全身的には安定。関節症状も無し。');
-    // var text = arr.join('<xhtml:br/>');         // 各行に改行を挿入
-    var text = arr.join('');                       // デモ
+    var text = arr.join('<xhtml:br/>');
     simpleProgressCourse.freeExpression = text;
 
     // コンポジションを生成する
