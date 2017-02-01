@@ -41,7 +41,7 @@ function prettyXml(xml) {
     // 表示するために escapeする
     var ret1 = xml_formatted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/ /g, '&nbsp;').replace(/\n/g,'<br />');
     // 改行は特別なので（規格書から）
-    ret1 = ret1.replace(/&lt;xhtml:br\/&gt;/g, '<br />');
+    // ret1 = ret1.replace(/&lt;xhtml:br\/&gt;/g, '<br />');
     return ret1;
 }
 
