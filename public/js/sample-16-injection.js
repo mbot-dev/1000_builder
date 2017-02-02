@@ -87,15 +87,8 @@ var postInjection = function (callback) {
     //------------------------------------------------------------------
 
     // POST
-    /*post('injection', simpleComposition, function (err, mml) {
+    post('injection', simpleComposition, function (err, mml) {
         // コールバック
-        callback(err, simpleComposition, mml);
-    });*/
-
-    // リモートプロシジャーコール(JSON-RPC2.0)を使用する場合
-    // contextに contentType = 'injection' の属性を設定する
-    simpleComposition.context.contentType = 'injection';
-    rpc(simpleComposition, function (err, mml) {
         callback(err, simpleComposition, mml);
     });
 };
