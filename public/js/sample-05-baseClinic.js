@@ -20,7 +20,13 @@ var postBaseClinic = function (callback) {
     // 血液型
     simpleBaseClinic.bloodtype = {
         abo: 'a',                                       // ABO 式血液型 MML0018
-        rh: 'rhD+'                                      // Rho(D) 式血液型 ? MML0019
+        rh: 'rhD+',                                     // Rho(D) 式血液型 ? MML0019
+        others: [{
+            typeName: 'h',
+            typeJudgement: 'o',
+            description: 'g'
+        }],
+        memo: '血液型メモ'
     };
 
     // コンポジションを生成する

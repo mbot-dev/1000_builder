@@ -9,7 +9,7 @@ var postReferral = function (callback) {
     // 紹介先の医療機関
     var referToFacility = {
         facilityId: '1.2.840.114319.5.1000.1.67890.1',      // 施設ID プロジェクトから指定される
-        facilityName: '京都医科大学',                         // 施設名
+        facilityName: '京都医科大学'　                         // 施設名
     };
 
     // 紹介状のコンテント
@@ -36,7 +36,7 @@ var postReferral = function (callback) {
     simpleReferral.patient = patient;
     simpleReferral.referFrom = referFrom;
     simpleReferral.referToFacility = referToFacility;
-
+    
     // コンポジションを生成する
     var simpleComposition = {                   // POSTする simpleComposition
         context: {                              // context: バイタルサイン確定時の文脈

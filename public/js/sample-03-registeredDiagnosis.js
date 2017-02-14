@@ -14,7 +14,7 @@ var postRegisteredDiagnosis = function (callback) {
         diagnosis: 'colon carcinoid',                       // 疾患名
         code: 'C189-.006',                                  // 疾患コード
         system: 'ICD10',                                    // 疾患コード体系名
-        category: 'mainDiagnosis',                          // 診断の分類　MML0012からMML0015を使用（オプション）
+        category: 'suspectedDiagnosis',                     // 診断の分類　MML0012からMML0015を使用（オプション）
         dateOfOnset: dateOfOnset,                           // 疾患開始日 YYYY-MM-DD 形式（オプション）
         dateOfRemission: dateOfRemission,                   // 疾患終了日 YYYY-MM-DD 形式（オプション）
         outcome: 'fullyRecovered'                           // 転帰 MML0016を使用（オプション）

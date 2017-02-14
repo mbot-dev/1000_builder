@@ -23,6 +23,22 @@ const moduleNames = {
     injection: 'mmlInj',
     hemodialysis: 'mmlHd'
 };
+const diagnosisCategoryTable = {
+    mainDiagnosis: 'MML0012',
+    complication: 'MML0012',
+    drg: 'MML0012',
+    academicDiagnosis: 'MML0013',
+    claimingDiagnosis: 'MML0013',
+    clinicalDiagnosis: 'MML0014',
+    pathologicalDiagnosis: 'MML0014',
+    laboratoryDiagnosis: 'MML0014',
+    operativeDiagnosis: 'MML0014',
+    preOperativeDiagnosis: 'MML0014',
+    intraOperativeDiagnosis: 'MML0014',
+    postOperativeDiagnosis: 'MML0014',
+    confirmedDiagnosis: 'MML0015',
+    suspectedDiagnosis: 'MML0015'
+};
 
 module.exports = {
 
@@ -748,11 +764,11 @@ module.exports = {
                 if (utils.propertyIsNotNull(entry, 'providerName')) {
                     it.providerName = entry.providerName;
                 }
-                if (utils.propertyIsNotNull(entry, 'paymentRatio') && utils.propertyIsNotNull(entry, 'paymentRatioType')) {
+                if (utils.propertyIsNotNull(entry, 'paymentRatio') && utils.propertyIsNotNull(entry, 'ratioType')) {
                     it.paymentRatio = {
                         value: entry.paymentRatio,                  // 負担率または負担金
                         attr: {
-                            ratioType: entry.paymentRatioType       // MML0032
+                            ratioType: entry.ratioType              // MML0032
                         }
                     };
                 }
@@ -798,7 +814,7 @@ module.exports = {
                 value: simpleDiagnosis.category,
                 attr: {
                     // ToDo MML0012 ~ MML0015
-                    tableId: 'MML0012'
+                    tableId: diagnosisCategoryTable[simpleDiagnosis.category]
                 }
             }];
         }
@@ -901,6 +917,7 @@ module.exports = {
                     utils.setPropertyIfNotNull(other, entry, 'description');
                 });
             }
+            utils.setPropertyIfNotNull(result.bloodtype, simpleBaseClinic.bloodtype, 'memo');
         }
         if (utils.propertyIsArrayAndNotEmpty(simpleBaseClinic, 'infection')) {
             result.infection = [];
@@ -2004,6 +2021,11 @@ module.exports = {
                 };
                 item.itemMemo.push(itemMemo);
             }
+
+            // Free memo
+            if (utils.propertyIsNotNull(entry, 'memoF')) {
+                item.itemMemoF = entry.memoF;
+            }
         });
         //console.log('module count = ' + testModule.laboTest.length);
         return testModule;
@@ -2387,7 +2409,7 @@ module.exports = {
             departmentName: ''                          // 診療科名称 ?
         };
         *******************************************************************************/
-
+        console.log(simpleReferral);
         var result = {};
         var refIndex = 0;
         var docId = docInfo.docId.uid;
@@ -2543,8 +2565,9 @@ module.exports = {
             }
         }
 
+        //------------------------------------------------
         // referToFacility
-        if (utils.propertyIsNotNull(simpleReferral, 'referToFacility')) {
+        /*if (utils.propertyIsNotNull(simpleReferral, 'referToFacility')) {
             result.referToFacility = {};
             if (utils.propertyIsNotNull(simpleReferral.referToFacility, 'facilityId') && utils.propertyIsNotNull(simpleReferral.referToFacility, 'facilityName')) {
                 result.referToFacility.Facility = this.buildFacility(simpleReferral.referToFacility.facilityId, simpleReferral.referToFacility.facilityName);
@@ -2552,7 +2575,20 @@ module.exports = {
             if (utils.propertyIsNotNull(simpleReferral.referToFacility, 'departmentId') && utils.propertyIsNotNull(simpleReferral.referToFacility, 'departmentName')) {
                 result.referToFacility.Department = this.buildDepartment(simpleReferral.referToFacility.departmentId, simpleReferral.referToFacility.departmentName);
             }
+        }*/
+        //------------------------------------------------
+        //------------------------------------------------propertyIsNotNullAllowEmpty
+        // referToFacility
+        if (utils.propertyIsNotNullAllowEmpty(simpleReferral, 'referToFacility')) {
+            result.referToFacility = {};
+            if (utils.propertyIsNotNullAllowEmpty(simpleReferral.referToFacility, 'facilityId') && utils.propertyIsNotNullAllowEmpty(simpleReferral.referToFacility, 'facilityName')) {
+                result.referToFacility.Facility = this.buildFacility(simpleReferral.referToFacility.facilityId, simpleReferral.referToFacility.facilityName);
+            }
+            if (utils.propertyIsNotNullAllowEmpty(simpleReferral.referToFacility, 'departmentId') && utils.propertyIsNotNullAllowEmpty(simpleReferral.referToFacility, 'departmentName')) {
+                result.referToFacility.Department = this.buildDepartment(simpleReferral.referToFacility.departmentId, simpleReferral.referToFacility.departmentName);
+            }
         }
+        //------------------------------------------------
 
         // referToPerson
         if (utils.propertyIsNotNull(simpleReferral, 'referToPerson')) {
@@ -2852,6 +2888,7 @@ module.exports = {
             duration: 7,                              // 14日分
             instruction: '内服2回 朝夜食後に',           // 用法
             PRN: false,                               // 頓用=false
+            repetitions: 0,                           // 総投与回数。(頓用、外用などの場合)
             brandSubstitutionPermitted: true,         // ジェネリック
             longTerm: false,                          // 長期処方
         },,,, ]
@@ -2911,6 +2948,11 @@ module.exports = {
             // 頓用
             if (utils.propertyIsNotNull(entry, 'PRN')) {
                 medication.PRN = entry.PRN;
+            }
+
+            // 総投与回数
+            if (utils.propertyIsNotNull(entry, 'repetitions')) {
+                medication.repetitions = entry.repetitions;
             }
 
             // ジェネリック デフォルトは true

@@ -42,6 +42,9 @@ var createTestItems = function (content) {
             simpleItem.memoCode = lineArray[9];          // メモコード
             simpleItem.memo = lineArray[10];             // メモ
         }
+        // freeM
+        simpleItem.memoF = 'フリーコメント';
+        
         items.push(simpleItem);
         return true;
     });

@@ -1,13 +1,13 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cfenv = require('cfenv');
 const helmet = require('helmet');
 const config = require('config');
 const logger = require('./logger/logger');
-const indexRouter = require('./api/indexRouter');
 const authRouter = require('./api/authRouter');
 const simpleRouter = require('./api/simpleRouter');
 const rpcRouter = require('./api/rpcRouter');
@@ -37,8 +37,7 @@ app.use(helmet.contentSecurityPolicy({
 app.use(bodyParser.json({limit: '256mb'}));
 app.use(bodyParser.urlencoded({limit: '256mb', extended: true}));
 app.use(morgan(':remote-addr [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time'));
-app.use(express.static(__dirname + '/public'));
-app.use(indexRouter);
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(config.path.oauth2, authRouter);
 app.use(config.path.simple, simpleRouter);
 app.use(config.path.rpc, rpcRouter);

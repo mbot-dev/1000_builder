@@ -42,9 +42,24 @@ var postPrescription = function (callback) {
         brandSubstitutionPermitted: false,              // ジェネリック医薬品への代替可 可の時true、省略時は可とみなす（オプション）
         longTerm: true                                  // 長期処方の時true、短期であればfalse（オプション）
     };
+    // 処方3
+    var med3 = {
+        issuedTo: 'external',                           // 院外処方の場合はexternal、院内処方の場合はinternalを指定する（オプション）
+        medicine: 'ジクロフェナクnaゲル',                  // 処方薬名称
+        medicineCode: '612320261',                      // 処方薬のコード
+        medicineCodeSystem: 'YJ',                       // コード体系
+        dose: 50,                                        // 数量
+        doseUnit: 'g',                                  // 単位
+        startDate: startDate,                           // 服薬開始日 YYYY-MM-DD（オプション）
+        instruction: '左膝に塗布',                        // 用法（オプション）
+        PRN: true,                                     // 頓用の時 true（オプション）
+        repetitions: 10,
+        brandSubstitutionPermitted: true              // ジェネリック医薬品への代替可 可の時true、省略時は可とみなす（オプション）
+    };
     // 配列へ追加
     simplePrescription.medication.push(med1);
     simplePrescription.medication.push(med2);
+    simplePrescription.medication.push(med3);
 
     // コンポジションを生成
     var simpleComposition = {                   // POSTする simpleComposition
