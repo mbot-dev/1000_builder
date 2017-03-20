@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- HeMX version 0.94b converted from DTD  2015-09-09 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-	   targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Hemodialysis/1.0"
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://www.medxml.net/MML/v4/ContentModule/Hemodialysis/1.0"
   xmlns:mmlHd="http://www.medxml.net/MML/v4/ContentModule/Hemodialysis/1.0"
   xmlns:mmlFc="http://www.medxml.net/MML/v4/SharedComponent/Facility/1.0"
   xmlns:mmlPi="http://www.medxml.net/MML/v4/ContentModule/PatientInfo/1.0"
@@ -17,8 +18,8 @@
   <xs:element name="HemoDialysisModule">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="mmlHd:HemoDialysis"/>
-        <xs:element ref="mmlHd:HeMX"/>
+        <xs:element ref="mmlHd:HemoDialysis" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="mmlHd:HeMX" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="version" type="xs:string" use="required" form="qualified"/>
       <xs:attribute name="createDate" type="xs:dateTime" use="required" form="qualified"/>
@@ -100,7 +101,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
- 
+
   <xs:element name="hdOrders">
     <xs:complexType>
       <xs:sequence>
@@ -133,7 +134,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:element name="effectiveDays">
     <xs:complexType>
       <xs:sequence>
@@ -173,12 +174,12 @@
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>
- 
+
   <xs:element name="timeHdStart">
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:duration">
-          <xs:attribute name="timeDirection" type="xs:string" use="required" form="qualified"/>          
+          <xs:attribute name="timeDirection" type="xs:string" use="required" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -188,7 +189,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:duration">
-          <xs:attribute name="timeDirection" type="xs:string" use="required" form="qualified"/>     
+          <xs:attribute name="timeDirection" type="xs:string" use="required" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
      </xs:complexType>
@@ -209,7 +210,7 @@
       <xs:simpleContent>
         <xs:extension base="xs:decimal">
           <xs:attribute name="unit" type="xs:string" use="optional" default="kg" form="qualified"/>
-          <xs:attribute name="cnote" type="xs:string" use="optional" form="qualified"/>         
+          <xs:attribute name="cnote" type="xs:string" use="optional" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
      </xs:complexType>
@@ -229,7 +230,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:decimal">
-          <xs:attribute name="unit" type="xs:string" use="optional" default="ml/min" form="qualified"/>          
+          <xs:attribute name="unit" type="xs:string" use="optional" default="ml/min" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -242,7 +243,7 @@
           <xs:attribute name="code" type="xs:string" use="optional" form="qualified"/>
           <xs:attribute name="type" type="xs:string" use="optional" form="qualified"/>
           <xs:attribute name="membraneArea" type="xs:decimal" use="optional" form="qualified"/>
-          <xs:attribute name="unit" type="xs:string" use="optional" default="m2" form="qualified"/>         
+          <xs:attribute name="unit" type="xs:string" use="optional" default="m2" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -264,7 +265,7 @@
         <xs:extension base="xs:string">
           <xs:attribute name="code" type="xs:string" use="optional" form="qualified"/>
           <xs:attribute name="type" type="xs:string" use="optional" form="qualified"/>
-          <xs:attribute name="modification" type="xs:string" use="optional" form="qualified"/>         
+          <xs:attribute name="modification" type="xs:string" use="optional" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -279,7 +280,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:element name="dialysateTemp">
     <xs:complexType>
       <xs:sequence>
@@ -289,7 +290,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:element name="dialysateTempValue">
     <xs:complexType>
       <xs:simpleContent>
@@ -349,7 +350,7 @@
       <xs:simpleContent>
         <xs:extension base="xs:string">
           <xs:attribute name="code" type="xs:string" form="qualified"/>
-          <xs:attribute name="type" type="xs:string" use="required" form="qualified"/>         
+          <xs:attribute name="type" type="xs:string" use="required" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -359,7 +360,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:decimal">
-          <xs:attribute name="unit" type="xs:string" use="optional" form="qualified"/>          
+          <xs:attribute name="unit" type="xs:string" use="optional" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -393,7 +394,7 @@
       <xs:simpleContent>
         <xs:extension base="xs:string">
           <xs:attribute name="code" type="xs:string" use="optional" form="qualified"/>
-          <xs:attribute name="tableId" type="xs:string" use="required" form="qualified"/>          
+          <xs:attribute name="tableId" type="xs:string" use="required" form="qualified"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -452,7 +453,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
- 
+
   <xs:element name="ufRate">
     <xs:complexType>
       <xs:simpleContent>
@@ -572,7 +573,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
- 
+
   <xs:element name="obItemName">
     <xs:complexType>
       <xs:simpleContent>
@@ -681,7 +682,7 @@
   <xs:element name="HeMX">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="1" maxOccurs="1" ref="mmlCm:extRef"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mmlCm:extRef"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

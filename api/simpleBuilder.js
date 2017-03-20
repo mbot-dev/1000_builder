@@ -53,7 +53,8 @@ module.exports = {
     createHREF: function (docId, index, href) {
         var arr = [];
         arr.push(docId);
-        arr.push('_');
+        // arr.push('_');
+        arr.push('-');
         arr.push(utils.addZero(index, 2));
         var lastDot = href.lastIndexOf('.');
         arr.push(href.substring(lastDot));
@@ -2808,8 +2809,8 @@ module.exports = {
             context.department = {
                 value: target.department,
                 attr: {
-                    facilityCode: target.depCode,
-                    facilityCodeId: target.depCodeId
+                    depCode: target.depCode,
+                    depCodeId: target.depCodeId
                 }
             };
         }
@@ -2819,8 +2820,8 @@ module.exports = {
             context.ward = {
                 value: target.ward,
                 attr: {
-                    facilityCode: target.wardCode,
-                    facilityCodeId: target.wardCodeId
+                    wardCode: target.wardCode,
+                    wardCodeId: target.wardCodeId
                 }
             };
         }
@@ -2830,8 +2831,8 @@ module.exports = {
             context.observer = {
                 value: target.observer,
                 attr: {
-                    facilityCode: target.obsCode,
-                    facilityCodeId: target.obsCodeId
+                    obsCode: target.obsCode,
+                    obsCodeId: target.obsCodeId
                 }
             };
         }
@@ -2841,7 +2842,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'vitalSign')) {
             result.VitalSignModule = [];
             simpleFlowSheet.vitalSign.forEach((entry) => {
-                result.VitalSignModule.push(this.vitalSign(docInfo, entry));
+                result.VitalSignModule.push(this.vitalsign(docInfo, entry));
             });
         }
 
@@ -2859,7 +2860,43 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'bodilyOutput')) {
             result.bodilyOutput = [];
             simpleFlowSheet.bodilyOutput.forEach((entry) => {
-                result.bodilyOutput.push(JSON.parse(JSON.stringify(entry)));
+                // result.bodilyOutput.push(JSON.parse(JSON.stringify(entry)));
+                var out = {};
+                result.bodilyOutput.push(out);
+
+                if (utils.propertyIsNotNull(entry, 'boType')) {
+                    out.boType = entry.boType;
+                }
+                if (utils.propertyIsNotNull(entry, 'boVolume')) {
+                    out.boVolume = entry.boVolume;
+                }
+                if (utils.propertyIsNotNull(entry, 'boUnit')) {
+                    out.boUnit = entry.boUnit;
+                }
+                if (utils.propertyIsNotNull(entry, 'boStatus')) {
+                    out.boStatus = entry.boStatus;
+                }
+                if (utils.propertyIsNotNull(entry, 'boColor')) {
+                    out.boColor = entry.boColor;
+                }
+                if (utils.propertyIsNotNull(entry, 'boPathway')) {
+                    out.boPathway = entry.boPathway;
+                }
+                if (utils.propertyIsNotNull(entry, 'boStartTime')) {
+                    out.boStartTime = entry.boStartTime;
+                }
+                if (utils.propertyIsNotNull(entry, 'boEndTime')) {
+                    out.boEndTime = entry.boEndTime;
+                }
+                if (utils.propertyIsNotNull(entry, 'boMemo')) {
+                    out.boMemo = entry.boMemo;
+                }
+                if (utils.propertyIsArrayAndNotEmpty(entry, 'boFrequency')) {
+                    out.boFrequency = [];
+                    entry.boFrequency.forEach((e) => {
+                        out.boFrequency.push(JSON.parse(JSON.stringify(e)));
+                    });
+                }
             });
         }
 
@@ -2867,6 +2904,8 @@ module.exports = {
         if (utils.propertyIsNotNull(simpleFlowSheet, 'fsMemo')) {
             result.fsMemo = simpleFlowSheet.fsMemo;
         }
+
+        // console.log(JSON.stringify(result, null, 4));
 
         return result;
     },
@@ -3069,7 +3108,13 @@ module.exports = {
      * 17. HemoDialysysModule
      */
     hemodialysis: function (docInfo, simpleHemoDialysys, extArray) {
-        return null;
+        var target = JSON.parse(JSON.stringify(simpleHemoDialysys));
+        target.hemoDialysis.forEach((e)=> {
+            e.facility = this.buildFacility(e.facility.id, e.facility.name);
+            e.patient = this.patientInfo(docInfo, e.patient, extArray);
+        });
+        logger.info(JSON.stringify(target, null, 4));
+        return target;
     },
 
     /**

@@ -14,36 +14,38 @@
     </header>
     <div class="w3-container w3-margin">
         <div class="w3-container">
-            <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテが必要とするMML4.0形式のデータを生成するAPIサーバーです。</p>
+            <p>千年ビルダーは、電子カルテなどの医療情報システムに簡単なAPIを提供し、千年カルテが必要とするMML4.1.2形式のデータを生成するAPIサーバーです。</p>
             <h4>利用イメージ</h4>
             <ul>
                 <li>患者さんがクリニックを受診しました。</li>
                 <li>医師は処方せんを出しました。</li>
             </ul>
-            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.0にエンコードされたデータを返却します。下記は、左がAPI、右が生成されたMMLです。</p>
+            <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.1.2にエンコードされたデータを返却します。下記は、左がAPI、右が生成されたMMLです。</p>
         </div>
         <div class="w3-row-padding">
             <p class="w3-half">API:
                 <select onchange="changeModule(this);">
                     <option value='prescription'>処方せん</option>
-                    <option value='registeredDiagnosis'>診断履歴</option>
-                    <option value='test'>検歴情報</option>
-                    <option value='report'>報告書</option>
                     <option value='patientInfo'>患者情報</option>
                     <option value='healthInsurance'>健康保険</option>
+                    <option value='registeredDiagnosis'>診断履歴</option>
                     <option value='lifestyle'>生活習慣</option>
                     <option value='baseClinic'>基礎的診療情報</option>
                     <option value='firstClinic'>初診時特有情報</option>
                     <option value='progressCourse'>経過記録</option>
                     <option value='surgery'>手術記録</option>
                     <option value='summary'>臨床サマリ</option>
+                    <option value='test'>検歴情報</option>
+                    <option value='report'>報告書</option>
                     <option value='referral'>紹介状</option>
-                    <option value='injection'>注射記録</option>
                     <option value='vitalSign'>バイタルサイン</option>
+                    <option value='flowSheet'>体温表</option>
+                    <option value='injection'>注射記録</option>
+                    <option value='hemodialysis'>透析記録</option>
                 </select>
             </p>
             <div class="w3-half">
-                <p>サーバーが生成した MML4.0</p>
+                <p>サーバーが生成した MML4.1.2</p>
             </div>
         </div>
         <div class="w3-row-padding">
@@ -80,7 +82,7 @@
             <h4>関連情報</h4>
             <ul>
                 <li><a href="https://www.facebook.com/gEHR-398609153661839/">千年カルテプロジェクト</a></li>
-                <li><a href="http://www.medxml.net/MML40j/mml4.html">MML4.0</a></li>
+                <li><a href="http://medxml.net/MML412j/mml4.html">MML4.1.2</a></li>
                 <li><a href="https://github.com/mbot-dev/1000_builder/wiki/mml-high-level-view">MMLのハイレベル・ビュー</a></li>
                 <li><a href="https://gist.github.com/dolphin-dev/c0d59774ecfbe47c0b3b">確定日について</a></li>
             </ul>
@@ -105,8 +107,10 @@
     <script type="text/javascript" src="js/sample-11-report.js"></script>
     <script type="text/javascript" src="js/sample-12-referral.js"></script>
     <script type="text/javascript" src="js/sample-13-vitalSign.js"></script>
+    <script type="text/javascript" src="js/sample-14-flowSheet.js"></script>
     <script type="text/javascript" src="js/sample-15-prescription.js"></script>
     <script type="text/javascript" src="js/sample-16-injection.js"></script>
+    <script type="text/javascript" src="js/sample-17-hemodialysis.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script>
         startApp();
