@@ -1,6 +1,6 @@
 {
   "name": "1000-builder",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "API server to generate MML4.0 for the gEHR project.",
   "main": "app.js",
   "scripts": {
@@ -14,19 +14,19 @@
   "author": "Kazushi Minagawa",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "cfenv": "^1.0.3",
-    "config": "^1.21.0",
-    "express": "^4.14.0",
-    "helmet": "^3.0.0",
-    "morgan": "^1.7.0",
-    "node-uuid": "^1.4.7",
-    "winston": "^2.2.0"
+    "body-parser": "^1.18.2",
+    "cfenv": "^1.0.4",
+    "config": "^1.29.2",
+    "express": "^4.16.2",
+    "helmet": "^3.9.0",
+    "morgan": "^1.9.0",
+    "uuid": "^3.1.0",
+    "winston": "^2.4.0"
   },
   "engines": {
-    "node": "6.9.5"
+    "node": "8.9.4"
   },
   "devDependencies": {
-    "chai": "^3.5.0"
+    "chai": "^4.1.2"
   }
 }

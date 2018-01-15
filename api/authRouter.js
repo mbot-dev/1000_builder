@@ -3,7 +3,8 @@
 const express = require('express');
 const assert = require('assert');
 const config = require('config');
-const uuid = require('node-uuid');
+// const uuid = require('node-uuid');
+const uuid = require('uuid');
 const logger = require('../logger/logger');
 const jweSimple = require('../api/jweSimple');
 const utils = require('../lib/utils');

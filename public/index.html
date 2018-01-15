@@ -5,12 +5,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link type="text/css" rel="stylesheet" href="css/w3.css">
-    <!-- link type="text/css" rel="stylesheet" href="http://www.w3schools.com/lib/w3.css" -->
+    <link type="text/css" rel="stylesheet" href="css/w3-colors-metro.css">
     <link type="text/css" rel="stylesheet" href="css/simple.css">
 </head>
 <body>
-    <header class="w3-container w3-blue">
-        <h2 class="w3-center">千年ビルダー</h2><a href="https://github.com/mbot-dev/1000_builder/wiki/home"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
+    <header class="w3-container w3-metro-blue">
+        <h2 class="w3-center">MMLアップコンバータ（千年ビルダー）</h2><a href="https://github.com/mbot-dev/1000_builder/wiki/home"><img id="git_mark" src="image/GitHub-Mark-Light-64px.png" alt="GitHub Mark"></a>
     </header>
     <div class="w3-container w3-margin">
         <div class="w3-container">
@@ -23,7 +23,7 @@
             <p>クライアントの医療情報システムはこの時の関係（患者、医師、処方）を簡単なJSONで表し、サーバーへポストします。サーバーはMML4.1.2にエンコードされたデータを返却します。下記は、左がAPI、右が生成されたMMLです。</p>
         </div>
         <div class="w3-row-padding">
-            <p class="w3-half">API:
+            <p class="w3-half w3-container">API:
                 <select onchange="changeModule(this);">
                     <option value='prescription'>処方せん</option>
                     <option value='patientInfo'>患者情報</option>
@@ -44,16 +44,16 @@
                     <option value='hemodialysis'>透析記録</option>
                 </select>
             </p>
-            <div class="w3-half">
+            <div class="w3-half w3-container">
                 <p>サーバーが生成した MML4.1.2</p>
             </div>
         </div>
         <div class="w3-row-padding">
             <div class="w3-half w3-small w3-border-top w3-border-bottom w3-border-gray">
-                <div id="simple_box"></div> <!-- Simple json to prepare -->
+                <div id="simple_box" style="overflow-x: auto;"></div> <!-- Simple json to prepare -->
             </div>
             <div class="w3-half w3-small w3-border-top w3-border-bottom w3-border-gray">
-                <div id="mml_box"></div> <!-- MML instance created -->
+                <div id="mml_box" style="overflow-x: auto;"></div> <!-- MML instance created -->
             </div>
         </div>
         <div class="w3-container">
@@ -77,7 +77,7 @@
                 <li>プロジェクトに参加するとこれと同等のサーバーが SaaS で提供されます。</li>
                 <li><a href="https://github.com/mbot-dev/1000_builder/wiki/home">Wiki</a> に仕様及びガイドがあります。</li>
                 <li><a href="https://github.com/mbot-dev/1000_builder">GitHub</a> にクライント及びサーバーのソースコードが置いてあります。</li>
-                <li>MML インスタンスの<a href="https://1000-validator.au-syd.mybluemix.net/">バリデーション・チェックはこちら</a>で行うことができます。</li>
+                <!-- li>MML インスタンスの<a href="https://1000-validator.au-syd.mybluemix.net/">バリデーション・チェックはこちら</a>で行うことができます。</li -->
             </ul>
             <h4>関連情報</h4>
             <ul>
@@ -88,8 +88,8 @@
             </ul>
         </div>
     </div>
-    <footer class="w3-container w3-blue">
-        <p class="w3-center">&copy;2017 千年カルテ</p>
+    <footer class="w3-container w3-metro-blue">
+        <p class="w3-center">&copy;2017-2018 千年カルテ・プロジェクト</p>
     </footer>
     <script type="text/javascript" src="js/uuid.js"></script>
     <script type="text/javascript" src="js/1000-utils.js"></script>

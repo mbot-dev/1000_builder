@@ -1,6 +1,7 @@
 'use strict';
 
-const uuid = require('node-uuid');
+// const uuid = require('node-uuid');
+const uuid = require('uuid');
 const utils = require('../lib/utils');
 const mmlBuilder = require('../lib/mmlBuilder');
 const logger = require('../logger/logger');

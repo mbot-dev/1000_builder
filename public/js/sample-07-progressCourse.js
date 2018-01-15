@@ -5,7 +5,7 @@ var postProgressCourse = function (callback) {
         freeExpression: ''
     };
 
-    /*
+
     // 改行サンプル  <xhtml:br/> を挿入
     var arr = [];
     arr.push('検尿　糖(-)蛋白(1)潜血(2)');
@@ -13,11 +13,11 @@ var postProgressCourse = function (callback) {
     arr.push('118/86');
     arr.push('貧血はHb10程度らしい。鉄剤終了後に再検されるだろう。');
     arr.push('全身的には安定。関節症状も無し。');
-    var text = arr.join('<xhtml:br/>');
-    simpleProgressCourse.freeExpression = text;*/
+    var text = arr.join('<br/>'); // var text = arr.join('<xhtml:br/>');
+    simpleProgressCourse.freeExpression = text;
 
     // section + source sample
-    var jsonCurse = {
+    /*var jsonCurse = {
         test: '検尿　糖(-)蛋白(1)潜血(2)',
         herat: '心音呼吸音正常（usually piping rales)',
         obs1: '貧血はHb10程度らしい。鉄剤終了後に再検されるだろう。',
@@ -32,7 +32,7 @@ var postProgressCourse = function (callback) {
     arr.push('\"json; codecs=abc ver1.2\" />');
     arr.push(textCourse);
     arr.push('</xhtml:section>');
-    simpleProgressCourse.freeExpression = arr.join('');
+    simpleProgressCourse.freeExpression = arr.join('');*/
 
     // コンポジションを生成する
     var simpleComposition = {                   // POSTする simpleComposition
