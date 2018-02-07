@@ -3,11 +3,8 @@
 const express = require('express');
 const assert = require('assert');
 const config = require('config');
-// const uuid = require('node-uuid');
 const uuid = require('uuid');
-const logger = require('../logger/logger');
 const jweSimple = require('../api/jweSimple');
-const utils = require('../lib/utils');
 
 const dev_keys = [
     {
@@ -38,16 +35,16 @@ const checkBody = function (req, res, next) {
 
 const checkCredential = function (req, res, next) {
     try {
-        var basic = 'Basic ';
-        var auth = req.get('Authorization');
-        var len = basic.length;
-        var decoded = new Buffer(auth.substring(len), 'base64').toString();
-        var arr = decoded.split(':');
-        logger.info(arr[0]);
-        logger.info(arr[1]);
-        var match = false;
-        for (var i=0; i<dev_keys.length; i++) {
-            var key = dev_keys[i];
+        const basic = 'Basic ';
+        const auth = req.get('Authorization');
+        const len = basic.length;
+        const decoded = new Buffer(auth.substring(len), 'base64').toString();
+        const arr = decoded.split(':');
+        // logger.info(arr[0]);
+        // logger.info(arr[1]);
+        let match = false;
+        for (let i=0; i<dev_keys.length; i++) {
+            const key = dev_keys[i];
             if (arr[0] === key.consumer && arr[1] === key.secret) {
                 match = true;
                 break;
@@ -59,7 +56,7 @@ const checkCredential = function (req, res, next) {
             assert.strictEqual('abc', 'edf', 'invalid_client');
         }
     } catch (err) {
-        var status = (err.message === 'invalid_client') ? 401 : 400;
+        const status = (err.message === 'invalid_client') ? 401 : 400;
         res.status(status).json({
             error: err.message
         });
@@ -67,14 +64,14 @@ const checkCredential = function (req, res, next) {
 };
 
 const generateToken = function (req, res, next) {
-    var now = Date.now();
-    var expires = Math.floor(now / 1000) + config.jwt.expires;
-    var claim = {
+    const now = Date.now();
+    const expires = Math.floor(now / 1000) + config.jwt.expires;
+    const claim = {
         jti: uuid.v4(),
         iat: now,
         exp: expires
     };
-    var key = new Buffer(config.jwt.secret, 'hex');
+    const key = new Buffer(config.jwt.secret, 'hex');
     req.token = jweSimple.compact(claim, key);
     next();
 };
@@ -87,6 +84,18 @@ const respond = function (req, res) {
     });
 };
 
-router.post('/', [checkBody, checkCredential, generateToken, respond]);
+const noTokenRespond = function (req, res) {
+    res.status(200).json({
+        token_type: config.jwt.token_type,      // beare
+        access_token: 'Server is configured to allow access without access token',        // jwt
+        expires_in: config.jwt.expires			// in seconds
+    });
+};
+
+if (config['jwt']['use_token']) {
+    router.post('/', [checkBody, checkCredential, generateToken, respond]);
+} else {
+    router.post('/', [noTokenRespond]);
+}
 
 module.exports = router;

@@ -16,11 +16,11 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "cfenv": "^1.0.4",
-    "config": "^1.29.2",
+    "config": "^1.29.4",
     "express": "^4.16.2",
-    "helmet": "^3.9.0",
+    "helmet": "^3.10.0",
     "morgan": "^1.9.0",
-    "uuid": "^3.1.0",
+    "uuid": "^3.2.1",
     "winston": "^2.4.0"
   },
   "engines": {

@@ -1,10 +1,7 @@
 'use strict';
 
-// const uuid = require('node-uuid');
-const uuid = require('uuid');
 const utils = require('../lib/utils');
-const mmlBuilder = require('../lib/mmlBuilder');
-const logger = require('../logger/logger');
+// const logger = require('../logger/logger');
 const moduleNames = {
     patientInfo: 'mmlPi',
     healthInsurance: 'mmlHi',
@@ -52,12 +49,12 @@ module.exports = {
     // 外部参照ファイルの href を生成する
     // docId_連番.拡張子  連番部は２桁
     createHREF: function (docId, index, href) {
-        var arr = [];
+        const arr = [];
         arr.push(docId);
         // arr.push('_');
         arr.push('-');
         arr.push(utils.addZero(index, 2));
-        var lastDot = href.lastIndexOf('.');
+        const lastDot = href.lastIndexOf('.');
         arr.push(href.substring(lastDot));
         return arr.join('');
     },
@@ -74,7 +71,7 @@ module.exports = {
             base64: ''                          // PDF、画像等の base64
         };
         *********************/
-        var copyExt = {
+        const copyExt = {
             attr: {
                 href: e.href
             }
@@ -172,7 +169,7 @@ module.exports = {
     // 施設情報 MMLで病院は施設で表現 漢字のみ
     buildFacility: function(fId, fName) {
         // 施設名称 漢字
-        var facilityName = {
+        const facilityName = {
             value: fName,
             attr: {
                 repCode: 'I',                       // 表記法 (漢字:I カナ:P ローマ字:A)
@@ -180,7 +177,7 @@ module.exports = {
             }
         };
         // 施設Id
-        var facilityId = {
+        const facilityId = {
             value: fId,                             // 施設に付番されているId type属性に発番元（体系）を記載する
             attr: {
                 type: 'OID',                        // MML0027 のOIDを使用する 千年カルテ仕様
@@ -196,7 +193,7 @@ module.exports = {
     // 診療科情報
     buildDepartment: function(dId, dName) {
         // 診療科Id
-        var deptId = {
+        const deptId = {
             value: dId,                             // 診療科ID 施設固有
             attr: {
                 type: 'facility',                   // 施設内ユーザー定義診療科コード:facilityを使用する 千年カルテ仕様
@@ -204,7 +201,7 @@ module.exports = {
             }
         };
         // 診療科名称 漢字
-        var deptName = {
+        const deptName = {
             value: dName,
             attr: {
                 repCode: 'I',                        // 表記法 (漢字:I カナ:P ローマ字:A)
@@ -222,10 +219,10 @@ module.exports = {
     // 千年ではfacilityは必須
     buildPersonalizedInfo: function (person) {
         // 作成者(creator)Id
-        var creatorId = this.buildPersonId(person.id, person.facility.id);
+        const creatorId = this.buildPersonId(person.id, person.facility.id);
 
         // 作成者氏名
-        var creatorNames = [];
+        const creatorNames = [];
         // 漢字は必須
         creatorNames.push(this.buildPersonNameWithKanji(person.fullName));
         if (utils.propertyIsNotNull(person, 'kana')) {
@@ -250,16 +247,16 @@ module.exports = {
         }
 
         // 施設情報 person.facility => 必須
-        var facility = this.buildFacility(person.facility.id, person.facility.name);
+        const facility = this.buildFacility(person.facility.id, person.facility.name);
 
         // 医療機関住所 => 必須
-        var facilityAddress = this.buildBusinessAddress(person.facility.zipCode, person.facility.address);
+        let facilityAddress = this.buildBusinessAddress(person.facility.zipCode, person.facility.address);
 
         // 医療機関電話番号 => 必須
-        var facilityPhone = this.buildTelephone(person.facility.telephone);
+        let facilityPhone = this.buildTelephone(person.facility.telephone);
 
         // creator(医師)個人情報
-        var personalizedInfo = {
+        const personalizedInfo = {
             Id: creatorId,                               // ID情報
             personName: creatorNames,                    // 人名 Name の配列
             Facility: facility,                          // 施設情報 Facility
@@ -269,7 +266,7 @@ module.exports = {
 
         // 診療科情報 => オプション
         if (utils.propertyIsNotNull(person, 'department')) {
-            var department = this.buildDepartment(person.department.id, person.department.name);
+            const department = this.buildDepartment(person.department.id, person.department.name);
             personalizedInfo.Department = department;
         }
 
@@ -316,10 +313,10 @@ module.exports = {
         };******************************************************/
 
         // creator(医師)個人情報
-        var personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
+        const personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
 
         // 医療資格  => 必須
-        var creatorLicense = this.buildCreatorLicense(simpleCreator.license);
+        let creatorLicense = this.buildCreatorLicense(simpleCreator.license);
 
         // 作成者情報
         return {
@@ -336,7 +333,7 @@ module.exports = {
      */
     buildDefaultAccessRight: function (patientId, patientName) {
         // 記載者施設に無期限全ての権限を与える
-        var accessRightForCreatorFacility = {
+        const accessRightForCreatorFacility = {
             attr: {
                 permit: 'all'
             },
@@ -350,7 +347,7 @@ module.exports = {
         };
 
         // 診療歴のある施設と患者を対象に無期限でread権限を与える
-        var accessRightForPatientAnExperienceFacility = {
+        const accessRightForPatientAnExperienceFacility = {
             attr: {
                 permit: 'read'
             },
@@ -379,7 +376,7 @@ module.exports = {
     // アクセス権を生成する
     buildAccessRight: function (patientId, patientName, simpleAccessRight) {
         // 記載者施設
-        var accessRightForCreator = {
+        const accessRightForCreator = {
             attr: {
                 permit: simpleAccessRight.creator
             },
@@ -393,7 +390,7 @@ module.exports = {
         };
 
         // 診療歴のある施設
-        var accessRightForExperience = {
+        const accessRightForExperience = {
             attr: {
                 permit: simpleAccessRight.experience
             },
@@ -407,7 +404,7 @@ module.exports = {
         };
 
         // 患者
-        var accessRightForPatient = {
+        const accessRightForPatient = {
             attr: {
                 permit: simpleAccessRight.patient
             },
@@ -447,24 +444,24 @@ module.exports = {
         ***********************************************************************/
 
         // 千年仕様 docId = moduleName_facilityId_patientId_uuid
-        var arr = [];
-        arr.push(this.getModuleName(metaInfo.contentModuleType));   // moduleName fron contentType
-        arr.push(metaInfo.facilityId);
-        arr.push(metaInfo.patientId);
-        arr.push(metaInfo.uuid);
-        var docUUID = arr.join('_');
+        const arr = [];
+        arr.push(this.getModuleName(metaInfo['contentModuleType']));   // moduleName fron contentType
+        arr.push(metaInfo['facilityId']);
+        arr.push(metaInfo['patientId']);
+        arr.push(metaInfo['uuid']);
+        const docUUID = arr.join('_');
 
         // 対象
-        var docInfo = {
+        const docInfo = {
             attr: {
-                contentModuleType: metaInfo.contentModuleType      // 文書の種類コード MML0005を使用
+                contentModuleType: metaInfo['contentModuleType']      // 文書の種類コード MML0005を使用
                 // moduleVersion: ''                               // 使用モジュールのDTDのURIを記載
             },
             securityLevel: accessRight,                            // accessRight の配列
             title: {
                 value: metaInfo.title,                             // 文書タイトル
                 attr: {
-                    generationPurpose: metaInfo.generationPurpose  // 文書詳細種別 MML0007を使用
+                    generationPurpose: metaInfo['generationPurpose']  // 文書詳細種別 MML0007を使用
                 }
             },
             docId: {                                               // 文書 ID 情報
@@ -473,7 +470,7 @@ module.exports = {
                 // groupId: []                                     // グループ ID groupIdの配列
             },
             confirmDate: {
-                value: metaInfo.confirmDate                         // カルテ電子保存の確定日時
+                value: metaInfo['confirmDate']                         // カルテ電子保存の確定日時
                 // attr: {
                 //   start: 'YYYY-MM-DDThh:mm:ss',                   // 時系列情報場合の開始日時
                 //   end: 'YYYY-MM-DDThh:mm:ss',                     // 時系列情報場合の終了日時
@@ -487,10 +484,10 @@ module.exports = {
 
         // groupId
         if (utils.propertyIsNotNull(metaInfo, 'groupId')) {
-            var group = {
+            let group = {
                 value: metaInfo.groupId,
                 attr: {
-                    groupClass: metaInfo.contentModuleType
+                    groupClass: metaInfo['contentModuleType']
                 }
             };
             docInfo.docId.groupId = [group];
@@ -501,8 +498,8 @@ module.exports = {
         if (utils.propertyIsNotNull(metaInfo, 'parentUUID') &&
             utils.propertyIsNotNull(metaInfo, 'parentConfirmDate')) {
 
-            var parentId = {
-                value: metaInfo.parentUUID,                    // 元の版のUUID
+            let parentId = {
+                value: metaInfo['parentUUID'],                    // 元の版のUUID
                 attr: {
                     relation: 'oldEdition'                        // 関連の種別 MML0008から使用
                 }
@@ -510,7 +507,7 @@ module.exports = {
             docInfo.docId.parentId = [parentId];
 
             docInfo.confirmDate.attr = {
-                firstConfirmDate: metaInfo.parentConfirmDate  // 最初の確定日
+                firstConfirmDate: metaInfo['parentConfirmDate']  // 最初の確定日
             };
         }
 
@@ -541,10 +538,10 @@ module.exports = {
         };*******************************************************************/
 
         // 患者Id
-        var id = this.buildPersonId(simplePatient.id, simplePatient.facilityId);
+        const id = this.buildPersonId(simplePatient.id, simplePatient.facilityId);
 
         // patientModule
-        var patientModule = {
+        const patientModule = {
             uniqueInfo: {
                 masterId: {
                     Id: id
@@ -701,10 +698,10 @@ module.exports = {
             ratioType: ''                                   // MML0032
         };
         ********************************************************************************/
-        var result = {};
+        const result = {};
 
         // countryType
-        var countryType = (utils.propertyIsNotNull(simpleHealthInsurance, 'countryType'))
+        const countryType = (utils.propertyIsNotNull(simpleHealthInsurance, 'countryType'))
             ? simpleHealthInsurance.countryType
             : 'JPN';
         result.attr = {
@@ -753,7 +750,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleHealthInsurance, 'publicInsurance')) {
             result.publicInsurance = [];
             simpleHealthInsurance.publicInsurance.forEach((entry) => {
-                var it = {
+                const it = {
                     attr: {
                         priority: entry.priority
                     },
@@ -796,7 +793,7 @@ module.exports = {
             outcome: ''
         };**************************************************/
 
-        var registeredDiagnosisModule = {
+        const registeredDiagnosisModule = {
             diagnosis: {
                 value: simpleDiagnosis.diagnosis,
                 attr: {
@@ -893,11 +890,11 @@ module.exports = {
         };
         ********************************************************************************/
         // return JSON.parse(JSON.stringify(simpleBaseClinic));
-        var result = {};
+        const result = {};
         if (utils.propertyIsArrayAndNotEmpty(simpleBaseClinic, 'allergy')) {
             result.allergy = [];
             simpleBaseClinic.allergy.forEach((entry) => {
-                var allergyItem = {};
+                const allergyItem = {};
                 result.allergy.push(allergyItem);
                 allergyItem.factor = entry.factor;
                 utils.setPropertyIfNotNull(allergyItem, entry, 'severity');
@@ -912,7 +909,7 @@ module.exports = {
             if (utils.propertyIsArrayAndNotEmpty(simpleBaseClinic.bloodtype, 'others')) {
                 result.bloodtype.others = [];
                 simpleBaseClinic.bloodtype.others.forEach((entry) => {
-                    var other = {};
+                    const other = {};
                     result.bloodtype.others.push(other);
                     other.typeName = entry.typeName;
                     other.typeJudgement = entry.typeJudgement;
@@ -924,7 +921,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleBaseClinic, 'infection')) {
             result.infection = [];
             simpleBaseClinic.infection.forEach((entry) => {
-                var inf = {};
+                const inf = {};
                 result.infection.push(inf);
                 inf.factor = entry.factor;
                 inf.examValue = entry.examValue;
@@ -990,14 +987,14 @@ module.exports = {
 
         // logger.info(JSON.stringify(simpleFirstClinic, null, 4));
 
-        var result = {};
+        const result = {};
 
         // familyHistory
         // if (utils.propertyIsNotNull(simpleFirstClinic, 'familyHistory')) {
         if (utils.propertyIsArrayAndNotEmpty(simpleFirstClinic, 'familyHistory')) {
             result.familyHistory = [];
             simpleFirstClinic.familyHistory.forEach((entry) => {
-                var fhItem = {
+                const fhItem = {
                     relation: entry.relation
                 };
                 result.familyHistory.push(fhItem);
@@ -1009,8 +1006,8 @@ module.exports = {
 
         //childhood
         if (utils.propertyIsNotNull(simpleFirstClinic, 'childhood')) {
-            var src = simpleFirstClinic.childhood;
-            var dest = {};
+            const src = simpleFirstClinic.childhood;
+            const dest = {};
             result.childhood = dest;
             if (utils.propertyIsNotNull(src, 'birthInfo')) {
                 dest.birthInfo = {};
@@ -1064,7 +1061,7 @@ module.exports = {
             if (utils.propertyIsArrayAndNotEmpty(src, 'vaccination')) {
                 dest.vaccination = [];
                 src.vaccination.forEach((entry) => {
-                    var it = {
+                    let it = {
                         vaccine: entry.vaccine,
                         injected: entry.injected
                     };
@@ -1087,7 +1084,7 @@ module.exports = {
                 };
                 simpleFirstClinic.pastHistory.pastHistoryItem.forEach((entry) => {
                     // timeExpression, eventExpression pair
-                    var it = {
+                    let it = {
                         timeExpression: entry.timeExpression,           // pair
                         eventExpression: [entry.eventExpression]        // pair
                     };
@@ -1115,16 +1112,16 @@ module.exports = {
             extRef: []
         };
         *******************************************************/
-        var result = {
+        const result = {
             freeExpression: simpleProgressCource.freeExpression
         };
         // console.log(result.freeExpression);
         // if (utils.propertyIsNotNull(simpleProgressCource, 'extRef')) {
         if (utils.propertyIsArrayAndNotEmpty(simpleProgressCource, 'extRef')) {
             result.extRef = [];
-            var index = 0;
-            var docId = docInfo.docId.uid;
-            var newHREF = null;
+            let index = 0;
+            const docId = docInfo.docId.uid;
+            let newHREF = null;
 
             simpleProgressCource.extRef.forEach((entry) => {
 
@@ -1200,7 +1197,7 @@ module.exports = {
 
         // logger.info(JSON.stringify(simpleSurgery, null,4));
 
-        var result = {
+        const result = {
             surgicalInfo: {
                 date: simpleSurgery.context.date
             }
@@ -1219,11 +1216,11 @@ module.exports = {
             result.surgicalInfo.duration = simpleSurgery.context.duration;
         }
         if (utils.propertyIsNotNull(simpleSurgery.context, 'surgicalDepartment')) {
-            var sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartment.id, simpleSurgery.context.surgicalDepartment.name);
+            const sdp = this.buildDepartment(simpleSurgery.context.surgicalDepartment.id, simpleSurgery.context.surgicalDepartment.name);
             result.surgicalInfo.surgicalDepartment = [sdp];
         }
         if (utils.propertyIsNotNull(simpleSurgery.context, 'patientDepartment')) {
-            var pdp = this.buildDepartment(simpleSurgery.context.patientDepartment.id, simpleSurgery.context.patientDepartment.name);
+            const pdp = this.buildDepartment(simpleSurgery.context.patientDepartment.id, simpleSurgery.context.patientDepartment.name);
             result.surgicalInfo.patientDepartment = [pdp];
         }
         // logger.info(JSON.stringify(result, null,4));
@@ -1238,7 +1235,7 @@ module.exports = {
         // surgicalProcedure
         result.surgicalProcedure = [];
         simpleSurgery.surgicalProcedure.forEach((entry) => {
-            var procedureItem = {
+            const procedureItem = {
                 operation: {
                     value: entry.operation
                 }
@@ -1265,7 +1262,7 @@ module.exports = {
             simpleSurgery.surgicalStaffs.forEach((entry) => {
                 // entry = simpleCreator + attributes
                 // logger.info(JSON.stringify(entry, null,4));
-                var staff = {
+                const staff = {
                     staffInfo: []
                 };
                 result.surgicalStaffs.push(staff);
@@ -1278,7 +1275,7 @@ module.exports = {
                         staff.attr.staffClass = entry.staffClass;
                     }
                 }
-                var pi = this.buildPersonalizedInfo(entry.staffInfo);
+                const pi = this.buildPersonalizedInfo(entry.staffInfo);
                 // logger.info(JSON.stringify(pi, null,4));
                 staff.staffInfo.push(pi);
             });
@@ -1290,7 +1287,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleSurgery, 'anesthesiaProcedure')) {
             result.anesthesiaProcedure = [];
             simpleSurgery.anesthesiaProcedure.forEach((entry) => {
-                var title = {
+                const title = {
                     value: entry.title
                 };
                 result.anesthesiaProcedure.push(title);
@@ -1312,7 +1309,7 @@ module.exports = {
             result.anesthesiologists = [];
             simpleSurgery.anesthesiologists.forEach((entry) => {
                 // entry = simpleCreator + attributes
-                var staff = {
+                const staff = {
                     staffInfo: []
                 };
                 result.anesthesiologists.push(staff);
@@ -1341,7 +1338,7 @@ module.exports = {
         if (utils.propertyIsNotNull(simpleSurgery, 'referenceInfo')) {
             // logger.info(JSON.stringify(simpleSurgery.referenceInfo, null, 4));
             // e.href
-            var newHREF = this.createHREF(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
+            const newHREF = this.createHREF(docInfo.docId.uid, 0, simpleSurgery.referenceInfo.href);
             simpleSurgery.referenceInfo.href = newHREF;
             // logger.info(newHREF);
 
@@ -1361,7 +1358,7 @@ module.exports = {
     },
 
     surgery: function (docInfo, simpleSurgery, extArray) {
-        var result = {
+        const result = {
             surgeryItem: []
         };
         simpleSurgery.surgeryItem.forEach((entry) => {
@@ -1498,11 +1495,11 @@ module.exports = {
     ***********************************************************************/
 
         // logger.info(JSON.stringify(simpleSummary, null, 4));
-        var docId = docInfo.docId.uid;
-        var refIndex = 0;
-        var newHREF = null;
+        const docId = docInfo.docId.uid;
+        let refIndex = 0;
+        let newHREF = null;
 
-        var result = {
+        const result = {
             serviceHistory: {                                       // 期間情報
                 attr: {
                     start: simpleSummary.context.start,             // サマリー対象期間の開始日
@@ -1518,7 +1515,7 @@ module.exports = {
             result.serviceHistory.outPatient = [];
             simpleSummary.context.outPatient.forEach((entry) => {
                 // date
-                var outPatientItem = {
+                const outPatientItem = {
                     date: entry.date
                 };
                 result.serviceHistory.outPatient.push(outPatientItem);
@@ -1538,7 +1535,7 @@ module.exports = {
                     outPatientItem.staffs = [];
                     entry.staffs.forEach((e) => {
                         // e = simpleCreator
-                        var staffInfo = this.buildCreatorInfo(e);   // staffInfo と同じ構造
+                        const staffInfo = this.buildCreatorInfo(e);   // staffInfo と同じ構造
                         outPatientItem.staffs.push(staffInfo);
                     });
                 }
@@ -1552,7 +1549,7 @@ module.exports = {
             simpleSummary.context.inPatient.forEach((entry) => {
                 //logger.info(JSON.stringify(entry, null, 4));
 
-                var inPatientItem = {};
+                const inPatientItem = {};
                 result.serviceHistory.inPatient.push(inPatientItem);
 
                 // admission 入院情報
@@ -1611,7 +1608,7 @@ module.exports = {
                     inPatientItem.staffs = [];
                     entry.staffs.forEach((e) => {
                         // e = simpleCreator
-                        var staffInfo = this.buildCreatorInfo(e);   // staffInfo と同じ構造
+                        const staffInfo = this.buildCreatorInfo(e);   // staffInfo と同じ構造
                         inPatientItem.staffs.push(staffInfo);
                     });
                 }
@@ -1685,7 +1682,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleSummary, 'clinicalCourse')) {
             result.clinicalCourse = [];
             simpleSummary.clinicalCourse.forEach((entry) => {
-                var clinicalRecord = {
+                const clinicalRecord = {
                     attr: {
                         date: entry.date
                     },
@@ -1695,7 +1692,7 @@ module.exports = {
                 if (utils.propertyIsArrayAndNotEmpty(entry, 'relatedDoc')) {
                     clinicalRecord.relatedDoc = [];
                     entry.relatedDoc.forEach((e) => {
-                        var relatedDoc = {
+                        const relatedDoc = {
                             value: e.uuid,
                             attr: {
                                 relation: e.relation
@@ -1741,7 +1738,7 @@ module.exports = {
         // medication: {                                           // 退院時処方 ? medication
         if (utils.propertyIsNotNull(simpleSummary, 'medication')) {
 
-            var hasMed = false;
+            let hasMed = false;
 
             if (utils.propertyIsNotNull(simpleSummary.medication, 'value')) {
                 if (!hasMed) {
@@ -1757,7 +1754,7 @@ module.exports = {
                         result.medication = {};
                         hasMed = true;
                     }
-                    var preArr = this.prescription(docInfo, simpleSummary.medication.simplePrescription);
+                    const preArr = this.prescription(docInfo, simpleSummary.medication.simplePrescription);
                     result.medication.PrescriptionModule = preArr[0];
                 }
             }
@@ -1783,7 +1780,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(simpleSummary, 'testResults')) {
             result.testResults = [];
             simpleSummary.testResults.forEach((entry) => {
-                var tr = {                                          // 個々の検査結果
+                const tr = {                                          // 個々の検査結果
                     attr: {
                         date: entry.date
                     },
@@ -1795,7 +1792,7 @@ module.exports = {
                 if (utils.propertyIsArrayAndNotEmpty(entry, 'relatedDoc')) {
                     tr.relatedDoc = [];
                     entry.relatedDoc.forEach((e) => {
-                        var relatedDoc = {
+                        const relatedDoc = {
                             value: e.uuid,
                             attr: {
                                 relation: e.relation
@@ -1821,7 +1818,7 @@ module.exports = {
 
         // plan value: '' xs:any extRef *
         if (utils.propertyIsNotNull(simpleSummary, 'plan')) {
-            var hasPlan = false;
+            let hasPlan = false;
             if (utils.propertyIsNotNull(simpleSummary.plan, 'value')) {
                 if (!hasPlan) {
                     result.plan = {};
@@ -1902,18 +1899,18 @@ module.exports = {
             memo: ''                      // メモ
         };
         ***********************************/
-        var context = simpleTest.context;
-        var currentSpc = '';                // パース中の検体コード
-        var currentLabTest = {};            // パース中の MML labTest
-        var item = {};                      // テスト項目（名称、結果値等）
-        var numValue = false;               // 数値結果かどうか ToDo..
-        var itemMemo = {};                  // テスト項目のメモ
+        const context = simpleTest.context;
+        let currentSpc = '';                // パース中の検体コード
+        let currentLabTest = {};            // パース中の MML labTest
+        let item = {};                      // テスト項目（名称、結果値等）
+        let numValue = false;               // 数値結果かどうか ToDo..
+        let itemMemo = {};                  // テスト項目のメモ
 
         // コード体系 千年でラボセンターコードを発番?
-        var facilityCodeId = utils.propertyIsNotNull(context, 'facilityIdType') ? context.facilityIdType : 'OID';
-        var centerCodeId = utils.propertyIsNotNull(context.laboratory, 'facilityIdType') ? context.laboratory.facilityIdType : 'OID';
+        const facilityCodeId = utils.propertyIsNotNull(context, 'facilityIdType') ? context.facilityIdType : 'OID';
+        const centerCodeId = utils.propertyIsNotNull(context.laboratory, 'facilityIdType') ? context.laboratory.facilityIdType : 'OID';
 
-        var testModule = {
+        const testModule = {
             information: {
                 attr: {
                     registId: context.issuedId,
@@ -2116,15 +2113,15 @@ module.exports = {
 
         // logger.info(JSON.stringify(simpleReport, null, 4));
 
-        var information = {};
-        var reportBody = {};
-        var result = {
+        const information = {};
+        const reportBody = {};
+        const result = {
             information: information,                               // 報告書ヘッダー情報
             reportBody: reportBody                                  // 報告書本文情報
         };
 
-        var context = simpleReport.context;
-        var body = simpleReport.body;
+        const context = simpleReport.context;
+        const body = simpleReport.body;
 
         // attr
         information.attr = {
@@ -2170,7 +2167,7 @@ module.exports = {
         // consultFrom => client
         if (utils.propertyIsNotNull(context, 'consulter')) {
 
-            var client = context.consulter;
+            const client = context.consulter;
             information.consultFrom = {};
 
             if (utils.propertyIsNotNull(client, 'facility')) {
@@ -2213,7 +2210,7 @@ module.exports = {
 
         // perform
         if (utils.propertyIsNotNull(context, 'performer')) {
-            var performer = context.performer;
+            const performer = context.performer;
             information.perform = {};
 
             if (utils.propertyIsNotNull(performer, 'facility')) {
@@ -2287,9 +2284,9 @@ module.exports = {
             // if (utils.propertyIsNotNull(body.testNotes, 'extRef')) {
             if (utils.propertyIsArrayAndNotEmpty(body.testNotes, 'extRef')) {
                 reportBody.testNotes.extRef = [];
-                var index = 0;
-                var docId = docInfo.docId.uid;
-                var newHREF = null;
+                let index = 0;
+                const docId = docInfo.docId.uid;
+                let newHREF = null;
                 body.testNotes.extRef.forEach((entry) => {
                     // correct entry.href
                     newHREF = this.createHREF(docId, index++, entry.href);
@@ -2300,7 +2297,7 @@ module.exports = {
                     reportBody.testNotes.extRef.push(this.buildExtRef(entry, null));
 
                     // 2. base64あり => docInfo.extRefs にまとめる
-                    var tmp = this.buildExtRef(entry, extArray);
+                    const tmp = this.buildExtRef(entry, extArray);
                     // logger.info(JSON.stringify(tmp, null, 4));
                     docInfo.extRefs.push(tmp);
                 });
@@ -2312,7 +2309,7 @@ module.exports = {
         if (utils.propertyIsArrayAndNotEmpty(body, 'testMemo')) {
             reportBody.testMemo = [];
             body.testMemo.forEach((entry) => {
-                var memo = {
+                const memo = {
                     value: entry.memo
                 };
                 reportBody.testMemo.push(memo);
@@ -2411,11 +2408,11 @@ module.exports = {
             departmentName: ''                          // 診療科名称 ?
         };
         *******************************************************************************/
-        console.log(simpleReferral);
-        var result = {};
-        var refIndex = 0;
-        var docId = docInfo.docId.uid;
-        var newHREF = null;
+        // console.log(simpleReferral);
+        const result = {};
+        let refIndex = 0;
+        const docId = docInfo.docId.uid;
+        let newHREF = null;
 
         // PatientModule
         result.PatientModule = this.patientInfo(docInfo, simpleReferral.patient);
@@ -2610,13 +2607,13 @@ module.exports = {
      */
     vitalsign: function (docInfo, simpleVitalSign, extArray) {
         // 必須属性
-        var vitalSign = {
+        const vitalSign = {
             item: [],
             observedTime: simpleVitalSign.observedTime
         };
         // item
         simpleVitalSign.item.forEach ((entry) => {
-            var item = {
+            const item = {
                 itemName: entry.itemName                // mmlVs01
             };
             if (utils.propertyIsNotNull(entry, 'value')) {
@@ -2629,7 +2626,7 @@ module.exports = {
                 item.unit = entry.unit;                 // mmlVs02
             }
             if (utils.propertyIsNotNull(entry, 'itemMemo')) {
-                var arr = [];
+                const arr = [];
                 entry.itemMemo.forEach((e) => {
                     arr.push(e);
                 });
@@ -2639,11 +2636,11 @@ module.exports = {
         });
         // Context
         if (utils.propertyIsNotNull(simpleVitalSign, 'context')) {
-            var target =　simpleVitalSign.context;
+            const target =　simpleVitalSign.context;
             vitalSign.context = {};
             // facility
             if (utils.propertyIsNotNull(target, 'facility')) {
-                var facility = {
+                const facility = {
                     value: target.facility,
                     attr: {
                         facilityCode: target.facilityCode,
@@ -2654,7 +2651,7 @@ module.exports = {
             }
             // department
             if (utils.propertyIsNotNull(target, 'department')) {
-                var department = {
+                const department = {
                     value: target.department
                 };
                 if (utils.propertyIsNotNull(target, 'depCode')) {
@@ -2667,7 +2664,7 @@ module.exports = {
             }
             // ward
             if (utils.propertyIsNotNull(target, 'ward')) {
-                var ward = {
+                const ward = {
                     value: target.ward
                 };
                 if (utils.propertyIsNotNull(target, 'wardCode') || utils.propertyIsNotNull(target, 'wardCodeId')) {
@@ -2683,7 +2680,7 @@ module.exports = {
             }
             // observer
             if (utils.propertyIsNotNull(target, 'observer')) {
-                var observer = {
+                const observer = {
                     value: target.observer
                 };
                 if (utils.propertyIsNotNull(target, 'obsCode') || utils.propertyIsNotNull(target, 'obsCodeId')) {
@@ -2700,7 +2697,7 @@ module.exports = {
         }
         // protocol
         if (utils.propertyIsNotNull(simpleVitalSign, 'protocol')) {
-            var target = simpleVitalSign.protocol;
+            const target = simpleVitalSign.protocol;
             vitalSign.protocol = {};
             if (utils.propertyIsNotNull(target, 'procedure')) {
                 vitalSign.protocol.procedure = target.procedure;
@@ -2788,13 +2785,13 @@ module.exports = {
             bofMemo: ''
         };
         *******************************************************************************/
-        var context = {};
+        const context = {};
 
-        var result = {
+        const result = {
             context: context
         };
 
-        var target = simpleFlowSheet.context;
+        const target = simpleFlowSheet.context;
 
         // facility
         context.facility = {
@@ -2862,7 +2859,7 @@ module.exports = {
             result.bodilyOutput = [];
             simpleFlowSheet.bodilyOutput.forEach((entry) => {
                 // result.bodilyOutput.push(JSON.parse(JSON.stringify(entry)));
-                var out = {};
+                const out = {};
                 result.bodilyOutput.push(out);
 
                 if (utils.propertyIsNotNull(entry, 'boType')) {
@@ -2935,13 +2932,13 @@ module.exports = {
         };
         ************************************************************/
 
-        var external = {issuedTo: 'external', medication: []};   // 院外処方Prescription
-        var internal = {issuedTo: 'internal', medication: []};   // 院内処方Prescription
-        var inOrExt = {medication: []};                          // 院内、院外が指定されていない場合
+        const external = {issuedTo: 'external', medication: []};   // 院外処方Prescription
+        const internal = {issuedTo: 'internal', medication: []};   // 院内処方Prescription
+        const inOrExt = {medication: []};                          // 院内、院外が指定されていない場合
 
         simplePrescription.medication.forEach((entry) => {
 
-            var medication = {
+            const medication = {
                 medicine: {
                     name: entry.medicine,
                     code: [{
@@ -3008,7 +3005,7 @@ module.exports = {
             }
         });
 
-        var retArray = [];
+        const retArray = [];
         if (external.medication.length > 0 ) {
             retArray.push(external);
         }
@@ -3048,12 +3045,12 @@ module.exports = {
             additionalInstruction: ''
         };
         ************************************************************/
-        var injection = {
+        const injection = {
             medication: []
         };
 
         simpleInjection.medication.forEach((entry) => {
-            var medication = {
+            const medication = {
                 medicine: {
                     name: entry.medicine,
                     code: [{
@@ -3109,12 +3106,12 @@ module.exports = {
      * 17. HemoDialysysModule
      */
     hemodialysis: function (docInfo, simpleHemoDialysys, extArray) {
-        var target = JSON.parse(JSON.stringify(simpleHemoDialysys));
+        const target = JSON.parse(JSON.stringify(simpleHemoDialysys));
         target.hemoDialysis.forEach((e)=> {
             e.facility = this.buildFacility(e.facility.id, e.facility.name);
             e.patient = this.patientInfo(docInfo, e.patient, extArray);
         });
-        logger.info(JSON.stringify(target, null, 4));
+        // logger.info(JSON.stringify(target, null, 4));
         return target;
     },
 
@@ -3138,13 +3135,13 @@ module.exports = {
         };
         ***************************************************/
         // このMMLの生成日
-        var createDate = utils.nowAsDateTime();
+        const createDate = utils.nowAsDateTime();
         // context
-        var context = simpleComposition.context;
+        const context = simpleComposition.context;
         // 患者情報モジュールを生成する docInfo=null
-        var patientModule = this.patientInfo(null, context.patient);
+        const patientModule = this.patientInfo(null, context.patient);
         // アクセス権
-        var simpleAccessRight = {};
+        let simpleAccessRight = {};
         if (utils.propertyIsNotNull(context, 'accessRight')) {
             simpleAccessRight = context.accessRight;
         } else {
@@ -3155,18 +3152,18 @@ module.exports = {
                 experience: 'read'
             };
         }
-        var accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
+        const accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
 
         // このMMLのcreatorInfoを生成する
-        var creatorInfo = this.buildCreatorInfo(context.creator);
+        const creatorInfo = this.buildCreatorInfo(context.creator);
         // Header
-        var mmlHeader = {
+        const mmlHeader = {
             CreatorInfo: creatorInfo,                    // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
             masterId: patientModule.uniqueInfo.masterId, // masterId
             toc: []                                      // tocItem の配列
         };
         // MML
-        var result = {
+        const result = {
             attr: {
                 createDate: createDate
             },
@@ -3176,7 +3173,7 @@ module.exports = {
             }
         };
         // docInfoを生成する際のもとにするObject
-        var metaInfo = {
+        const metaInfo = {
             contentModuleType: contentType,             // コンテントタイプ
             facilityId: context.patient.facilityId,     // 医療機関ID
             patientId: context.patient.id,              // 患者ID
@@ -3198,9 +3195,9 @@ module.exports = {
         // logger.info(JSON.stringify(metaInfo, null, 4));
         // MML 規格のdocInfo でmetaInfoを基に生成される
         // MML のモジュール単位に付加される
-        var docInfo = {};
-        var content = {};
-        var extArray = [];
+        let docInfo = {};
+        let content = {};
+        const extArray = [];
 
         simpleComposition.content.forEach((entry) => {
             if (contentType === 'prescription') {
@@ -3208,7 +3205,7 @@ module.exports = {
                 // metaInfo.contentModuleType = contentType;
                 // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
                 // ToDo ToDo
-                var arr = this.prescription(docInfo, entry, extArray);
+                const arr = this.prescription(docInfo, entry, extArray);
                 // 結果は配列で返る
                 arr.forEach((prescription) => {
                     // それに薬が入っていたらModuleItemへ加える
@@ -3231,10 +3228,10 @@ module.exports = {
         // logger.info(JSON.stringify(result, null, 4));
 
         // MML instance file を生成するためにラッパーで返す
-        var tmpArr = [];
+        const tmpArr = [];
         tmpArr.push(utils.compactDateTime(createDate));
         tmpArr.push(docInfo.docId.uid);
-        var fileName = tmpArr.join('_');
+        const fileName = tmpArr.join('_');
 
         // extArray.forEach((ex) => {
             // logger.info(ex.href);

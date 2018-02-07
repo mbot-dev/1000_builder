@@ -32,25 +32,25 @@ const base64UrlDecode = function (base64) {
  */
 jwe.compact = function (payload, key) {
     try {
-        var text = JSON.stringify(payload);
+        const text = JSON.stringify(payload);
 
         // random initialization vector
-        var iv = crypto.randomBytes(12);
+        const iv = crypto.randomBytes(12);
 
         // AES 256 GCM Mode
-        var cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
 
         // encrypt the given payload
-        var encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+        const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
 
         // extract the auth tag
-        var tag = cipher.getAuthTag();
+        const tag = cipher.getAuthTag();
 
         // compact
-        var arr = [];
+        const arr = [];
 
         // header
-        var header = {
+        const header = {
             alg: 'dir',
             enc: 'A256GCM'
         };
@@ -80,19 +80,19 @@ jwe.compact = function (payload, key) {
  */
 jwe.verify = function (token, key) {
     // split the token by .
-    var arr = token.split('.');
+    const arr = token.split('.');
 
     // convert data to buffers
-    var iv = base64UrlDecode(arr[2]);
-    var text = base64UrlDecode(arr[3]);
-    var tag = base64UrlDecode(arr[4]);
+    const iv = base64UrlDecode(arr[2]);
+    const text = base64UrlDecode(arr[3]);
+    const tag = base64UrlDecode(arr[4]);
 
     // AES 256 GCM Mode
-    var decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
     decipher.setAuthTag(tag);
 
     // decrypt the given text
-    var decrypted = decipher.update(text, 'binary', 'utf8') + decipher.final('utf8');
+    const decrypted = decipher.update(text, 'binary', 'utf8') + decipher.final('utf8');
 
     return JSON.parse(decrypted);
 };

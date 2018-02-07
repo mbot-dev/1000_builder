@@ -19,36 +19,36 @@ router.use((req, res, next) => {
 });
 
 // JWE verification
-router.use((req, res, next) => {
+const verify = (req, res, next) => {
     try {
-        var bearer = 'Bearer ';
-        var auth = req.get('Authorization');
+        const bearer = 'Bearer ';
+        const auth = req.get('Authorization');
         assert.ok(auth.startsWith(bearer), 'invalid_request');
-        var len = bearer.length;
-        var token = auth.substring(len);
-        var key = new Buffer(config.jwt.secret, 'hex');
-        var payload = jweSimple.verify(token, key);
+        const len = bearer.length;
+        const token = auth.substring(len);
+        const key = new Buffer(config.jwt.secret, 'hex');
+        const payload = jweSimple.verify(token, key);
         assert.ok(payload !== null, 'invalid_client');
         next();
     } catch (error) {
-        var status = error.message === 'invalid_client' ? 401 : 400;
+        const status = error.message === 'invalid_client' ? 401 : 400;
         res.status(status).json({
             error: error.message
         });
     }
-});
+};
 
-var build = function (req, res) {
+const build = (req, res) => {
     try {
         // パラメータ
-        var contentType = req.params.contentType;
-        var simpleComposition = req.body;
+        const contentType = req.params.contentType;
+        const simpleComposition = req.body;
         simpleComposition.context.contentType = contentType;
-        var rpcId = simpleComposition.context.uuid;
+        const rpcId = simpleComposition.context.uuid;
 
         // 生成する
-        var wrapper = simpleBuilder.build(simpleComposition, contentType);
-        var mml = mmlBuilder.build(wrapper.json);
+        const wrapper = simpleBuilder.build(simpleComposition, contentType);
+        const mml = mmlBuilder.build(wrapper.json);
         logger.info(utils.formatXml(mml));
         wrapper.mml = mml;
         wrapper.json = null;
@@ -62,13 +62,17 @@ var build = function (req, res) {
         });
     } catch (err) {
         logger.warn(err);
-        var msg = '処理を実行できません。リクエストパラメータの設定やAPIデータの形式を確認してください。';
+        const msg = '処理を実行できません。リクエストパラメータの設定やAPIデータの形式を確認してください。';
         res.status(500).json({
             error: msg
         });
     }
 };
 
-router.post('/:contentType', build);
+if (config['jwt']['use_token']) {
+	router.post('/:contentType', verify, build);
+} else {
+    router.post('/:contentType', build);
+}
 
 module.exports = router;
