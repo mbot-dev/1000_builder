@@ -24,7 +24,7 @@ router.use((req, res, next) => {
 
 const checkBody = function (req, res, next) {
     try {
-        assert.strictEqual(req.body.grant_type, 'client_credentials');
+        assert.strictEqual(req.body['grant_type'], 'client_credentials');
         next();
     } catch (err) {
         res.status(400).json({
@@ -65,30 +65,30 @@ const checkCredential = function (req, res, next) {
 
 const generateToken = function (req, res, next) {
     const now = Date.now();
-    const expires = Math.floor(now / 1000) + config.jwt.expires;
+    const expires = Math.floor(now / 1000) + config['jwt']['expires'];
     const claim = {
         jti: uuid.v4(),
         iat: now,
         exp: expires
     };
-    const key = new Buffer(config.jwt.secret, 'hex');
+    const key = new Buffer(config['jwt']['secret'], 'hex');
     req.token = jweSimple.compact(claim, key);
     next();
 };
 
 const respond = function (req, res) {
     res.status(200).json({
-        token_type: config.jwt.token_type,      // beare
-        access_token: req.token,                // jwt
-        expires_in: config.jwt.expires			// in seconds
+        token_type: config['jwt']['token_type'],      // beare
+        access_token: req.token,                      // jwt
+        expires_in: config['jwt']['expires']		  // in seconds
     });
 };
 
 const noTokenRespond = function (req, res) {
     res.status(200).json({
-        token_type: config.jwt.token_type,      // beare
+        token_type: config['jwt']['token_type'],      // beare
         access_token: 'Server is configured to allow access without access token',        // jwt
-        expires_in: config.jwt.expires			// in seconds
+        expires_in: config['jwt']['expires']			// in seconds
     });
 };
 

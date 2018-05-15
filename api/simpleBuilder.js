@@ -3150,7 +3150,7 @@ module.exports = {
                 patient: 'read',
                 creator: 'all',
                 experience: 'read'
-            };
+            }
         }
         const accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
 

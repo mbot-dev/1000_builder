@@ -21,7 +21,7 @@ const app = express();
 			} else {
 				res.redirect('https://' + req.headers.host + req.url);
 			}
-		});
+		})
 	}
 })(app);
 app.use(helmet());
@@ -46,13 +46,13 @@ if (process.env.VCAP_APPLICATION) {
 	const server = app.listen(appEnv.port, appEnv.bind, () => {
 		const info = ['Listening on ', server.address().address, ':', server.address().port].join('');
 		logger.info(info)
-	});
+	})
 
 } else {
 	const server = app.listen(6001, '0.0.0.0', () => {
 		const info = ['Listening on ', server.address().address, ':', server.address().port].join('');
 		logger.info(info);
-	});
+	})
 }
 
 

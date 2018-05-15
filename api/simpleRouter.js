@@ -8,6 +8,10 @@ const logger = require('../logger/logger');
 const jweSimple = require('../api/jweSimple');
 const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
+const buffer = require('buffer').Buffer;
+
+const kafkaProducer = config['msg_sender']['publish'] ? require('./kafkaProducer') : null
+const topicName = config['msg_sender']['topicName'];
 
 const router = express.Router();
 
@@ -49,15 +53,21 @@ const build = (req, res) => {
         // 生成する
         const wrapper = simpleBuilder.build(simpleComposition, contentType);
         const mml = mmlBuilder.build(wrapper.json);
-        logger.info(utils.formatXml(mml));
-        wrapper.mml = mml;
+        const formated = utils.formatXml(mml);
+        logger.info(formated);
+        wrapper.mml = mml;  // formated
         wrapper.json = null;
 
+        // パブリッシュする
+        if (kafkaProducer !== null) {
+          kafkaProducer.produce(topicName, JSON.stringify(wrapper));
+        }
         // レスポンス
+        // 整形して返す
         res.status(200).json({
             id: rpcId,
             result: {
-                mml: mml
+                mml: wrapper.mml
             }
         });
     } catch (err) {
