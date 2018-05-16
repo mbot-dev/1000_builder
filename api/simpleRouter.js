@@ -80,10 +80,33 @@ const build = (req, res) => {
     }
 };
 
+const deleteInstance = (req, res) => {
+    try {
+        // パラメータ
+        // const contentType = req.params.contentType;
+        const simpleComposition = req.body;
+        const rpcId = simpleComposition.context.uuid;
+        logger.info('delete: ' + rpcId);
+
+        // レスポンス 200
+        res.status(200).json({
+            id: rpcId
+        });
+    } catch (err) {
+        logger.warn(err);
+        const msg = '処理を実行できません。リクエストパラメータの設定やAPIデータの形式を確認してください。';
+        res.status(500).json({
+            error: msg
+        });
+    }
+};
+
 if (config['jwt']['use_token']) {
 	router.post('/:contentType', verify, build);
 } else {
     router.post('/:contentType', build);
 }
+
+router.delete('/:contentType', deleteInstance);
 
 module.exports = router;
