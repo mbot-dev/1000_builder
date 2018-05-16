@@ -11,6 +11,7 @@ const mmlBuilder = require('../lib/mmlBuilder');
 const buffer = require('buffer').Buffer;
 
 const kafkaProducer = config['msg_sender']['publish'] ? require('./kafkaProducer') : null
+// const kafkaProducer = require('./kafkaProducer');
 const topicName = config['msg_sender']['topicName'];
 
 const router = express.Router();
