@@ -52,8 +52,8 @@ const build = (req, res) => {
         const rpcId = simpleComposition.context.uuid;
 
         // 生成する
-        const wrapper = simpleBuilder.build(simpleComposition, contentType);
-        const mml = mmlBuilder.build(wrapper.json);
+        const wrapper = simpleBuilder.build(simpleComposition, contentType, false);
+        const mml = mmlBuilder.build(wrapper.json, false);
         const formated = utils.formatXml(mml);
         logger.info(formated);
         wrapper.mml = mml;  // formated
@@ -83,14 +83,31 @@ const build = (req, res) => {
 const deleteInstance = (req, res) => {
     try {
         // パラメータ
-        // const contentType = req.params.contentType;
+        const contentType = req.params.contentType;
         const simpleComposition = req.body;
+        simpleComposition.context.contentType = contentType;
         const rpcId = simpleComposition.context.uuid;
         logger.info('delete: ' + rpcId);
 
+        // 生成する
+        const wrapper = simpleBuilder.build(simpleComposition, contentType, true);
+        const mml = mmlBuilder.build(wrapper.json, true);
+        const formated = utils.formatXml(mml);
+        logger.info(formated);
+        wrapper.mml = mml;  // formated
+        wrapper.json = null;
+
+        // パブリッシュする
+        if (kafkaProducer !== null) {
+          kafkaProducer.produce(topicName, JSON.stringify(wrapper));
+        }
+
         // レスポンス 200
         res.status(200).json({
-            id: rpcId
+            id: rpcId,
+            result: {
+                mml: wrapper.mml
+            }
         });
     } catch (err) {
         logger.warn(err);

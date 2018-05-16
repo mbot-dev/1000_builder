@@ -3120,7 +3120,7 @@ module.exports = {
       * @param {simpleComposition} - simpleComposition
       * @returns {MML}
      */
-    build: function (simpleComposition, contentType) {
+    build: function (simpleComposition, contentType, deleteInstance) {
         // logger.info(JSON.stringify(simpleComposition, null, 4));
         /***************************************************
         var simpleComposition = {
@@ -3199,31 +3199,38 @@ module.exports = {
         let content = {};
         const extArray = [];
 
-        simpleComposition.content.forEach((entry) => {
-            if (contentType === 'prescription') {
-                // contentModuleTypeをセットする
-                // metaInfo.contentModuleType = contentType;
-                // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
-                // ToDo ToDo
-                const arr = this.prescription(docInfo, entry, extArray);
-                // 結果は配列で返る
-                arr.forEach((prescription) => {
-                    // それに薬が入っていたらModuleItemへ加える
-                    if (prescription.medication.length > 0) {
-                        // MML 規格によりModule単位にuuidを付番する
-                        // metaInfo.uuid = uuid.v4();
-                        // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
-                        docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
-                        // logger.info(JSON.stringify(docInfo, null, 4));
-                        result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
-                    }
-                });
-            } else {
-                docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
-                content = this[contentType].call(this, docInfo, entry, extArray);
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-            }
-        });
+        if (deleteInstance) {
+          docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+          result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
+          
+        } else {
+          simpleComposition.content.forEach((entry) => {
+
+              if (contentType === 'prescription') {
+                  // contentModuleTypeをセットする
+                  // metaInfo.contentModuleType = contentType;
+                  // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
+                  // ToDo ToDo
+                  const arr = this.prescription(docInfo, entry, extArray);
+                  // 結果は配列で返る
+                  arr.forEach((prescription) => {
+                      // それに薬が入っていたらModuleItemへ加える
+                      if (prescription.medication.length > 0) {
+                          // MML 規格によりModule単位にuuidを付番する
+                          // metaInfo.uuid = uuid.v4();
+                          // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
+                          docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                          // logger.info(JSON.stringify(docInfo, null, 4));
+                          result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
+                      }
+                  });
+              } else {
+                  docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                  content = this[contentType].call(this, docInfo, entry, extArray);
+                  result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
+              }
+          });
+        }
         // logger.info(JSON.stringify(docInfo.docId, null, 4));
         // logger.info(JSON.stringify(result, null, 4));
 
