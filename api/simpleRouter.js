@@ -1,5 +1,3 @@
-'use strict';
-
 const express = require('express');
 const assert = require('assert');
 const config = require('config');
@@ -10,8 +8,7 @@ const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
 const buffer = require('buffer').Buffer;
 
-const kafkaProducer = config['msg_sender']['publish'] ? require('./kafkaProducer') : null
-// const kafkaProducer = require('./kafkaProducer');
+const publisher = config['msg_sender']['publish'] ? require('./redisPublisher') : null
 const topicName = config['msg_sender']['topicName'];
 
 const router = express.Router();
@@ -44,12 +41,20 @@ const verify = (req, res, next) => {
 };
 
 const build = (req, res) => {
+
+  let contentType = req.params.contentType;
+  let simpleComposition = req.body;
+  simpleComposition.context.contentType = contentType;
+  const rpcId = simpleComposition.context.uuid;
+  logger.info(JSON.stringify(simpleComposition, null, 3));
+
     try {
-        // パラメータ
-        const contentType = req.params.contentType;
-        const simpleComposition = req.body;
-        simpleComposition.context.contentType = contentType;
-        const rpcId = simpleComposition.context.uuid;
+        // // パラメータ
+        // contentType = req.params.contentType;
+        // simpleComposition = req.body;
+        // simpleComposition.context.contentType = contentType;
+        // const rpcId = simpleComposition.context.uuid;
+        // logger.info(JSON.stringify(simpleComposition, null, 3));
 
         // 生成する
         const wrapper = simpleBuilder.build(simpleComposition, contentType, false);
@@ -60,8 +65,8 @@ const build = (req, res) => {
         wrapper.json = null;
 
         // パブリッシュする
-        if (kafkaProducer !== null) {
-          kafkaProducer.produce(topicName, JSON.stringify(wrapper));
+        if (publisher !== null) {
+          publisher.publish(topicName, JSON.stringify(wrapper));
         }
         // レスポンス
         // 整形して返す
@@ -73,21 +78,31 @@ const build = (req, res) => {
         });
     } catch (err) {
         logger.warn(err);
+        if (simpleComposition) {
+          logger.warn(JSON.stringify(simpleComposition, null, 3));
+        }
         const msg = '処理を実行できません。リクエストパラメータの設定やAPIデータの形式を確認してください。';
         res.status(500).json({
+           id: rpcId,
             error: msg
         });
     }
 };
 
 const deleteInstance = (req, res) => {
+  const contentType = req.params.contentType;
+  const simpleComposition = req.body;
+  simpleComposition.context.contentType = contentType;
+  const rpcId = simpleComposition.context.uuid;
+  logger.info('delete: ' + rpcId);
+
     try {
-        // パラメータ
-        const contentType = req.params.contentType;
-        const simpleComposition = req.body;
-        simpleComposition.context.contentType = contentType;
-        const rpcId = simpleComposition.context.uuid;
-        logger.info('delete: ' + rpcId);
+        // // パラメータ
+        // const contentType = req.params.contentType;
+        // const simpleComposition = req.body;
+        // simpleComposition.context.contentType = contentType;
+        // const rpcId = simpleComposition.context.uuid;
+        // logger.info('delete: ' + rpcId);
 
         // 生成する
         const wrapper = simpleBuilder.build(simpleComposition, contentType, true);
@@ -98,8 +113,8 @@ const deleteInstance = (req, res) => {
         wrapper.json = null;
 
         // パブリッシュする
-        if (kafkaProducer !== null) {
-          kafkaProducer.produce(topicName, JSON.stringify(wrapper));
+        if (publisher !== null) {
+          publisher.publish(topicName, JSON.stringify(wrapper));
         }
 
         // レスポンス 200
@@ -111,8 +126,12 @@ const deleteInstance = (req, res) => {
         });
     } catch (err) {
         logger.warn(err);
+        if (simpleComposition) {
+          logger.warn(JSON.stringify(simpleComposition, null, 3));
+        }
         const msg = '処理を実行できません。リクエストパラメータの設定やAPIデータの形式を確認してください。';
         res.status(500).json({
+          id: rpcId,
             error: msg
         });
     }

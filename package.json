@@ -14,6 +14,7 @@
   "author": "Kazushi Minagawa",
   "license": "MIT",
   "dependencies": {
+    "app-root-path": "^2.0.1",
     "archiver": "^2.1.1",
     "body-parser": "^1.18.2",
     "cfenv": "^1.0.4",
@@ -23,7 +24,7 @@
     "glob": "^7.1.2",
     "helmet": "^3.11.0",
     "morgan": "^1.9.0",
-    "node-rdkafka": "^2.2.3",
+    "redis": "^2.8.0",
     "uuid": "^3.2.1",
     "winston": "^2.4.0"
   },

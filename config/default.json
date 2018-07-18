@@ -10,7 +10,7 @@
       "expires": 7200
   },
   "msg_sender": {
-    "publish": false,
+    "publish": true,
     "topicName": "j3"
   },
   "log": {
@@ -18,7 +18,7 @@
   },
   "mmlOutput": {
       "write": true,
-      "path": "/home/1000/1000/mml"
+      "path": "/Users/kazushi/Desktop/1000/mml"
   },
   "uploader": {
       "path": "/home/1000/zip"

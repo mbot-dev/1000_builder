@@ -1,8 +1,15 @@
+const redis = require("redis");
 const fs = require('fs');
 const config = require('config');
 const logger = require('./logger/logger');
 const utils = require('./lib/utils');
-const Kafka = require('node-rdkafka');
+
+const options = {
+    host: 'localhost',
+    port: 6379
+};
+
+const topicName = config['msg_sender']['topicName'];
 
 const saveToFile = (data) => {
   const wrapper = JSON.parse(data);
@@ -69,20 +76,14 @@ const saveToFile = (data) => {
   });
 };
 
-const consumer = new Kafka.KafkaConsumer({
-  'group.id': 'kafka',
-  'metadata.broker.list': 'localhost:9092',
-}, {});
+const client = redis.createClient(options);
 
-consumer.connect();
-consumer.on('ready', () => {
-  consumer.subscribe(['j3']);
-  logger.info('subscribed to j3');
-  consumer.consume();
+client.subscribe(topicName);
+
+client.on('message', (topic, data) => {
+  saveToFile(data);
 });
-consumer.on('data', (data) => {
-  const json = data.value.toString('utf8');
-  // logger.info(json);
-  // build(json);
-  saveToFile(json);
+
+client.on('error', (err) => {
+  logger.error(`redis error: ${err}`);
 });
