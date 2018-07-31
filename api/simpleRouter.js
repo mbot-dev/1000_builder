@@ -8,7 +8,8 @@ const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
 const buffer = require('buffer').Buffer;
 
-const publisher = config['msg_sender']['publish'] ? require('./redisPublisher') : null
+// const publisher = config['msg_sender']['publish'] ? require('./redisPublisher') : null
+const publisher = config['msg_sender']['publish'] ? require('./kafkaProducer') : null
 const topicName = config['msg_sender']['topicName'];
 
 const router = express.Router();
@@ -46,7 +47,7 @@ const build = (req, res) => {
   let simpleComposition = req.body;
   simpleComposition.context.contentType = contentType;
   const rpcId = simpleComposition.context.uuid;
-  logger.info(JSON.stringify(simpleComposition, null, 3));
+  // logger.info(JSON.stringify(simpleComposition, null, 3));
 
     try {
         // // パラメータ
@@ -66,7 +67,7 @@ const build = (req, res) => {
 
         // パブリッシュする
         if (publisher !== null) {
-          publisher.publish(topicName, JSON.stringify(wrapper));
+          publisher.produce(topicName, JSON.stringify(wrapper));
         }
         // レスポンス
         // 整形して返す
@@ -94,7 +95,7 @@ const deleteInstance = (req, res) => {
   const simpleComposition = req.body;
   simpleComposition.context.contentType = contentType;
   const rpcId = simpleComposition.context.uuid;
-  logger.info('delete: ' + rpcId);
+  // logger.info('delete: ' + rpcId);
 
     try {
         // // パラメータ
@@ -114,7 +115,7 @@ const deleteInstance = (req, res) => {
 
         // パブリッシュする
         if (publisher !== null) {
-          publisher.publish(topicName, JSON.stringify(wrapper));
+          publisher.produce(topicName, JSON.stringify(wrapper));
         }
 
         // レスポンス 200

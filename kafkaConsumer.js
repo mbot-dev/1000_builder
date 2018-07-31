@@ -1,15 +1,9 @@
-const redis = require('redis');
 const fs = require('fs');
+const mkdirp = require('mkdirp');
 const config = require('config');
 const logger = require('./logger/logger');
 const utils = require('./lib/utils');
-
-const options = {
-    host: 'localhost',
-    port: 6379
-};
-
-const topicName = config['msg_sender']['topicName'];
+const Kafka = require('node-rdkafka');
 
 const saveToFile = (data) => {
   const wrapper = JSON.parse(data);
@@ -18,18 +12,19 @@ const saveToFile = (data) => {
   // File components 1000 specification
   const fileParams = fileName.split('_');
   const createDatePart = fileParams[0];
+  const modulePart = fileParams[1];
   const { extArray } = wrapper;
   const pArray = [];
   // Pretty MML
   const pretty = utils.formatXml(mml);
   const buf = Buffer.from(pretty, 'utf8');
   // Path
-  const arr = [];
-  arr.push(config.mmlOutput.path);
-  arr.push('/');
-  arr.push(fileName);
-  arr.push('.xml');
-  const path = arr.join('');
+  const rootDir = config.mmlOutput.path;  // Top mml output dir
+  const dateDir = createDatePart.substring(0, 8);  // date part
+  const dirToWrite = `${rootDir}/${dateDir}/${modulePart}`;  // /root/date/module
+  mkdirp.sync(dirToWrite);
+  const path = `${dirToWrite}/${fileName}.xml`;
+
   // 実際のFileは生成しないモード
   if (!config.mmlOutput.write) {
     return;
@@ -49,12 +44,11 @@ const saveToFile = (data) => {
   // 外部参照ファイル
   extArray.forEach((e) => {
     const extContent = Buffer.from(e.base64, 'base64');
-    const cmp = [config.mmlOutput.path];
-    cmp.push('/');
-    cmp.push(createDatePart);
-    cmp.push('_');
-    cmp.push(e.href);
-    const extPath = cmp.join('');
+    const md = e.href.split('_')[0];  // module part
+    const extFileDir = `${rootDir}/${dateDir}/${md}`;
+    mkdirp.sync(extFileDir);
+    const extPath = (`${extFileDir}/${createDatePart}_${e.href}`); // /root/date/module
+
     const p = new Promise((resolve, reject) => {
       fs.writeFile(extPath, extContent, (err) => {
         if (err) {
@@ -76,19 +70,20 @@ const saveToFile = (data) => {
   });
 };
 
-const client = redis.createClient(options);
+const consumer = new Kafka.KafkaConsumer({
+  'group.id': 'kafka',
+  'metadata.broker.list': 'localhost:9092',
+}, {});
 
-client.on('connect', () => {
-  logger.info(`Redis subscriber is connected to the ${options.host} on ${options.port}`);
-  client.subscribe(topicName);
-  logger.info(`subscribed to topic ${topicName}`)
+consumer.connect();
+consumer.on('ready', () => {
+  consumer.subscribe(['j3']);
+  logger.info('subscribed to j3');
+  consumer.consume();
 });
-
-client.on('message', (topic, data) => {
-  logger.info('redis received the message');
-  saveToFile(data);
-});
-
-client.on('error', (err) => {
-  logger.error(`redis error: ${err}`);
+consumer.on('data', (data) => {
+  const json = data.value.toString('utf8');
+  // logger.info(json);
+  // build(json);
+  saveToFile(json);
 });

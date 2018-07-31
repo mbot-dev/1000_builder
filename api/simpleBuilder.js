@@ -3154,8 +3154,9 @@ module.exports = {
         }
         const accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
 
-        // このMMLのcreatorInfoを生成する
+        // このMMLのcreatorInfoを生成する -> ベンダー
         const creatorInfo = this.buildCreatorInfo(context.creator);
+
         // Header
         const mmlHeader = {
             CreatorInfo: creatorInfo,                    // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
@@ -3202,7 +3203,7 @@ module.exports = {
         if (deleteInstance) {
           docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
           result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-          
+
         } else {
           simpleComposition.content.forEach((entry) => {
 
