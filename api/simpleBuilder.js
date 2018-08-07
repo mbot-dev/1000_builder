@@ -3184,12 +3184,16 @@ module.exports = {
         //-----------------------------------------------------------------------
         if (context.creator.facility.id === '1.2.840.114319.5.1000.1.26.1') {
           context.creator.facility.id = '1.2.840.114319.5.1000.1.12.3';
+          // Fix
+          context.patient.facilityId = context.creator.facility.id;
         }
         //--------------------------------------------------
         // Check time part ToDo 訂正依頼
         //--------------------------------------------------
-        if (context.confirmDate === 'yyyy-MM-dd'.length) {
-          context.confirmDate = `${context.confirmDate}T00:00:00`
+        let testConfirm = context.confirmDate.trim();
+        if (!testConfirm.includes('T')) {
+          testConfirm = `${testConfirm}T00:00:00`
+          context.confirmDate = testConfirm
         }
 
         // 患者情報モジュールを生成する docInfo=null
