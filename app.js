@@ -1,5 +1,3 @@
-'use strict';
-
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
@@ -40,19 +38,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(config['path']['oauth2'], authRouter);
 app.use(config['path']['simple'], simpleRouter);
 
+const startInfo = (server) => {
+  const { address } = server.address();
+  const { port } = server.address();
+  logger.info(`Listening on ${address} : ${port}`);
+};
+
 // Start Server
 if (process.env.VCAP_APPLICATION) {
 	const appEnv = cfenv.getAppEnv();
 	const server = app.listen(appEnv.port, appEnv.bind, () => {
-		const info = ['Listening on ', server.address().address, ':', server.address().port].join('');
-		logger.info(info)
+		startInfo(server);
 	})
 
 } else {
 	const server = app.listen(6001, '0.0.0.0', () => {
-		const info = ['Listening on ', server.address().address, ':', server.address().port].join('');
-		logger.info(info);
+		startInfo(server);
 	})
 }
-
-

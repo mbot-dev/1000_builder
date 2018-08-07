@@ -1,7 +1,7 @@
 'use strict';
 
 const utils = require('../lib/utils');
-// const logger = require('../logger/logger');
+const logger = require('../logger/logger');
 const moduleNames = {
     patientInfo: 'mmlPi',
     healthInsurance: 'mmlHi',
@@ -20,6 +20,25 @@ const moduleNames = {
     prescription: 'mmlPs',
     injection: 'mmlInj',
     hemodialysis: 'mmlHd'
+};
+const titleNames = {
+    patientInfo: {name: '患者基本情報', purpose: 'other'},
+    healthInsurance: {name: '健康保険', purpose: 'other'},
+    registeredDiagnosis: {name: '診断履歴', purpose: 'record'},
+    lifestyle: {name: '生活習慣', purpose: 'other'},
+    baseClinic: {name: '基礎的診療情報', purpose: 'other'},
+    firstClinic: {name: '初診時特有情報', purpose: 'record'},
+    progressCourse: {name: '経過記録', purpose: 'record'},
+    surgery: {name: '手術記録', purpose: 'record'},
+    summary: {name: '臨床サマリ', purpose: 'summary'},
+    referral: {name: '紹介状', purpose: 'consult'},
+    test: {name: '検査結果', purpose: 'reportTest'},
+    report: {name: '放射線診断報告書', purpose: 'reportRadiology'},
+    flowsheet: {name: '体温表', purpose: 'flowsheet'},
+    vitalsign: {name: 'バイタルサイン', purpose: 'vitalsign'},
+    prescription: {name: '処方', purpose: 'prescription'},
+    injection: {name: '注射記録', purpose: 'injection'},
+    hemodialysis: {name: '透析', purpose: 'hemodialysis'}
 };
 const diagnosisCategoryTable = {
     mainDiagnosis: 'MML0012',
@@ -325,6 +344,17 @@ module.exports = {
         };
     },
 
+    // ベンダー info
+    buildInstanceCreatorInfo: function (venderInfo) {
+      const personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
+      let creatorLicense = this.buildCreatorLicense(simpleCreator.license);
+      // 作成者情報
+      return {
+          PersonalizedInfo: personalizedInfo,          // 個人情報形式 PersonalizedInfo
+          creatorLicense: [creatorLicense]             // 生成者の資格 creatorLicenseの配列
+      };
+    },
+
     /**
      * デフォルトのアクセス権を生成する
      * @param {string} patientId - 患者Id
@@ -361,11 +391,12 @@ module.exports = {
             person: [{
                 attr: {
                     personCode: 'patient',
-                    tableId: 'MML0036',
-                    personId: patientId,                            // 患者ID
-                    personIdType: 'dolphinUserId_2001-10-03'        // ToDo
+                    tableId: 'MML0036'
+                    // personId: patientId                            // 患者ID -> No use
+                    // personIdType: 'dolphinUserId_2001-10-03'    // ToDo -> No use
                 },
-                value: patientName
+                // value: patientName  // 被記載者へ変更
+                value: '被記載者'  // 被記載者
             }]
         };
 
@@ -374,7 +405,7 @@ module.exports = {
     },
 
     // アクセス権を生成する
-    buildAccessRight: function (patientId, patientName, simpleAccessRight) {
+    buildAccessRight: function (patientId, ptName, simpleAccessRight) {
         // 記載者施設
         const accessRightForCreator = {
             attr: {
@@ -411,11 +442,12 @@ module.exports = {
             person: [{
                 attr: {
                     personCode: 'patient',
-                    tableId: 'MML0036',
-                    personId: patientId,                            // 患者ID
-                    personIdType: '1000_Years_Karte'                // ToDo
+                    tableId: 'MML0036'
+                    // personId: patientId                            // 患者ID -> No use
+                    // personIdType: '1000_Years_Karte'            // ToDo -> No use
                 },
-                value: patientName
+                // value: patientName  // 被記載者へ変更
+                value: '被記載者'  // 被記載者
             }]
         };
 
@@ -450,6 +482,13 @@ module.exports = {
         arr.push(metaInfo['patientId']);
         arr.push(metaInfo['uuid']);
         const docUUID = arr.join('_');
+        // -------------------------------------------------------
+        // contentModuleType To Title
+        // -------------------------------------------------------
+        const titleSpec = titleNames[metaInfo['contentModuleType']];
+        const title = titleSpec['name'];
+        const purpose = titleSpec['purpose'];
+        //--------------------------------------------------------
 
         // 対象
         const docInfo = {
@@ -459,9 +498,11 @@ module.exports = {
             },
             securityLevel: accessRight,                            // accessRight の配列
             title: {
-                value: metaInfo.title,                             // 文書タイトル
+                // value: metaInfo.title,                             // 文書タイトル
+                value: title,                                         // 文書タイトル
                 attr: {
-                    generationPurpose: metaInfo['generationPurpose']  // 文書詳細種別 MML0007を使用
+                    // generationPurpose: metaInfo['generationPurpose']  // 文書詳細種別 MML0007を使用
+                    generationPurpose: purpose  // 文書詳細種別 MML0007を使用
                 }
             },
             docId: {                                               // 文書 ID 情報
@@ -3138,6 +3179,19 @@ module.exports = {
         const createDate = utils.nowAsDateTime();
         // context
         const context = simpleComposition.context;
+        //-----------------------------------------------------------------------
+        // OID修正
+        //-----------------------------------------------------------------------
+        if (context.creator.facility.id === '1.2.840.114319.5.1000.1.26.1') {
+          context.creator.facility.id = '1.2.840.114319.5.1000.1.12.3';
+        }
+        //--------------------------------------------------
+        // Check time part ToDo 訂正依頼
+        //--------------------------------------------------
+        if (context.confirmDate === 'yyyy-MM-dd'.length) {
+          context.confirmDate = `${context.confirmDate}T00:00:00`
+        }
+
         // 患者情報モジュールを生成する docInfo=null
         const patientModule = this.patientInfo(null, context.patient);
         // アクセス権
@@ -3154,12 +3208,24 @@ module.exports = {
         }
         const accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
 
-        // このMMLのcreatorInfoを生成する -> ベンダー
+        // このインスタンスの creator = ベンダー...
+        const venderInfo = Object.assign({}, context.creator);
+        // logger.info(JSON.stringify(venderInfo, null, 3));
+        venderInfo.id = '電子カルテシステム HAPPY ACTIS V3.14';
+        venderInfo.fullName = 'キヤノンメディカルシステムズ株式会社';
+        // logger.info(JSON.stringify(venderInfo, null, 3));
+        const instaneCreator = this.buildCreatorInfo(venderInfo);
+        instaneCreator.PersonalizedInfo.Id.attr.tableId = 'MML0024';
+        // logger.info(JSON.stringify(instaneCreator, null, 3));
+        //-----------------------------------------------------------------------
+
+        // 文書の creatorInfo
         const creatorInfo = this.buildCreatorInfo(context.creator);
 
         // Header
+        // creatorInfo => instaneCreatorを使用
         const mmlHeader = {
-            CreatorInfo: creatorInfo,                    // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
+            CreatorInfo: instaneCreator,                 // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
             masterId: patientModule.uniqueInfo.masterId, // masterId
             toc: []                                      // tocItem の配列
         };
