@@ -8,10 +8,6 @@ const simpleBuilder = require('../api/simpleBuilder');
 const mmlBuilder = require('../lib/mmlBuilder');
 const buffer = require('buffer').Buffer;
 
-// const publisher = config['msg_sender']['publish'] ? require('./redisPublisher') : null
-const publisher = config['msg_sender']['publish'] ? require('./kafkaProducer') : null
-const topicName = config['msg_sender']['topicName'];
-
 const router = express.Router();
 
 router.use((req, res, next) => {
@@ -47,16 +43,9 @@ const build = (req, res) => {
   let simpleComposition = req.body;
   simpleComposition.context.contentType = contentType;
   const rpcId = simpleComposition.context.uuid;
-  // logger.info(JSON.stringify(simpleComposition, null, 3));
+  logger.debug(JSON.stringify(simpleComposition, null, 3));
 
     try {
-        // // パラメータ
-        // contentType = req.params.contentType;
-        // simpleComposition = req.body;
-        // simpleComposition.context.contentType = contentType;
-        // const rpcId = simpleComposition.context.uuid;
-        // logger.info(JSON.stringify(simpleComposition, null, 3));
-
         // 生成する
         const wrapper = simpleBuilder.build(simpleComposition, contentType, false);
         const mml = mmlBuilder.build(wrapper.json, false);
@@ -65,10 +54,6 @@ const build = (req, res) => {
         wrapper.mml = mml;  // formated
         wrapper.json = null;
 
-        // パブリッシュする
-        if (publisher !== null) {
-          publisher.produce(topicName, JSON.stringify(wrapper));
-        }
         // レスポンス
         // 整形して返す
         res.status(200).json({
@@ -95,16 +80,9 @@ const deleteInstance = (req, res) => {
   const simpleComposition = req.body;
   simpleComposition.context.contentType = contentType;
   const rpcId = simpleComposition.context.uuid;
-  // logger.info('delete: ' + rpcId);
+  logger.debug('delete: ' + rpcId);
 
     try {
-        // // パラメータ
-        // const contentType = req.params.contentType;
-        // const simpleComposition = req.body;
-        // simpleComposition.context.contentType = contentType;
-        // const rpcId = simpleComposition.context.uuid;
-        // logger.info('delete: ' + rpcId);
-
         // 生成する
         const wrapper = simpleBuilder.build(simpleComposition, contentType, true);
         const mml = mmlBuilder.build(wrapper.json, true);
@@ -112,11 +90,6 @@ const deleteInstance = (req, res) => {
         logger.info(formated);
         wrapper.mml = mml;  // formated
         wrapper.json = null;
-
-        // パブリッシュする
-        if (publisher !== null) {
-          publisher.produce(topicName, JSON.stringify(wrapper));
-        }
 
         // レスポンス 200
         res.status(200).json({

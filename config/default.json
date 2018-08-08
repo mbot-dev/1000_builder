@@ -4,23 +4,23 @@
       "simple": "/mml/api/v1"
   },
   "jwt": {
-      "use_token": false,
+      "use_token": true,
       "token_type": "bearer",
       "secret": "96d108bec049b22f88f990d2e16cd27591c53e5856dc404d9e65ac301d68a14a",
       "expires": 7200
   },
   "msg_sender": {
-    "publish": true,
+    "publish": false,
     "topicName": "j3"
   },
   "log": {
-      "directory": "/var/log/1000/log"
+      "directory": "/path_to_log"
   },
   "mmlOutput": {
-      "write": true,
-      "path": "/Users/kazushi/Desktop/1000/mml"
+      "write": false,
+      "path": "/path_to_mml"
   },
   "uploader": {
-      "path": "/home/1000/zip"
+      "path": "/path_to_zip"
   }
 }

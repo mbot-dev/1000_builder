@@ -1,5 +1,3 @@
-'use strict';
-
 const utils = require('../lib/utils');
 const logger = require('../logger/logger');
 const moduleNames = {
@@ -3179,23 +3177,6 @@ module.exports = {
         const createDate = utils.nowAsDateTime();
         // context
         const context = simpleComposition.context;
-        //-----------------------------------------------------------------------
-        // OID修正
-        //-----------------------------------------------------------------------
-        if (context.creator.facility.id === '1.2.840.114319.5.1000.1.26.1') {
-          context.creator.facility.id = '1.2.840.114319.5.1000.1.12.3';
-          // Fix
-          context.patient.facilityId = context.creator.facility.id;
-        }
-        //--------------------------------------------------
-        // Check time part ToDo 訂正依頼
-        //--------------------------------------------------
-        let testConfirm = context.confirmDate.trim();
-        if (!testConfirm.includes('T')) {
-          testConfirm = `${testConfirm}T00:00:00`
-          context.confirmDate = testConfirm
-        }
-
         // 患者情報モジュールを生成する docInfo=null
         const patientModule = this.patientInfo(null, context.patient);
         // アクセス権
@@ -3210,26 +3191,15 @@ module.exports = {
                 experience: 'read'
             }
         }
+        // アクセス権設定
         const accessRight = this.buildAccessRight(context.patient.id, context.patient.fullName, simpleAccessRight);
-
-        // このインスタンスの creator = ベンダー...
-        const venderInfo = Object.assign({}, context.creator);
-        // logger.info(JSON.stringify(venderInfo, null, 3));
-        venderInfo.id = '電子カルテシステム HAPPY ACTIS V3.14';
-        venderInfo.fullName = 'キヤノンメディカルシステムズ株式会社';
-        // logger.info(JSON.stringify(venderInfo, null, 3));
-        const instaneCreator = this.buildCreatorInfo(venderInfo);
-        instaneCreator.PersonalizedInfo.Id.attr.tableId = 'MML0024';
-        // logger.info(JSON.stringify(instaneCreator, null, 3));
-        //-----------------------------------------------------------------------
 
         // 文書の creatorInfo
         const creatorInfo = this.buildCreatorInfo(context.creator);
 
         // Header
-        // creatorInfo => instaneCreatorを使用
         const mmlHeader = {
-            CreatorInfo: instaneCreator,                 // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
+            CreatorInfo: creatorInfo,                    // 生成者識別情報．構造は MML 共通形式 (作成者情報形式) 参照．
             masterId: patientModule.uniqueInfo.masterId, // masterId
             toc: []                                      // tocItem の配列
         };
