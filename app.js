@@ -50,9 +50,14 @@ if (process.env.VCAP_APPLICATION) {
 	const server = app.listen(appEnv.port, appEnv.bind, () => {
 		startInfo(server);
 	})
-
 } else {
-	const server = app.listen(6001, '0.0.0.0', () => {
+	let port = 6001;
+	const array = process.argv;
+	if (array.length > 2) {
+		const strPort = array.slice(2);
+		port = parseInt(strPort);
+	}
+	const server = app.listen(port, '0.0.0.0', () => {
 		startInfo(server);
-	})
+	});
 }

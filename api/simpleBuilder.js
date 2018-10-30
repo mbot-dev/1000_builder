@@ -2876,9 +2876,15 @@ module.exports = {
 
         // vitalSign
         // if (utils.propertyIsNotNull(simpleFlowSheet, 'vitalSign')) {
-        if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'vitalSign')) {
+        if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'vitalSign')) {   // vitalSign
             result.VitalSignModule = [];
             simpleFlowSheet.vitalSign.forEach((entry) => {
+                result.VitalSignModule.push(this.vitalsign(docInfo, entry));
+            });
+        }
+        else if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'VitalSign')) {   // VitalSign
+            result.VitalSignModule = [];
+            simpleFlowSheet.VitalSign.forEach((entry) => {
                 result.VitalSignModule.push(this.vitalsign(docInfo, entry));
             });
         }
