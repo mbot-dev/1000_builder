@@ -8,6 +8,18 @@ const dev_keys = [
     {
         consumer: '2a1ecdd5-a1ec-4226-aaac-e42b8d602c1e',
         secret: '5dbe45c15f68209ff401e1e218639c25e86067bb7d11438d9ca343681b1cc141'
+    },
+    {
+      consumer: '3855de23-71ce-4d08-9442-a52759414b5a',
+      secret: '94205331440ee1f5025ccea9d1ddb6d04d5386de1e7606041c80bea44ed79922'
+    },
+    {
+      consumer: '9faff368-258f-49ff-9efd-68a5c7054651',
+      secret: 'db76162440b4e9438d97bb1cc8437fa0e06e28a083b881f7c2308d26c1c63bdd'
+    },
+    {
+      consumer: '3541af22-f55e-4d83-82b9-fedac0397c57',
+      secret: '556335d91610af13243a0995d9524b0d8a5c3caaf5a3625255831df5b3e4b68d'
     }
 ];
 

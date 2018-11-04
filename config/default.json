@@ -4,7 +4,7 @@
       "simple": "/mml/api/v1"
   },
   "jwt": {
-      "use_token": false,
+      "use_token": true,
       "token_type": "bearer",
       "secret": "96d108bec049b22f88f990d2e16cd27591c53e5856dc404d9e65ac301d68a14a",
       "expires": 7200
