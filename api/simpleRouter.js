@@ -1,5 +1,5 @@
-const express = require('express');
 const assert = require('assert');
+const express = require('express');
 const config = require('config');
 const utils = require('../lib/utils');
 const logger = require('../logger/logger');

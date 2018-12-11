@@ -80,14 +80,14 @@ module.exports = {
     // extArrayにbase64のデータを集める
     buildExtRef: function (e, extArray) {
         /*********************
-        var e = {
+         var e = {
             href: '',                           // uri
             contentType: '',                    // コンテントタイプ ?
             medicalRole: '',                    // 役割 ?
             title: '',                          // タイトル ?
             base64: ''                          // PDF、画像等の base64
         };
-        *********************/
+         *********************/
         const copyExt = {
             attr: {
                 href: e.href
@@ -160,7 +160,7 @@ module.exports = {
             full: address                                // 一連住所
         };
         if (postalCode) {
-          ret.zip = postalCode                               // 郵便番号
+            ret.zip = postalCode                               // 郵便番号
         }
         return ret;
     },
@@ -188,7 +188,7 @@ module.exports = {
     },
 
     // 施設情報 MMLで病院は施設で表現 漢字のみ
-    buildFacility: function(fId, fName) {
+    buildFacility: function (fId, fName) {
         // 施設名称 漢字
         const facilityName = {
             value: fName,
@@ -212,7 +212,7 @@ module.exports = {
     },
 
     // 診療科情報
-    buildDepartment: function(dId, dName) {
+    buildDepartment: function (dId, dName) {
         // 診療科Id
         const deptId = {
             value: dId,                             // 診療科ID 施設固有
@@ -291,8 +291,8 @@ module.exports = {
         //     personalizedInfo.Department = department;
         // }
         if (person.department && person.department.name && person.department.id) {
-          const department = this.buildDepartment(person.department.id, person.department.name);
-          personalizedInfo.Department = department;
+            const department = this.buildDepartment(person.department.id, person.department.name);
+            personalizedInfo.Department = department;
         }
 
         // 電子メールもセット可能  => オプション
@@ -320,7 +320,7 @@ module.exports = {
      */
     buildCreatorInfo: function (simpleCreator) {
         /******************************************************
-        var simpleCreator = {
+         var simpleCreator = {
             id: '',
             fullName: '',
             license: '',                             // MML0026
@@ -337,12 +337,13 @@ module.exports = {
             }
         };******************************************************/
 
-        // creator(医師)個人情報
+            // creator(医師)個人情報
+        logger.info(JSON.stringify(simpleCreator, null, 3))
         const personalizedInfo = this.buildPersonalizedInfo(simpleCreator);
 
         // 医療資格  => 必須
         if (!simpleCreator.license) {
-          simpleCreator.license = 'other';
+            simpleCreator.license = 'other';
         }
         let creatorLicense = this.buildCreatorLicense(simpleCreator.license);
 
@@ -462,7 +463,7 @@ module.exports = {
      */
     buildDocInfo: function (metaInfo, creatorInfo, accessRight) {
         /*********************************************************************:
-        var metaInfo = {
+         var metaInfo = {
             contentModuleType: contentType,             // コンテントタイプ
             facilityId: context.patient.facilityId,     // 医療機関ID
             patientId: context.patient.id,              // 患者ID
@@ -471,10 +472,10 @@ module.exports = {
             title: '',
             generationPurpose: ''
         };
-        ***********************************************************************/
-        // console.log(`confirmFate=${metaInfo.confirmDate}`)
+         ***********************************************************************/
+            // console.log(`confirmFate=${metaInfo.confirmDate}`)
 
-        // 千年仕様 docId = moduleName_facilityId_patientId_uuid
+            // 千年仕様 docId = moduleName_facilityId_patientId_uuid
         const arr = [];
         arr.push(this.getModuleName(metaInfo['contentModuleType']));   // moduleName fron contentType
         arr.push(metaInfo['facilityId']);
@@ -530,7 +531,7 @@ module.exports = {
      */
     patientInfo: function (docInfo, simplePatient, extArray) {
         /********************************************************************
-        var simplePatient = {
+         var simplePatient = {
             id: '',                                         // Id
             idType: ''                                      // MML0024(全国統一:national 地域:local 施設固有:facility)
             facilityId: '',                                 // 施設Id
@@ -554,7 +555,7 @@ module.exports = {
           }
         };*******************************************************************/
 
-        // 患者Id
+            // 患者Id
         const id = this.buildPersonId(simplePatient.id, simplePatient.facilityId);
 
         // patientModule
@@ -578,7 +579,7 @@ module.exports = {
         if (utils.propertyIsNotNull(simplePatient, 'fullName')) {
             patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.fullName));
         } else if (utils.propertyIsNotNull(simplePatient, 'fullname')) {
-          patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.fullname));
+            patientModule.personName.push(this.buildPersonNameWithKanji(simplePatient.fullname));
         }
         // かな/カナ氏名
         if (utils.propertyIsNotNull(simplePatient, 'kana')) {
@@ -625,13 +626,13 @@ module.exports = {
 
         // 死亡
         if (utils.propertyIsNotNull(simplePatient, 'death')) {
-          const death = {
-            value: patientModule.death.value,
-            attr: {
-              date: patientModule.death.date
+            const death = {
+                value: simplePatient.death.value,
+                attr: {
+                    date: simplePatient.death.date
+                }
             }
-          }
-          patientModule.death = death;
+            patientModule.death = death;
         }
 
         return patientModule;
@@ -642,67 +643,67 @@ module.exports = {
      */
     healthInsurance: function (docInfo, simpleHealthInsurance, extArray) {
         /*******************************************************************************
-        // 保険種別
-        insuranceClass;
+         // 保険種別
+         insuranceClass;
 
-        // 保険種別コード
-        insuranceClassCode;
+         // 保険種別コード
+         insuranceClassCode;
 
-        // 保険者番号
-        insuranceNumber;
+         // 保険者番号
+         insuranceNumber;
 
-        // 被保険者記号
-        clientGroup;
+         // 被保険者記号
+         clientGroup;
 
-        // 被保険者番号
-        clientNumber;
+         // 被保険者番号
+         clientNumber;
 
-        // 本人家族区分
-        familyClass;
+         // 本人家族区分
+         familyClass;
 
-        // 開始日(交付年月日）
-        startDate;
+         // 開始日(交付年月日）
+         startDate;
 
-        // 有効期限
-        expiredDate;
+         // 有効期限
+         expiredDate;
 
-        // 継続疾患名 no use
-        continuedDisease;
+         // 継続疾患名 no use
+         continuedDisease;
 
-        // 入院時負担率
-        payInRatio;
+         // 入院時負担率
+         payInRatio;
 
-        // 外来時負担率
-        payOutRatio;
+         // 外来時負担率
+         payOutRatio;
 
-        // 公費負担リスト
-        publicItems;
+         // 公費負担リスト
+         publicItems;
 
-        // 複数公費の優先順位
-        priority;
+         // 複数公費の優先順位
+         priority;
 
-        // 公費負担名称
-        providerName;
+         // 公費負担名称
+         providerName;
 
-        // 負担者番号
-        provider;
+         // 負担者番号
+         provider;
 
-        // 受給者番号
-        recipient;
+         // 受給者番号
+         recipient;
 
-        // 開始日
-        startDate;
+         // 開始日
+         startDate;
 
-        // 開始日
-        expiredDate;
+         // 開始日
+         expiredDate;
 
-        // 負担率または負担金
-        paymentRatio;
+         // 負担率または負担金
+         paymentRatio;
 
-        // 負担率または負担金
-        paymentRatioType;
+         // 負担率または負担金
+         paymentRatioType;
 
-        var simpleHealthInsurance = {
+         var simpleHealthInsurance = {
             countryType: '',                                // 国コード ?
             insuranceClass: '',                             // 保険種別 ?
             insuranceClassCode: '',                         // 保険種別コード ?
@@ -717,7 +718,7 @@ module.exports = {
             publicInsurance: []                             // 公費負担医療情報 [publicInsuranceItem]  ?
         };
 
-        var publicInsuranceItem = {
+         var publicInsuranceItem = {
             priority: ''                                    // 優先順位
             providerName: '',                               // 公費負担名称 ?
             provider: '',                                   // 負担者番号
@@ -727,7 +728,7 @@ module.exports = {
             paymentRatio: '',                               // ?
             ratioType: ''                                   // MML0032
         };
-        ********************************************************************************/
+         ********************************************************************************/
         const result = {};
 
         // countryType
@@ -761,16 +762,16 @@ module.exports = {
 
         // startDate
         if (simpleHealthInsurance.startDate) {
-          result.startDate = simpleHealthInsurance.startDate;
+            result.startDate = simpleHealthInsurance.startDate;
         } else {
-          result.startDate = '1601-01-01';
+            result.startDate = '1601-01-01';
         }
 
         // expiredDate  9999-12-31
         if (simpleHealthInsurance.expiredDate) {
-          result.expiredDate = simpleHealthInsurance.expiredDate;
+            result.expiredDate = simpleHealthInsurance.expiredDate;
         } else {
-          result.expiredDate = '9999-12-31';
+            result.expiredDate = '9999-12-31';
         }
 
         // paymentInRatio
@@ -821,7 +822,7 @@ module.exports = {
      */
     registeredDiagnosis: function (docInfo, simpleDiagnosis, extArray) {
         /****************************************************
-        var simpleDiagnosis = {
+         var simpleDiagnosis = {
             diagnosis: '',
             code: '',
             system: '',
@@ -831,7 +832,7 @@ module.exports = {
             outcome: ''
         };**************************************************/
         if (simpleDiagnosis.system === 'ICD10') {
-          simpleDiagnosis.system = 'ICD-10';
+            simpleDiagnosis.system = 'ICD-10';
         }
         const registeredDiagnosisModule = {
             diagnosis: {
@@ -881,13 +882,13 @@ module.exports = {
      */
     lifestyle: function (docInfo, simpleLifestyle, extArray) {
         /******************************************
-        var simpleLifestyle = {
+         var simpleLifestyle = {
             occupation: '',
             tobacco: '',
             alcohol: '',
             other: ''
         };
-        ******************************************/
+         ******************************************/
         return JSON.parse(JSON.stringify(simpleLifestyle));
     },
 
@@ -896,40 +897,40 @@ module.exports = {
      */
     baseClinic: function (docInfo, simpleBaseClinic, extArray) {
         /*******************************************************************************
-        var simpleBaseClinic = {                    // 基礎的診療情報
+         var simpleBaseClinic = {                    // 基礎的診療情報
             allergy: [],                            // アレルギー情報 ? [allergyItem]
             bloodtype: {},                          // 血液型情報 ?
             infection: []                           // 感染性情報 ? [infectionItem]
         };
 
-        var allergyItem = {
+         var allergyItem = {
             factor: '',                             // アレルギー原因
             severity: '',                           // アレルギー反応程度 ? MML0017
             identifiedDate: '',                     // アレルギー同定日 ?
             memo: ''                                // アレルギーメモ ?
         };
 
-        var bloodtype = {
+         var bloodtype = {
             abo: '',                                // ABO 式血液型 MML0018
             rh: '',                                 // Rho(D) 式血液型 ? MML0019
             others: [],                             // その他の血液型 ? [other]
             memo: ''                                // メモ ?
         };
 
-        var other = {
+         var other = {
             typeName: '',                           // 血液型名称
             typeJudgement: '',                      // 血液型判定
             description: ''                         // 血液型注釈 ?
         };
 
-        var infectionItem = {
+         var infectionItem = {
             factor: '',                             // 感染性要因名
             examValue: '',                          // 感染性要因検査値
             identifiedDate: '',                     // 感染性要因同定日 ?
             memo: ''                                // 感染性要因メモ ?
         };
-        ********************************************************************************/
-        // return JSON.parse(JSON.stringify(simpleBaseClinic));
+         ********************************************************************************/
+            // return JSON.parse(JSON.stringify(simpleBaseClinic));
         const result = {};
         if (utils.propertyIsArrayAndNotEmpty(simpleBaseClinic, 'allergy')) {
             result.allergy = [];
@@ -962,17 +963,17 @@ module.exports = {
                 const len = arr.length;
                 let first = true;
                 for (i = 0; i < len; i++) {
-                  const entry = arr[i];
-                  if (entry.typeName && entry.typeJudgement) {
-                    if (first) {
-                      result.bloodtype.others = [];
+                    const entry = arr[i];
+                    if (entry.typeName && entry.typeJudgement) {
+                        if (first) {
+                            result.bloodtype.others = [];
+                        }
+                        const other = {};
+                        result.bloodtype.others.push(other);
+                        other.typeName = entry.typeName;
+                        other.typeJudgement = entry.typeJudgement;
+                        utils.setPropertyIfNotNull(other, entry, 'description');
                     }
-                    const other = {};
-                    result.bloodtype.others.push(other);
-                    other.typeName = entry.typeName;
-                    other.typeJudgement = entry.typeJudgement;
-                    utils.setPropertyIfNotNull(other, entry, 'description');
-                  }
                 }
             }
             utils.setPropertyIfNotNull(result.bloodtype, simpleBaseClinic.bloodtype, 'memo');
@@ -996,7 +997,7 @@ module.exports = {
      */
     firstClinic: function (docInfo, simpleFirstClinic, extArray) {
         /******************************************************************************
-        var simpleFirstClinic = {                                   // 初診時特有情報
+         var simpleFirstClinic = {                                   // 初診時特有情報
             familyHistory: [],                                      // 家族歴情報 ? [familyHistoryItem]
             childhood: {},                                          // 小児期情報 ?
             pastHistory: {},                                        // 既往歴情報 ?
@@ -1004,14 +1005,14 @@ module.exports = {
             presentIllnessNotes: ''                                 // 現病歴自由記載 ?
         };
 
-        var familyHistoryItem = {
+         var familyHistoryItem = {
             relation: '',                                           // 続柄コード MML0020
             simpleDiagnosis: {},                                    // 疾患名情報
             age: '',                                                // 家族の疾患時年齢 ?
             memo: ''                                                // メモ ?
         };
 
-        var childhood = {                                           // 出生時情報
+         var childhood = {                                           // 出生時情報
             birthInfo: {
                 facilityId: '',                                     // Facility へ変換 oid
                 facilityName: ''
@@ -1026,25 +1027,25 @@ module.exports = {
             vaccination: []                                         // 予防接種情報 ? [vaccinationItem]
         };
 
-        var vaccinationItem = {
+         var vaccinationItem = {
             vaccine: '',                                            // 接種ワクチン名
             injected: '',                                           // 実施状態．true：ワクチン接種，false：接種せず
             age: '',                                                // 接種時年齢 ? PnYnM 1歳6ヶ月=P1Y6M
             memo: ''                                                // 実施時メモ ?
         };
 
-        var pastHistory = {                                         // 既往歴情報 choice
+         var pastHistory = {                                         // 既往歴情報 choice
             freeNotes: '',                                          // 自由文章表現 choice
             pastHistoryItem: []                                     // 時間表現併用 choice Not support
         };
 
-        var pastHistoryItem = {
+         var pastHistoryItem = {
             timeExpression: '',                                     // 時間表現
             eventExpression: []                                     // 時間表現に対応するイベント表現 ? [string]
         };
-        ******************************************************************************/
+         ******************************************************************************/
 
-        // logger.info(JSON.stringify(simpleFirstClinic, null, 4));
+            // logger.info(JSON.stringify(simpleFirstClinic, null, 4));
 
         const result = {};
 
@@ -1166,15 +1167,15 @@ module.exports = {
      */
     progressCourse: function (docInfo, simpleProgressCource, extArray) {
         /*******************************************************
-        var simpleProgressCource = {
+         var simpleProgressCource = {
             freeExpression: '',
             extRef: []
         };
-        *******************************************************/
-        //-----------------------------------------------------------------------
+         *******************************************************/
+            //-----------------------------------------------------------------------
         let f_text = simpleProgressCource.freeExpression;
-        let esc_text = f_text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        esc_text = esc_text.replace(/&lt;br\s*\/&gt;/g,'<xhtml:br />');
+        let esc_text = f_text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        esc_text = esc_text.replace(/&lt;br\s*\/&gt;/g, '<xhtml:br />');
         esc_text = esc_text.replace(/(?:\r\n|\r|\n)/g, '<xhtml:br />');
         //-----------------------------------------------------------------------
         const result = {
@@ -1209,11 +1210,11 @@ module.exports = {
      */
     buildSurgeryItem: function (docInfo, simpleSurgery, extArray) {
         /*******************************************************************************
-        var simpleSurgery = {                                   // 手術記録情報
+         var simpleSurgery = {                                   // 手術記録情報
             surgeryItem: []                                     // [surgeryItem]
         };
 
-        var surgeryItem = {
+         var surgeryItem = {
             context: {                                          // 手術ヘッダー情報 -> surgicalInfo
                 type: '',                                       // MML0021
                 date: '',                                       // 手術施行日 CCYY-MM-DD
@@ -1235,7 +1236,7 @@ module.exports = {
             memo: ''                                            // 手術に関する追加事項 ?
         };
 
-        var procedureItem = {
+         var procedureItem = {
             operation: ''                                        // 手術法 choice
             code: '',                                            // 手術法コード
             system: ''                                           // 手術法コード体系名
@@ -1243,30 +1244,30 @@ module.exports = {
             procedureMemo: ''                                   // 手術法に関する追加事項 ?
         };
 
-        var operationElementItem = {
+         var operationElementItem = {
             values: []                                          // 分割された手術要素名 [title]
         };
 
-        var titleItem = {                                       // 分割された手術要素名
+         var titleItem = {                                       // 分割された手術要素名
             title: '',
             code: '',                                           // 手術法コード 麻酔法名コード
             system: ''                                          // 手術法コード体系名 麻酔法名コード体系名
         };
 
-        var staff = {
+         var staff = {
             superiority: '',                                    // 序列
             staffClass: ''                                      // 手術スタッフ区分 MML0022
             staffInfo: {}                                       // スタッフ 情報 todo simpleCreator -> [mmlPsi:PersonalizedInfo]
         };
-        *******************************************************************************/
+         *******************************************************************************/
 
-        // logger.info(JSON.stringify(simpleSurgery, null,4));
+            // logger.info(JSON.stringify(simpleSurgery, null,4));
 
         const result = {
-            surgicalInfo: {
-                date: simpleSurgery.context.date
-            }
-        };
+                surgicalInfo: {
+                    date: simpleSurgery.context.date
+                }
+            };
 
         // surgicalInfo
         if (utils.propertyIsNotNull(simpleSurgery.context, 'type')) {
@@ -1437,7 +1438,7 @@ module.exports = {
      */
     summary: function (docInfo, simpleSummary, extArray) {
         /***********************************************************************
-        var SummaryModule = {                                       // 臨床経過サマリー情報
+         var SummaryModule = {                                       // 臨床経過サマリー情報
             serviceHistory: {                                       // 期間情報
                 attr: {
                     start: '',                                      // サマリー対象期間の開始日
@@ -1486,7 +1487,7 @@ module.exports = {
             }                                                       // 患者に関する留意事項 ?
         };
 
-        var outPatientItem = {
+         var outPatientItem = {
             date: '',                                               // 外来受診日 date　書式：CCYY-MM-DD
             outPatientCondition: {                                  // 外来受診状態 ?
                 value: '',
@@ -1498,18 +1499,18 @@ module.exports = {
             staffs: []                                              // 患者担当スタッフ情報 ? [staffInfo]
         };
 
-        var inPatientItem = {                                       // 個々の入院暦
+         var inPatientItem = {                                       // 個々の入院暦
             admission: {},                                          // 入院
             discharge: {},                                          // 退院
             staffs: [],                                             // ? [staffInfo]
         };
 
-        var staffInfo = {                                           // 外来担当スタッフ
+         var staffInfo = {                                           // 外来担当スタッフ
             PersonalizedInfo: {},                                   // mmlPsi:PersonalizedInfo  ToDo PersonalizedInfo
             creatorLicense: []                                      // mmlCi:creatorLicense
         };
 
-        var admission = {                                           // 入院
+         var admission = {                                           // 入院
             date: '',                                               // 入院 (転入) 日 CCYY-MM-DD
             admissionCondition: {                                   // 入院時状態 ?
                 value: '',
@@ -1520,7 +1521,7 @@ module.exports = {
             referFrom: {}                                           // 紹介元情報 ? mmlPsi:PersonalizedInfo
         };
 
-        var discharge = {                                           // 退院
+         var discharge = {                                           // 退院
             date: '',                                               // 退院 (転出) 日 CCYY-MM-DD
             dischargeCondition: {                                   // 退院時状態 ?
                 value: '',
@@ -1531,8 +1532,8 @@ module.exports = {
             referTo: {}                                             // 紹介先情報 ? mmlPsi:PersonalizedInfo
         };
 
-        // contains both text and other elements
-        var clinicalRecord = {
+         // contains both text and other elements
+         var clinicalRecord = {
             attr: {
                 date: ''                                            // イベント発生日時
             },
@@ -1541,8 +1542,8 @@ module.exports = {
             extRef: []                                              // extref * [extRef]
         };
 
-        // contains both text and other elements
-        var testResult = {                                          // 個々の検査結果
+         // contains both text and other elements
+         var testResult = {                                          // 個々の検査結果
             attr: {
                 date: ''                                            // YYYY-MM-DDThhTHH:mm:ss
             },
@@ -1551,15 +1552,15 @@ module.exports = {
             relatedDoc: []                                          // 関連文書 * [relatedDoc]
         };
 
-        var relatedDoc = {
+         var relatedDoc = {
             value: '',                                              // MmlModuleItemのuid
             attr: {
                 relation: ''                                        // MML0008
             }
         };
-    ***********************************************************************/
+         ***********************************************************************/
 
-        // logger.info(JSON.stringify(simpleSummary, null, 4));
+            // logger.info(JSON.stringify(simpleSummary, null, 4));
         const docId = docInfo.docId.uid;
         let refIndex = 0;
         let newHREF = null;
@@ -1924,7 +1925,7 @@ module.exports = {
      */
     test: function (docInfo, simpleTest, extArray) {
         /***********************************
-        var simpleTest = {
+         var simpleTest = {
             context: {
                 issuedId: issuedId,                             // 検査Id 　運用で決める
                 issuedTime: issuedTime,                         // 受付日時
@@ -1950,7 +1951,7 @@ module.exports = {
             },
             testResult: []
         };
-        var simpleResult = {
+         var simpleResult = {
             spcCode: '',                  // 検体コード
             spcName: '',                  // 検体名
             testCode: '',                 // コード
@@ -1963,7 +1964,7 @@ module.exports = {
             memoCode: '',                 // メモコード
             memo: ''                      // メモ
         };
-        ***********************************/
+         ***********************************/
         const context = simpleTest.context;
         let currentSpc = '';                // パース中の検体コード
         let currentLabTest = {};            // パース中の MML labTest
@@ -2037,79 +2038,79 @@ module.exports = {
             pass = pass && stringValue !== '';          // それが '' ではない
             publish = pass && stringValue !== 'None';   // それが 'None' ではない
             if (publish && !testModule.canPublish) {    // publish でまだcanPubがfalseの時
-              testModule.canPublish = true
+                testModule.canPublish = true
             }
 
             if (pass) {
-              //------------------------------------------------------------------
-              // value に < > が入っている場合を修正
-              //-------------------------------------------------------------------
-              let test = isNaN(entry.value);
-              if (test) {
-                // 数値ではない場合  注意 isNaN(' ') -> false このケースは 上記の pass で除外
-                let esc_value = entry.value.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                entry.value = esc_value
-              }
-              // console.log(`value=${entry.value}`);  //　
-              //------------------------------------------------------------------
-              item = {
-                  itemName: {
-                      value: entry.name,              // テスト項目名称
-                      attr: {
-                          itCode: entry.code,         // コード
-                          itCodeId: context.codeSystem
-                      }
-                  },
-                  value: entry.value                  // 結果値
-              };
-              currentLabTest.item.push(item);
+                //------------------------------------------------------------------
+                // value に < > が入っている場合を修正
+                //-------------------------------------------------------------------
+                let test = isNaN(entry.value);
+                if (test) {
+                    // 数値ではない場合  注意 isNaN(' ') -> false このケースは 上記の pass で除外
+                    let esc_value = entry.value.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    entry.value = esc_value
+                }
+                // console.log(`value=${entry.value}`);  //　
+                //------------------------------------------------------------------
+                item = {
+                    itemName: {
+                        value: entry.name,              // テスト項目名称
+                        attr: {
+                            itCode: entry.code,         // コード
+                            itCodeId: context.codeSystem
+                        }
+                    },
+                    value: entry.value                  // 結果値
+                };
+                currentLabTest.item.push(item);
 
-              // numValue = !isNa && has unit;
-              let numValue = !test
-              numValue = numValue && (entry.unit && entry.unit !== 'None')
+                // numValue = !isNa && has unit;
+                let numValue = !test
+                numValue = numValue && (entry.unit && entry.unit !== 'None')
 
-              if (numValue) {
-                  item.numValue = {
-                      value: entry.value
-                  };
-                  item.numValue.attr = {};
+                if (numValue) {
+                    item.numValue = {
+                        value: entry.value
+                    };
+                    item.numValue.attr = {};
 
-                  if (entry.lowerLimit && entry.lowerLimit !== 'None') {
-                    let lv = entry.lowerLimit.replace(/以下/g, '').replace(/以上/g, '').replace(/未満/g, '')
-                    item.numValue.attr.low = lv;
-                  }
-                  if (entry.upperLimit && entry.upperLimit !== 'None') {
-                    let hv = entry.upperLimit.replace(/以下/g, '').replace(/以上/g, '').replace(/未満/g, '')
-                    item.numValue.attr.up = hv;
-                  }
-                  if (entry.out && entry.out !== 'None') {
-                      item.numValue.attr.out = entry.out;
-                  }
-              }
+                    if (entry.lowerLimit && entry.lowerLimit !== 'None') {
+                        let lv = entry.lowerLimit.replace(/以下/g, '').replace(/以上/g, '').replace(/未満/g, '')
+                        item.numValue.attr.low = lv;
+                    }
+                    if (entry.upperLimit && entry.upperLimit !== 'None') {
+                        let hv = entry.upperLimit.replace(/以下/g, '').replace(/以上/g, '').replace(/未満/g, '')
+                        item.numValue.attr.up = hv;
+                    }
+                    if (entry.out && entry.out !== 'None') {
+                        item.numValue.attr.out = entry.out;
+                    }
+                }
 
-              if (numValue) {
-                  item.unit = {
-                      value: entry.unit
-                  };
-              }
+                if (numValue) {
+                    item.unit = {
+                        value: entry.unit
+                    };
+                }
 
-              if (utils.propertyIsNotNull(entry, 'memoCode') && utils.propertyIsNotNull(entry, 'memo')) {
-                  item.itemMemo = [];
-                  itemMemo = {
-                      value: entry.memo,                               // 項目コメント値
-                      attr: {
-                          imCodeName: context.codeSystem,              // 項目コメント名称
-                          imCode: entry.memoCode,                      // ユーザー指定
-                          mCodeId: context.codeSystem                  // 用いたテーブル名を入力
-                      }
-                  };
-                  item.itemMemo.push(itemMemo);
-              }
+                if (utils.propertyIsNotNull(entry, 'memoCode') && utils.propertyIsNotNull(entry, 'memo')) {
+                    item.itemMemo = [];
+                    itemMemo = {
+                        value: entry.memo,                               // 項目コメント値
+                        attr: {
+                            imCodeName: context.codeSystem,              // 項目コメント名称
+                            imCode: entry.memoCode,                      // ユーザー指定
+                            mCodeId: context.codeSystem                  // 用いたテーブル名を入力
+                        }
+                    };
+                    item.itemMemo.push(itemMemo);
+                }
 
-              // Free memo
-              if (utils.propertyIsNotNull(entry, 'memoF')) {
-                  item.itemMemoF = entry.memoF;
-              }
+                // Free memo
+                if (utils.propertyIsNotNull(entry, 'memoF')) {
+                    item.itemMemoF = entry.memoF;
+                }
             }
         });
         //console.log('module count = ' + testModule.laboTest.length);
@@ -2121,12 +2122,12 @@ module.exports = {
      */
     report: function (docInfo, simpleReport, extArray) {
         /********************************************************************************
-        var simpleReport = {
+         var simpleReport = {
             context: {},                                      // 報告書ヘッダー情報
             body: {}                                          // 報告書本文情報
         };
 
-        var context = {
+         var context = {
             performTime: '',                                    // 検査実施日時 required
             reportTime: ''                                      // 報告日時 required
             reportStatus: '',                                   // 報告状態
@@ -2172,7 +2173,7 @@ module.exports = {
             }
         };
 
-        var body = {                                            // 報告書本文情報
+         var body = {                                            // 報告書本文情報
             chiefComplaints: '',                                // 主訴 ?
             testPurpose: '',                                    // 検査目的 ?
             testDx: '',                                         // 検査診断 ?
@@ -2184,20 +2185,20 @@ module.exports = {
             testMemoF: ''                                       // 検査フリーコメント ?
         };
 
-        var testNotes = {
+         var testNotes = {
             value: '',
             extRef: []                                          // [extRef]
         };
 
-        var testMemo = {
+         var testMemo = {
             memo: '',
             memoCodeName: '',
             memoCode: '',
             memoCodeId: ''
         };
-        ********************************************************************************/
+         ********************************************************************************/
 
-        // logger.info(JSON.stringify(simpleReport, null, 4));
+            // logger.info(JSON.stringify(simpleReport, null, 4));
 
         const information = {};
         const reportBody = {};
@@ -2364,7 +2365,7 @@ module.exports = {
                     value: entry.memo
                 };
                 reportBody.testMemo.push(memo);
-                if (utils.propertyIsNotNull(entry, 'memoCode') || utils.propertyIsNotNull(entry, 'memoCodeId') ) {
+                if (utils.propertyIsNotNull(entry, 'memoCode') || utils.propertyIsNotNull(entry, 'memoCodeId')) {
                     memo.attr = {};
                     if (utils.propertyIsNotNull(entry, 'memoCodeName')) {
                         memo.attr.tmCodeName = entry.memoCodeName;
@@ -2392,7 +2393,7 @@ module.exports = {
      */
     referral: function (docInfo, simpleReferral, extArray) {
         /*******************************************************************************
-        var simpleReferral = {
+         var simpleReferral = {
             patient: {},                                // 患者情報 simplePatientInfo
             occupation: '',                             // 職業 ?
             referFrom: {},                              // 紹介者情報を入れる親エレメント simpleCreator
@@ -2413,53 +2414,53 @@ module.exports = {
             referToUnknownName: ''                      // 医師名を指定しない相手 ?
         };
 
-        // 既往歴
-        var pastHistory = {
+         // 既往歴
+         var pastHistory = {
             value: '',                                  // 既往歴
             extRef: []                                  // 外部参照図 * [extRef]
         };
 
-        // 家族歴歴
-        var familyHistory = {
+         // 家族歴歴
+         var familyHistory = {
             value: '',                                  // 家族歴歴
             extRef: []                                  // 外部参照図 * [extRef]
         };
 
-        // 現病歴
-        var presentIllness = {
+         // 現病歴
+         var presentIllness = {
             value: '',                                  // 現病歴
             extRef: []                                  // 外部参照図 * [extRef]
         };
 
-        // 検査結果
-        var testResults = {
+         // 検査結果
+         var testResults = {
             value: '',                                  // 検査結果
             extRef: []                                  // 外部参照図 * [extRef]
         };
 
-        // 現在の処方
-        var medication = {
+         // 現在の処方
+         var medication = {
             value: '',                                  // 説明
             simplePrescription: {},                     // simplePrescription
             simpleInjection: {},                        // simpleInjection
             extRef: []                                  // 外部参照 * [extRef]
         };
 
-        // 備考
-        var remarks: {
+         // 備考
+         var remarks: {
             value: ''                                   // 備考
             extRef: []                                  // 外部参照図 * [extRef]
         },
 
-        // 紹介先医療機関名
-        var referToFacility = {
+         // 紹介先医療機関名
+         var referToFacility = {
             facilityId: '',                             // 施設ID プロジェクトから指定
             facilityName: '',                           // 施設名称
             departmentId: '',                           // 診療科ID ?
             departmentName: ''                          // 診療科名称 ?
         };
-        *******************************************************************************/
-        // console.log(simpleReferral);
+         *******************************************************************************/
+            // console.log(simpleReferral);
         const result = {};
         let refIndex = 0;
         const docId = docInfo.docId.uid;
@@ -2663,14 +2664,14 @@ module.exports = {
             observedTime: simpleVitalSign.observedTime
         };
         // item
-        simpleVitalSign.item.forEach ((entry) => {
+        simpleVitalSign.item.forEach((entry) => {
             const item = {
                 itemName: entry.itemName                // mmlVs01
             };
             if (utils.propertyIsNotNull(entry, 'value')) {
                 item.value = entry.value;
             } else if (utils.propertyIsNotNull(entry, 'numValue')) {
-              item.value = entry.numValue;
+                item.value = entry.numValue;
             }
             if (utils.propertyIsNotNull(entry, 'numValue')) {
                 item.numValue = entry.numValue;
@@ -2689,7 +2690,7 @@ module.exports = {
         });
         // Context
         if (utils.propertyIsNotNull(simpleVitalSign, 'context')) {
-            const target =　simpleVitalSign.context;
+            const target = simpleVitalSign.context;
             vitalSign.context = {};
             // facility
             if (utils.propertyIsNotNull(target, 'facility')) {
@@ -2777,7 +2778,7 @@ module.exports = {
      */
     flowsheet: function (docInfo, simpleFlowSheet, extArray) {
         /*******************************************************************************
-        var simpleFlowSheet = {
+         var simpleFlowSheet = {
             context: {},
             VitalSignModule: [],                                        // *
             intake: [],                                                 // *
@@ -2785,7 +2786,7 @@ module.exports = {
             fsMemo: ''                                                  // ?
         };
 
-        var context = {
+         var context = {
             facility: '',
             facilityCode: '',
             facilityCodeId: ''                                          // ca | insurance | monbusho | JMARI
@@ -2800,7 +2801,7 @@ module.exports = {
             obsCodeId: ''
         };
 
-        var intake = {
+         var intake = {
             intakeType: '',
             intakeVolume: '',                                           // xs:decimal
             intakeUnit: '',
@@ -2810,7 +2811,7 @@ module.exports = {
             intakeMemo: ''
         };
 
-        var bodilyOutput = {
+         var bodilyOutput = {
             boType: '',
             boVolume: '',                                               // xs:decimal
             boUnit: '',
@@ -2823,13 +2824,13 @@ module.exports = {
             boMemo: ''
         };
 
-        var boFrequency = {
+         var boFrequency = {
             bofTimes: '',
             bofPeriodStartTime: '',                                     // xs:dateTim
             bofPeriodEndTime: '',                                       // xs:dateTim
             bofMemo: ''
         };
-        *******************************************************************************/
+         *******************************************************************************/
         const context = {};
 
         const result = {
@@ -2887,8 +2888,7 @@ module.exports = {
             simpleFlowSheet.vitalSign.forEach((entry) => {
                 result.VitalSignModule.push(this.vitalsign(docInfo, entry));
             });
-        }
-        else if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'VitalSign')) {   // VitalSign
+        } else if (utils.propertyIsArrayAndNotEmpty(simpleFlowSheet, 'VitalSign')) {   // VitalSign
             result.VitalSignModule = [];
             simpleFlowSheet.VitalSign.forEach((entry) => {
                 result.VitalSignModule.push(this.vitalsign(docInfo, entry));
@@ -3010,7 +3010,7 @@ module.exports = {
      */
     prescription: function (docInfo, simplePrescription, extArray) {
         /**********************************************************
-        var simplePrescription = {
+         var simplePrescription = {
             medication: [{issuedTo: '',               // 院外処方:external 院内処方:internal
             medicine: '',                             // 処方薬
             medicineCode: '',                         // 処方薬のコード
@@ -3028,17 +3028,17 @@ module.exports = {
             longTerm: false,                          // 長期処方
         },,,, ]
         };
-        ************************************************************/
+         ************************************************************/
 
         const external = {issuedTo: 'external', medication: []};   // 院外処方Prescription
         const internal = {issuedTo: 'internal', medication: []};   // 院内処方Prescription
         const inOrExt = {medication: []};                          // 院内、院外が指定されていない場合
 
         simplePrescription.medication.forEach((entry) => {
-          // コード体系がない場合
-          if (!entry.medicineCodeSystem || entry.medicineCodeSystem === '処方薬剤コード体系名' || entry.medicineCodeSystem === 'LOCAL') {
-            entry.medicineCodeSystem = 'local';
-          }
+            // コード体系がない場合
+            if (!entry.medicineCodeSystem || entry.medicineCodeSystem === '処方薬剤コード体系名' || entry.medicineCodeSystem === 'LOCAL') {
+                entry.medicineCodeSystem = 'local';
+            }
 
             const medication = {
                 medicine: {
@@ -3113,13 +3113,13 @@ module.exports = {
         });
 
         const retArray = [];
-        if (external.medication.length > 0 ) {
+        if (external.medication.length > 0) {
             retArray.push(external);
         }
-        if (internal.medication.length > 0 ) {
+        if (internal.medication.length > 0) {
             retArray.push(internal);
         }
-        if (inOrExt.medication.length > 0 ) {
+        if (inOrExt.medication.length > 0) {
             retArray.push(inOrExt);
         }
 
@@ -3131,12 +3131,12 @@ module.exports = {
      */
     injection: function (docInfo, simpleInjection, extArray) {
         /**********************************************************
-        var simpleInjection = {
+         var simpleInjection = {
             medication: [],
             narcoticPrescriptionLicenseNumber: '',
             comment: ''
         };
-        var medicationObj = {
+         var medicationObj = {
             medicine: '',                             // 薬剤名称
             medicineCode: '',                         // 薬剤コード
             medicineCodeystem: '',                    // コード体系
@@ -3151,7 +3151,7 @@ module.exports = {
             batchNo: '',
             additionalInstruction: ''
         };
-        ************************************************************/
+         ************************************************************/
         const injection = {
             medication: []
         };
@@ -3161,13 +3161,13 @@ module.exports = {
         //--------------------------------------------------------
         simpleInjection.medication.forEach((entry) => {
 
-          if (!entry.doseUnit && entry.doseunit) {
-            entry.doseUnit = entry.doseunit
-          }
+            if (!entry.doseUnit && entry.doseunit) {
+                entry.doseUnit = entry.doseunit
+            }
 
             // medicineCodeSystem undefined
             if (!entry.medicineCodeSystem || entry.medicineCodeSystem === '処方薬剤コード体系名' || entry.medicineCodeSystem === 'LOCAL') {
-              entry.medicineCodeSystem = 'local';
+                entry.medicineCodeSystem = 'local';
             }
             const medication = {
                 medicine: {
@@ -3187,18 +3187,18 @@ module.exports = {
             if (utils.propertyIsNotNull(entry, 'startDateTime')) {
                 medication.startDateTime = entry.startDateTime;
             } else {
-              medication.startDateTime = '1601-01-01T00:00:00';  // 日付不明
+                medication.startDateTime = '1601-01-01T00:00:00';  // 日付不明
             }
             // 投与修了日時
             if (utils.propertyIsNotNull(entry, 'endDateTime')) {
-              if (entry.endDateTime === entry.startDateTime) {
-                // 同じ
-                entry.endDateTime = '9999-12-31T00:00:00';
-              } else {
-                medication.endDateTime = entry.endDateTime;
-              }
+                if (entry.endDateTime === entry.startDateTime) {
+                    // 同じ
+                    entry.endDateTime = '9999-12-31T00:00:00';
+                } else {
+                    medication.endDateTime = entry.endDateTime;
+                }
             } else {
-              medication.endDateTime = '1601-01-01T:00:00:00';  // 日付不明
+                medication.endDateTime = '1601-01-01T:00:00:00';  // 日付不明
             }
             //------------------------------------------------------------------
             // 用法指示
@@ -3237,7 +3237,7 @@ module.exports = {
      */
     hemodialysis: function (docInfo, simpleHemoDialysys, extArray) {
         const target = JSON.parse(JSON.stringify(simpleHemoDialysys));
-        target.hemoDialysis.forEach((e)=> {
+        target.hemoDialysis.forEach((e) => {
             e.facility = this.buildFacility(e.facility.id, e.facility.name);
             e.patient = this.patientInfo(docInfo, e.patient, extArray);
         });
@@ -3246,14 +3246,14 @@ module.exports = {
     },
 
     /**
-      * MML を生成する
-      * @param {simpleComposition} - simpleComposition
-      * @returns {MML}
+     * MML を生成する
+     * @param {simpleComposition} - simpleComposition
+     * @returns {MML}
      */
     build: function (simpleComposition, contentType, deleteInstance) {
         // logger.info(JSON.stringify(simpleComposition, null, 4));
         /***************************************************
-        var simpleComposition = {
+         var simpleComposition = {
             context: {
                 createDate: createDate,  // yyyy-MM-ddTHH:mm:ss
                 vender: {
@@ -3269,8 +3269,8 @@ module.exports = {
             },
             content: [{simpleXXX}]
         };
-        ***************************************************/
-        // context
+         ***************************************************/
+            // context
         const context = simpleComposition.context;
 
         //----------------------------------------------------------------------
@@ -3278,10 +3278,14 @@ module.exports = {
         //----------------------------------------------------------------------
         let createDate = null;
         if (context.createDate) {
-          createDate = context.createDate;
+            createDate = context.createDate;
+            logger.info(`createDate=${createDate}`);
+        } else if (context.createdate) {
+            createDate = context.createDate;
+            logger.info(`createDate=${createDate}`);
         } else {
-          // 現時刻
-          createDate = utils.nowAsDateTime();
+            // 現時刻
+            createDate = utils.nowAsDateTime();
         }
 
         //----------------------------------------------------------------------
@@ -3295,40 +3299,66 @@ module.exports = {
         //----------------------------------------------------------------------
         let venderInfo = null;
         if (context.vender) {
-          venderInfo = Object.assign({}, context.creator);
-          venderInfo.id = context.vender.appName;
-          venderInfo.fullName = context.vender.name;
-          venderInfo.kana = context.vender.kana;
+            venderInfo = Object.assign({}, context.creator);
+            venderInfo.id = context.vender.appName;
+            venderInfo.fullName = context.vender.name;
+            venderInfo.kana = context.vender.kana;
         }
         //----------------------------------------------------------------------
-        // キャノン千葉大　OID修正, Creator修正, Venderinfo 修正
+        // OID修正, Creator修正, VenderInfo 追加
         //----------------------------------------------------------------------
         if (context.creator.facility.id === '1.2.840.114319.5.1000.1.26.1') {
-          // 正しい値
-          context.creator.facility.id = '1.2.840.114319.5.1000.1.12.3';
+            // 正しい値
+            context.creator.facility.id = '1.2.840.114319.5.1000.1.12.3';
 
-          // 患者施設ID
-          context.patient.facilityId = context.creator.facility.id;
+            // 患者施設ID
+            context.patient.facilityId = context.creator.facility.id;
 
-          // Creator fullName & id を performerから借用
-          if (contentType === 'report') {
-            const rpContent = simpleComposition.content[0];
-            if (rpContent.context.performer) {
-              const performer = rpContent.context.performer;
-              if (performer.fullName && performer.id) {
-                context.creator.id = performer.id;
-                context.creator.fullName = performer.fullName;
-                context.creator.license = 'doctor';
-              }
+            // Creator fullName & id を performerから借用
+            if (contentType === 'report') {
+                const rpContent = simpleComposition.content[0];
+                if (rpContent.context.performer) {
+                    const performer = rpContent.context.performer;
+                    if (performer.fullName && performer.id) {
+                        context.creator.id = performer.id;
+                        context.creator.fullName = performer.fullName;
+                        context.creator.license = 'doctor';
+                    }
+                }
             }
-          }
 
-          // ベンダー
-          venderInfo = Object.assign({}, context.creator);
-          // logger.info(JSON.stringify(venderInfo, null, 3));
-          venderInfo.id = '電子カルテシステム HAPPY ACTIS V3.14';
-          venderInfo.fullName = 'キヤノンメディカルシステムズ株式会社';
-          venderInfo.kana = 'キヤノンメディカルシステムズカブシキガイシャ';
+            // ベンダー
+            venderInfo = Object.assign({}, context.creator);
+            // logger.info(JSON.stringify(venderInfo, null, 3));
+            venderInfo.id = '電子カルテシステム HAPPY ACTIS V3.14';
+            venderInfo.fullName = 'キヤノンメディカルシステムズ株式会社';
+            venderInfo.kana = 'キヤノンメディカルシステムズカブシキガイシャ';
+        }
+
+        if (context.creator.facility.id === '1.2.840.114319.5.1000.1.40.4') {
+
+            // 患者施設ID
+            context.patient.facilityId = context.creator.facility.id;
+
+            // Creator fullName & id を performerから借用
+            if (contentType === 'report') {
+                const rpContent = simpleComposition.content[0];
+                if (rpContent.context.performer) {
+                    const performer = rpContent.context.performer;
+                    if (performer.fullName && performer.id) {
+                        context.creator.id = performer.id;
+                        context.creator.fullName = performer.fullName;
+                        context.creator.license = 'doctor';
+                    }
+                }
+            }
+
+            // ベンダー
+            venderInfo = Object.assign({}, context.creator);
+            // logger.info(JSON.stringify(venderInfo, null, 3));
+            venderInfo.id = '電子カルテシステム HAPPY ACTIS V3.14';
+            venderInfo.fullName = 'キヤノンメディカルシステムズ株式会社';
+            venderInfo.kana = 'キヤノンメディカルシステムズカブシキガイシャ';
         }
 
         //----------------------------------------------------------------------
@@ -3380,7 +3410,7 @@ module.exports = {
         // MML
         //----------------------------------------------------------------------
         const result = {
-          canPublish: true,  // 意味のないインスタンスはパブリッシュしない testのケース
+            canPublish: true,  // 意味のないインスタンスはパブリッシュしない testのケース
             attr: {
                 createDate: createDate
             },
@@ -3407,66 +3437,66 @@ module.exports = {
         const extArray = [];
 
         if (deleteInstance) {
-          docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
-          result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
+            docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
 
         } else {
-          simpleComposition.content.forEach((entry) => {
+            simpleComposition.content.forEach((entry) => {
 
-              if (contentType === 'prescription') {
-                  // contentModuleTypeをセットする
-                  // metaInfo.contentModuleType = contentType;
-                  // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
-                  // ToDo ToDo
-                  const arr = this.prescription(docInfo, entry, extArray);
-                  // 結果は配列で返る
-                  arr.forEach((prescription) => {
-                      // それに薬が入っていたらModuleItemへ加える
-                      if (prescription.medication.length > 0) {
-                          // MML 規格によりModule単位にuuidを付番する
-                          // metaInfo.uuid = uuid.v4();
-                          // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
-                          docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
-                          // logger.info(JSON.stringify(docInfo, null, 4));
-                          result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
-                      }
-                  });
+                if (contentType === 'prescription') {
+                    // contentModuleTypeをセットする
+                    // metaInfo.contentModuleType = contentType;
+                    // 要素のsimplePrescriptionから院内院外別の処方せんを生成する
+                    // ToDo ToDo
+                    const arr = this.prescription(docInfo, entry, extArray);
+                    // 結果は配列で返る
+                    arr.forEach((prescription) => {
+                        // それに薬が入っていたらModuleItemへ加える
+                        if (prescription.medication.length > 0) {
+                            // MML 規格によりModule単位にuuidを付番する
+                            // metaInfo.uuid = uuid.v4();
+                            // 院内と院外で別モジュール値なるのでそれごとにdocInfoを生成する
+                            docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                            // logger.info(JSON.stringify(docInfo, null, 4));
+                            result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: prescription});
+                        }
+                    });
 
-              } else if (contentType === 'test') {
-                //--------------------------------------------------------------
-                // Force to 院内検査
-                //--------------------------------------------------------------
-                lab = {
-                  facilityName: context.creator.facility.name,
-                  facilityId: context.creator.facility.id,
-                  facilityIdType: 'OID'
-                };
-                entry.context.laboratory = lab;
-                // 依頼施設
-                entry.context.facilityId = context.creator.facility.id;
-                entry.context.facilityName = context.creator.facility.name;
-                entry.context.facilityIdType = 'OID';
-                entry.context.codeSystem = 'local';
-                entry.context.resultStatus = '最終報告';
-                entry.context.resultStatusCode = 'final';
-                docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
-                content = this[contentType].call(this, docInfo, entry, extArray);
-                // 値が全て None のケースを判定
-                if (!content.canPublish && result.canPublish) {
-                  result.canPublish = content.canPublish;
+                } else if (contentType === 'test') {
+                    //--------------------------------------------------------------
+                    // Force to 院内検査
+                    //--------------------------------------------------------------
+                    lab = {
+                        facilityName: context.creator.facility.name,
+                        facilityId: context.creator.facility.id,
+                        facilityIdType: 'OID'
+                    };
+                    entry.context.laboratory = lab;
+                    // 依頼施設
+                    entry.context.facilityId = context.creator.facility.id;
+                    entry.context.facilityName = context.creator.facility.name;
+                    entry.context.facilityIdType = 'OID';
+                    entry.context.codeSystem = 'local';
+                    entry.context.resultStatus = '最終報告';
+                    entry.context.resultStatusCode = 'final';
+                    docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                    content = this[contentType].call(this, docInfo, entry, extArray);
+                    // 値が全て None のケースを判定
+                    if (!content.canPublish && result.canPublish) {
+                        result.canPublish = content.canPublish;
+                    }
+                    result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
+
+                } else {
+                    docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
+                    content = this[contentType].call(this, docInfo, entry, extArray);
+                    if (contentType === 'referral') {
+                        // 意味なし
+                        result.canPublish = false;
+                    }
+                    result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
                 }
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-
-              } else {
-                docInfo = this.buildDocInfo(metaInfo, creatorInfo, accessRight);
-                content = this[contentType].call(this, docInfo, entry, extArray);
-                if (contentType === 'referral') {
-                  // 意味なし
-                  result.canPublish = false;
-                }
-                result.MmlBody.MmlModuleItem.push({docInfo: docInfo, content: content});
-              }
-          });
+            });
         }
         logger.debug(JSON.stringify(docInfo.docId, null, 4));
         logger.debug(JSON.stringify(result, null, 4));
@@ -3478,7 +3508,7 @@ module.exports = {
         const fileName = tmpArr.join('_');
 
         // extArray.forEach((ex) => {
-            // logger.info(ex.href);
+        // logger.info(ex.href);
         // });
 
         return {

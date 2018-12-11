@@ -14,18 +14,18 @@
   "author": "Kazushi Minagawa",
   "license": "MIT",
   "dependencies": {
-    "app-root-path": "^2.0.1",
-    "archiver": "^2.1.1",
-    "body-parser": "^1.18.2",
-    "cfenv": "^1.0.4",
-    "config": "^1.29.4",
-    "express": "^4.16.2",
-    "helmet": "^3.11.0",
-    "morgan": "^1.9.0",
-    "uuid": "^3.2.1",
+    "app-root-path": "^2.1.0",
+    "archiver": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "cfenv": "^1.1.0",
+    "config": "^3.0.0",
+    "express": "^4.16.4",
+    "helmet": "^3.15.0",
+    "morgan": "^1.9.1",
+    "uuid": "^3.3.2",
     "winston": "^2.4.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2"
+    "chai": "^4.2.0"
   }
 }
